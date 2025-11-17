@@ -1,0 +1,79 @@
+{
+  "id": "resp_0f797011d795f39f00691ae13ba0ac819fa2ffb024784571fc",
+  "created_at": 1763369275.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_0f797011d795f39f00691ae13c4828819f94d7383fa36f52ce",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_0f797011d795f39f00691ae148f94c819f9058e70faa754b5c",
+      "content": [
+        {
+          "annotations": [],
+          "text": "One minimal rule suffices to derive d2(o4):\n\nd2(X) :- d3(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 128,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 923,
+    "output_tokens_details": {
+      "reasoning_tokens": 896
+    },
+    "total_tokens": 1051
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "prompt_cache_retention": null,
+  "store": true
+}

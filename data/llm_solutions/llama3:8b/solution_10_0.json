@@ -1,0 +1,26 @@
+{
+  "satisfiable": true,
+  "witnesses": [
+    {
+      "index": 1,
+      "atoms": [
+        "d3(o0)",
+        "d3(o4)",
+        "d0(o4)",
+        "d1(o2)"
+      ],
+      "time_seconds": 5.6e-05
+    }
+  ],
+  "warnings": [],
+  "statistics": {
+    "models_found": 1,
+    "conflicts": 0.0,
+    "choices": 0.0,
+    "atoms": 4.0,
+    "rules": 4.0,
+    "time_total": 0.000253,
+    "time_solve": 6.9e-05,
+    "time_total_python": 0.0
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "satisfiable": false,
+  "witnesses": [],
+  "warnings": [],
+  "statistics": {
+    "models_found": 0,
+    "conflicts": 1.0,
+    "choices": 0.0,
+    "atoms": 10.0,
+    "rules": 10.0,
+    "time_total": 6.1e-05,
+    "time_solve": 0.0,
+    "time_total_python": 0.0
+  }
+}
