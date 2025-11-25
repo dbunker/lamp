@@ -1,7 +1,6 @@
-d2(o0).
-d0(o1).
+d3(o4).
+d2(o3).
 d3(o1).
-d4(o1).
+d0(o0).
 
-d3(X) :- d4(X), not d1(X).
-d1(X) :- not d4(X), d2(X).
+d1(X) :- not d2(X), not d3(X), d0(X).

@@ -1,6 +1,6 @@
 {
-  "id": "resp_0d8a55fbca2d264500691ae06ac6e48190be4933119a4de6c0",
-  "created_at": 1763369066.0,
+  "id": "resp_0810c6891a4414f800691b40bdc4e081a2ab97b33f97b9471f",
+  "created_at": 1763393725.0,
   "error": null,
   "incomplete_details": null,
   "instructions": null,
@@ -9,7 +9,7 @@
   "object": "response",
   "output": [
     {
-      "id": "rs_0d8a55fbca2d264500691ae06b112c8190a434fd4f0199f7f4",
+      "id": "rs_0810c6891a4414f800691b40be0d2481a2b3980265c259e56a",
       "summary": [],
       "type": "reasoning",
       "content": null,
@@ -17,7 +17,7 @@
       "status": null
     },
     {
-      "id": "msg_0d8a55fbca2d264500691ae07132f08190b62675504cab8436",
+      "id": "msg_0810c6891a4414f800691b40c7c2e881a2814eb54e4d3ba507",
       "content": [
         {
           "annotations": [],
@@ -64,11 +64,11 @@
     "input_tokens_details": {
       "cached_tokens": 0
     },
-    "output_tokens": 463,
+    "output_tokens": 591,
     "output_tokens_details": {
-      "reasoning_tokens": 448
+      "reasoning_tokens": 576
     },
-    "total_tokens": 591
+    "total_tokens": 719
   },
   "user": null,
   "billing": {

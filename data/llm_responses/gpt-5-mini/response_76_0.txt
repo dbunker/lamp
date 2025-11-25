@@ -1,6 +1,6 @@
 {
-  "id": "resp_0ec531abeab2840900691ae23b1b2881918c570319490f5193",
-  "created_at": 1763369531.0,
+  "id": "resp_09d95974a283df8400691b42f4eb80819cae71bc5e940819d4",
+  "created_at": 1763394292.0,
   "error": null,
   "incomplete_details": null,
   "instructions": null,
@@ -9,7 +9,7 @@
   "object": "response",
   "output": [
     {
-      "id": "rs_0ec531abeab2840900691ae23b67688191bc8f16e2dbf07295",
+      "id": "rs_09d95974a283df8400691b42f5432c819c997d7b09ef70e994",
       "summary": [],
       "type": "reasoning",
       "content": null,
@@ -17,11 +17,11 @@
       "status": null
     },
     {
-      "id": "msg_0ec531abeab2840900691ae2472e188191bc361f28afdd23e8",
+      "id": "msg_09d95974a283df8400691b42fc9420819cad3a7a1c8df3e061",
       "content": [
         {
           "annotations": [],
-          "text": "d2(X) :- d3(X), d1(X).",
+          "text": "d2(X) :- d1(X), not d3(X).",
           "type": "output_text",
           "logprobs": []
         }
@@ -64,11 +64,11 @@
     "input_tokens_details": {
       "cached_tokens": 0
     },
-    "output_tokens": 851,
+    "output_tokens": 468,
     "output_tokens_details": {
-      "reasoning_tokens": 832
+      "reasoning_tokens": 448
     },
-    "total_tokens": 979
+    "total_tokens": 596
   },
   "user": null,
   "billing": {

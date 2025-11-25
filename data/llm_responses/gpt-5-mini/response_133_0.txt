@@ -1,0 +1,79 @@
+{
+  "id": "resp_038832cd326e4bd700691b45f4f95c81979d5a773e7ff870e2",
+  "created_at": 1763395060.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_038832cd326e4bd700691b45f542bc8197a10191714a65e56c",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_038832cd326e4bd700691b45fe508881979341e219adc93c2a",
+      "content": [
+        {
+          "annotations": [],
+          "text": "d2(X) :- d3(X), not d0(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 138,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 724,
+    "output_tokens_details": {
+      "reasoning_tokens": 704
+    },
+    "total_tokens": 862
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "prompt_cache_retention": null,
+  "store": true
+}

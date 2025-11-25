@@ -4,13 +4,14 @@
     {
       "index": 1,
       "atoms": [
-        "d3(o4)",
-        "d1(o1)",
-        "d1(o4)",
-        "d4(o4)",
-        "d2(o1)"
+        "d4(o1)",
+        "d4(o2)",
+        "d2(o0)",
+        "d2(o2)",
+        "d0(o2)",
+        "d3(o2)"
       ],
-      "time_seconds": 1.1e-05
+      "time_seconds": 7.9e-05
     }
   ],
   "warnings": [],
@@ -18,10 +19,10 @@
     "models_found": 1,
     "conflicts": 0.0,
     "choices": 0.0,
-    "atoms": 5.0,
-    "rules": 5.0,
-    "time_total": 7.5e-05,
-    "time_solve": 1.9e-05,
+    "atoms": 6.0,
+    "rules": 6.0,
+    "time_total": 0.000409,
+    "time_solve": 0.000102,
     "time_total_python": 0.0
   }
 }

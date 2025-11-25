@@ -11,6 +11,8 @@ from openai import OpenAI
 from pathlib import Path
 from ollama import Client
 import pandas as pd
+import logging
+
 
 ########## ASP Models ##########
 
@@ -152,7 +154,7 @@ class OpenAIClient(LLM):
         )
 
         full_response = json.loads(response.model_dump_json())
-        print(json.dumps(full_response, indent=2))
+        logging.info(json.dumps(full_response, indent=2))
         response_content = full_response["output"][1]["content"][0]["text"]
 
         return [full_response, response_content]
@@ -177,8 +179,8 @@ class OllamaClient(LLM):
         response = self.client.chat(
             model=self.title, 
             messages=[{
-                'role': 'user',
-                'content': prompt
+                "role": "user",
+                "content": prompt
             }]
         )
 
@@ -195,22 +197,22 @@ class OllamaClient(LLM):
 
 def get_llm_response(client: LLM, prompt: str, response_path: str, rerun: bool):
 
-    print('Run', client.title)
+    logging.info(f"Run {client.title}")
 
-    # Check if output is already present, don't run if it is
+    # Check if output is already present, do not run if it is
     if not os.path.exists(response_path) or rerun:
 
         [full_response, response_content] = client.send_prompt(prompt)
 
-        print(full_response)
+        logging.info(full_response)
         write_json(response_path, full_response)
 
     else:
         full_response = read_json(response_path)
         response_content = client.get_content(full_response)
 
-    print('Response:')
-    print(response_content)
+    logging.info("Response:")
+    logging.info(response_content)
     return response_content
 
 ########## Example Generation ##########
@@ -272,7 +274,7 @@ def generate_example(config: ModelConfig) -> KnowledgeBase:
 
             # Ensure at least one positive and 
             if config.num_literals <= config.num_neg_literals:
-                raise RuntimeError('Too many negative literals')
+                raise RuntimeError("Too many negative literals")
 
             # Possibly allow for negative
             pos = literal_id <= config.num_literals - config.num_neg_literals - 1
@@ -293,16 +295,16 @@ def generate_benchmark(config: ModelConfig, index):
     # Check for no more or less than one stable model
     while (len(model_stats["witnesses"]) != 1 or 
            len(model_stats["warnings"]) != 0 or 
-           len(kb.facts) == len(model_stats["witnesses"][0]['atoms'])):
+           len(kb.facts) == len(model_stats["witnesses"][0]["atoms"])):
 
         if len(model_stats["witnesses"]) != 1:
-            print(f"Not only 1 stable model: {model_stats["witnesses"]}")
+            logging.info(f"Not only 1 stable model: {model_stats["witnesses"]}")
 
         elif len(model_stats["warnings"]) != 0:
-            print(f"Has warnings: {model_stats["warnings"]}")
+            logging.info(f"Has warnings: {model_stats["warnings"]}")
 
-        elif len(kb.facts) == len(model_stats["witnesses"][0]['atoms']):
-            print(f"Needs more atoms: {model_stats["witnesses"][0]['atoms']}")
+        elif len(kb.facts) == len(model_stats["witnesses"][0]["atoms"]):
+            logging.info(f"Needs more atoms: {model_stats["witnesses"][0]["atoms"]}")
 
         kb = generate_example(config)
         model_stats = run_asp(str(kb))
@@ -316,14 +318,15 @@ def generate_benchmark(config: ModelConfig, index):
 
 def generate_benchmarks():
 
+    # Generate rules based on various configurations
     index = 0
-    for example_number in range(5):
+    for example_number in range(1):
         for num_predicates in [4, 5]:
             for num_possible_terms in [4, 5]:
-                for num_facts in [4]:
-                    for num_rules in [1, 2]:
-                        for num_literals in [1, 2]:
-                            for num_neg_literals in [0, 1]:
+                for num_facts in [4, 5]:
+                    for num_rules in [1, 2, 3]:
+                        for num_literals in [1, 2, 3]:
+                            for num_neg_literals in [0, 1, 2]:
 
                                 if num_literals <= num_neg_literals:
                                     continue
@@ -437,10 +440,10 @@ def expected_models(json_response: Dict) -> List[Atom]:
 
 
 def atoms_from_model(stats: Dict):
-    if len(stats['witnesses']) == 0:
+    if len(stats["witnesses"]) == 0:
         return set()
 
-    values = stats['witnesses'][0]['atoms']
+    values = stats["witnesses"][0]["atoms"]
     return set(parse_atom(value) for value in values)
 
 ########## Run LLM ##########
@@ -460,82 +463,14 @@ Write the rules as the final lines of output.
 """
 
 
-def explicit_prompt(facts: str, stable_model: str):
-
-    return f"""
-You are given:
-
-1. An ASP program's facts (all rules have been removed).
-2. A target stable model that the original (complete) program produced.
-
-Your task is to reconstruct the missing rules.
-Each rule must conform strictly to this schematic form (for any predicate symbol d{{n}} and arity 1):
-
-d{{n}}(X) :- L1, L2, ..., Lk.
-
-where each literal Li is either d{{m}}(X) or not d{{m}}(X) for some predicate d{{m}}.
-
-Constraints:
-
-- Allowed predicates in rule bodies: only d{{m}}(X) (positive) or not d{{m}}(X) (default negation).
-- Allowed head predicates: only d{{n}}(X) (arity 1).
-- Variables: use only the single variable X (appearing in the head for safety).
-- No constants except those appearing in the given facts.
-- No aggregates, choice rules, disjunctions, or integrity constraints.
-- No facts (rules with empty bodies); only the provided facts are to remain facts.
-- The reconstructed rules, when combined with the given facts, must yield exactly the provided stable model under standard stable-model semantics.
-- Prefer the minimal set of rules (fewest total rules and literals) that achieves this.
-- If multiple minimal sets exist, output any one valid minimal set.
-
-Input:
-
-Facts (only):
-{facts}
-
-Target stable model:
-{stable_model}
-
-Output instructions (IMPORTANT):
-
-- You may include a brief "Reasoning:" section to explain your derivation.
-- After your reasoning, end your message with ONLY the rules, one per line, with no commentary, headers, or trailing text below them.
-- The last non-empty lines of your entire response must be exactly the rules in ASP syntax.
-
-If no rules are needed to obtain the target stable model from the facts, end with a single line:
-% no additional rules required
-
-If it is impossible to obtain exactly the target stable model using only the allowed rule schema, end with a single line:
-% no solution using the allowed rule schema
-
-Procedure you should follow (do not print these steps):
-1) Identify all d{{n}}/1 predicates appearing in the facts and in the target stable model.
-2) Hypothesize candidate rules of the allowed form that, together with the facts, yield exactly the target stable model.
-3) Test and prune candidates to ensure the result is stable and minimal.
-4) Output any reasoning you wish, then finish with ONLY the final rules, one per line.
-
-Example (illustrative only; do not reuse for the actual task):
-
-Facts:
-d1(a). d2(a).
-
-Target stable model:
-{{ d1(a), d2(a), d3(a) }}
-
-Acceptable output shape:
-Reasoning: From d1(a) and d2(a) we must derive d3(a); minimal positive rule suffices.
-
-d3(X) :- d1(X), d2(X).
-"""
-
-
 # Run through LLM to get new llm program with the same facts, but generated rules
 def run_llm_for_rules(client: LLM, original_kb: KnowledgeBase, original_stats: Dict, response_path: str, rerun=False) -> KnowledgeBase:
 
     facts = ". ".join(str(fact) for fact in original_kb.facts)
-    stable_model = " ".join(original_stats["witnesses"][0]['atoms'])
+    stable_model = " ".join(original_stats["witnesses"][0]["atoms"])
     
     prompt = simple_prompt(facts, stable_model)
-    print(prompt)
+    logging.info(prompt)
 
     response = get_llm_response(client, prompt, response_path, rerun)
 
@@ -558,20 +493,27 @@ def run_llm_for_rules(client: LLM, original_kb: KnowledgeBase, original_stats: D
     return llm_kb
 
 
+def number_files(path: str):
+
+    folder = Path(path)
+    return sum(1 for file in folder.iterdir() if file.is_file())
+
+
 # Run with clingo to see if stable model matches
 def run_llms():
 
     clients = [
         OllamaClient("gpt-oss:20b"),
-        # OllamaClient("qwen2.5-coder:32b"),
         OpenAIClient("gpt-5-mini"),
-        OllamaClient("qwen3-coder:30b"),
-        # OllamaClient("deepseek-r1:14b")
+        OllamaClient("qwen3-coder:30b")
     ]
+
+    total_num = number_files("data/orig_benchmarks")
+    logging.info(f"Run {total_num}")
 
     for client in clients:
 
-        for index in range(120):
+        for index in range(total_num):
 
             run_index = 0
 
@@ -604,10 +546,10 @@ def run_llms():
             # If passes or out of retries, save results 
 
             if original_values != llm_values:
-                print(f"Original: {original_values}")
-                print(f"LLM:      {llm_values}")
+                logging.info(f"Original: {original_values}")
+                logging.info(f"LLM:      {llm_values}")
             else:
-                print(f"Both: {original_values}")
+                logging.info(f"Both: {original_values}")
 
 ########## Aggregate results ##########
 
@@ -621,7 +563,7 @@ def aggregate_results():
         "num_facts",
         "num_rules",
         "total_pos_literals",
-        "total_num_neg_literals",
+        "total_neg_literals",
         "solution_atoms",
         "num_solution_atoms",
         "rules",
@@ -636,7 +578,7 @@ def aggregate_results():
         "num_facts": "int64",
         "num_rules": "int64",
         "total_pos_literals": "int64",
-        "total_num_neg_literals": "int64",
+        "total_neg_literals": "int64",
         "solution_atoms": "object",
         "num_solution_atoms": "int64",
         "rules": "object",
@@ -648,16 +590,20 @@ def aggregate_results():
         ["gpt-oss:20b", True ],
         ["gpt-5-mini", True ],
         ["qwen3-coder:30b", True]
-        # ["deepseek-r1:32b", True ]
     ]
+
+    path = "data"
+
+    total_num = number_files(f"{path}/orig_benchmarks")
+    logging.info(f"Aggregate {total_num}")
 
     for [ model, is_llm ] in models:
 
         for index in range(120):
 
             run_index = 0
-            benchmarks_path = f"data/llm_benchmarks/{model}/benchmark_{index}_{run_index}.lp" if is_llm else f"data/orig_benchmarks/benchmark_{index}.lp"
-            solutions_path = f"data/llm_solutions/{model}/solution_{index}_{run_index}.json" if is_llm else f"data/orig_solutions/solution_{index}.json" 
+            benchmarks_path = f"{path}/llm_benchmarks/{model}/benchmark_{index}_{run_index}.lp" if is_llm else f"{path}/orig_benchmarks/benchmark_{index}.lp"
+            solutions_path = f"{path}/llm_solutions/{model}/solution_{index}_{run_index}.json" if is_llm else f"{path}/orig_solutions/solution_{index}.json" 
 
             program = read_file(benchmarks_path)
             kb = parse_kb(program)
@@ -688,7 +634,7 @@ def aggregate_results():
                 "num_facts": len(kb.facts),
                 "num_rules": len(kb.rules),
                 "total_pos_literals": len(pos_literals),
-                "total_num_neg_literals": len(neg_literals),
+                "total_neg_literals": len(neg_literals),
                 "solution_atoms": solution_atoms,
                 "num_solution_atoms": len(solution_atoms),
                 "rules": kb.rules,
@@ -715,16 +661,22 @@ def aggregate_results():
         joined_df["rules_llm"] == joined_df["rules_original"]
     )
 
-    num_true = joined_df["solution_match"].sum()
+    num_true = joined_df["rules_match"].sum()
 
-    print(num_true)
-    print(joined_df)
-    
+    logging.info(num_true)
+    logging.info(joined_df)
+
+    return joined_df
+
 
 def main():
 
-    # generate_benchmarks()
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(levelname)s %(asctime)s\n%(message)s"
+    )
 
+    # generate_benchmarks()
     # run_llms()
 
     aggregate_results()

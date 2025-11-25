@@ -4,24 +4,29 @@
     {
       "index": 1,
       "atoms": [
-        "d3(o2)",
-        "d2(o0)",
-        "d2(o2)",
-        "d0(o1)",
-        "d1(o1)"
+        "d3(o3)",
+        "d1(o4)",
+        "d1(o3)",
+        "d1(o1)",
+        "d2(o1)"
       ],
-      "time_seconds": 5.9e-05
+      "time_seconds": 9.3e-05
     }
   ],
-  "warnings": [],
+  "warnings": [
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:7:15-21: info: atom does not occur in any rule head:\n  d0(o1)\n"
+    }
+  ],
   "statistics": {
     "models_found": 1,
     "conflicts": 0.0,
     "choices": 0.0,
     "atoms": 5.0,
     "rules": 5.0,
-    "time_total": 0.000301,
-    "time_solve": 7.7e-05,
+    "time_total": 0.000649,
+    "time_solve": 0.000135,
     "time_total_python": 0.0
   }
 }

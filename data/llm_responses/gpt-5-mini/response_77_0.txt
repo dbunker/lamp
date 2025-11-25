@@ -1,6 +1,6 @@
 {
-  "id": "resp_02f92f2a7d48dabd00691ae248350481a0a4c74aed6810c74d",
-  "created_at": 1763369544.0,
+  "id": "resp_008d6690d937557100691b42fd506c81a38e49d71a000cc60f",
+  "created_at": 1763394301.0,
   "error": null,
   "incomplete_details": null,
   "instructions": null,
@@ -9,7 +9,7 @@
   "object": "response",
   "output": [
     {
-      "id": "rs_02f92f2a7d48dabd00691ae248748081a0987dd436015c4604",
+      "id": "rs_008d6690d937557100691b42fdbecc81a3b65e36b188924ef6",
       "summary": [],
       "type": "reasoning",
       "content": null,
@@ -17,11 +17,11 @@
       "status": null
     },
     {
-      "id": "msg_02f92f2a7d48dabd00691ae259c36c81a0ab98490e6b317fd6",
+      "id": "msg_008d6690d937557100691b430ab2d481a39a739fd75334d28c",
       "content": [
         {
           "annotations": [],
-          "text": "Minimal set of rules that yields the given stable model:\n\nd0(X) :- d1(X).\nd3(X) :- not d2(X).",
+          "text": "A single rule suffices to derive d0(o0) (and nothing else):\n\nd0(X) :- d1(X).",
           "type": "output_text",
           "logprobs": []
         }
@@ -60,15 +60,15 @@
   "top_logprobs": 0,
   "truncation": "disabled",
   "usage": {
-    "input_tokens": 138,
+    "input_tokens": 128,
     "input_tokens_details": {
       "cached_tokens": 0
     },
-    "output_tokens": 1252,
+    "output_tokens": 928,
     "output_tokens_details": {
-      "reasoning_tokens": 1216
+      "reasoning_tokens": 896
     },
-    "total_tokens": 1390
+    "total_tokens": 1056
   },
   "user": null,
   "billing": {
