@@ -238,9 +238,9 @@ class ModelConfig:
 # d2(X) :- d0(X), not d1(X).
 
 # Example base
-# vehicle(bike).
+# vehicle(scooter).
 # vehicle(car).
-# slow_moving(bike).
+# slow_moving(scooter).
 # highway_possible(X) :- vehicle(X), not slow_moving(X).
 def generate_example(config: ModelConfig) -> KnowledgeBase:
 
@@ -543,7 +543,7 @@ def run_llms():
             llm_values = atoms_from_model(llm_stats)
 
             # If fails, retry saying what is incorrect
-            # If passes or out of retries, save results 
+            # Stop if passes or out of retries
 
             if original_values != llm_values:
                 logging.info(f"Original: {original_values}")
