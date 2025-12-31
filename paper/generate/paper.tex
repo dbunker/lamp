@@ -1,0 +1,373 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+%\documentclass[runningheads]{llncs}
+\documentclass{llncs}
+%
+\usepackage{graphicx}
+
+\usepackage{booktabs}
+\usepackage{caption}
+\captionsetup[table]{skip=10pt}
+
+\usepackage{xcolor}
+
+\setlength{\parskip}{0.5em}
+
+\usepackage[T1]{fontenc}
+\usepackage{xcolor}
+\usepackage{listings}
+
+\lstdefinelanguage{ASP}{
+  sensitive=true,
+  morestring=[b]",
+  morekeywords={not},
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  keywordstyle=[2]\color{purple}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{teal},
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true
+}
+
+\begin{document}
+
+\title{LAMP: ASP Configuration Model Rules Deduction and Optimization with LLMs}
+
+\author{David Bunker}
+
+\authorrunning{D. Bunker}
+
+\institute{University of Potsdam}
+%\email{\{abc,lncs\}@uni-heidelberg.de}}
+%
+\maketitle
+
+\begin{abstract}
+Answer Set Programming (ASP) offers a compelling mechanism to represent product configuration. However, being able to deduce such programs that are sufficiently performant remains challenging for many users. In this area Large Language Models (LLMs) have the potential to bridge this gap. This work proposes a LLM to ASP Modeling Protocol (LAMP) system to deduce and optimize ASP rules based on provided instance facts and the expected stable models. This system also facilitates the evaluation of LLM capabilities in this regard of which gpt-oss, gpt-5-mini and qwen3-coder where selected for testing. To properly perform the evaluation a variety of ASP program complexities and potential optimizations were assessed including: varying the number of rules, number of positive and negative body literals, and number of predicates and terms. The evaluation of varying complexities also demonstrates which program features are most challenging for LLMs in ASP program generation. 
+\end{abstract}
+
+\section{Introduction}
+
+% \textit{concretizer}
+
+Product configuration problems arise across many domains, including software and hardware customization, industrial manufacturing, service composition among others. These problems are characterized by combinatorial constraints that determine which combinations of components are valid. Answer Set Programming (ASP) models such problems, offering clear semantics based on stable models with expressive capabilities for constraints, defaults, and combinatorial reasoning.
+
+However, writing ASP programs that are both correct and performant remains challenging, particularly for new users, as modeling choices can significantly affect solver behavior. Recent progress in Large Language Models (LLMs) offers new opportunities to reduce this modeling burden. LLMs have shown strong capabilities in code generation and program synthesis, suggesting they may assist in deriving ASP encodings from high level specifications \cite{ishay2023leveraginglargelanguagemodels}.
+
+LLMs can also be evaluated for logic programming abilities using such systems. It has been shown LLMs can perform inductive logic programming, such as learning logic rules from background knowledge and positive and negative examples when combined with feedback from a formal inference engine, such as Prolog \cite{gandarela2025inductivelearninglogicaltheories}. Here the authors proposed a systematic evaluation framework graded by expressivity to quantify LLM strengths and limitations in logic theory induction.
+
+Similarly, the proposed LLM to ASP Modeling Protocol (LAMP) is designed to guide LLMs in deducing and optimizing ASP rules from given instance facts and expected stable models. LAMP provides a structured interaction protocol that enables refinement of ASP encodings, with the goal of improving both correctness and performance. Beyond proposing the system itself, LAMP is used as a framework for evaluating the capabilities of different LLMs in ASP program generation.
+
+The relevant research questions of this work are: 
+
+\noindent
+\textbf{RQ1.} Is a structured approach for LLM assisted ASP modeling possible using LAMP system?
+
+\noindent
+\textbf{RQ2.} Does this system allow for comparative evaluation of LLMs on ASP generation and optimization tasks?
+
+\noindent
+\textbf{RQ3.} Which ASP language features most strongly affect LLM performance?
+
+This proposal investigates the current capabilities of Large Language Models (LLMs) regarding Answer Set Programming (ASP) and offers directions for future research at the intersection of artificial intelligence and constraint solving. Such a system can then be contrasted against similar systems such as those based on LLMs fine-tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, iterative scheduling and plan generation with LLMs and ASP \cite{lin2024clmaspcouplinglargelanguage}, and LLM based systems that can learn directly from ASP answer sets \cite{borroto2025questionansweringllmslearning}.
+
+\section{ASP, Complexity and Datasets}
+
+This section presents a method for applying ASP to product configuration that is suited for use with LLMs. This is followed by several ways to systematically vary the complexity, enabling an analysis of the LAMP process and prompting quality, LLM performance, and the specific features that pose the greatest challenges for LLMs. Finally, the process used to generate datasets of ASP programs for these experiments is outlined.
+
+\subsection{Answer Set Programming}
+
+% - 2. LLMs Generating Answer Set Programs (NL -> ASP, spec -> ASP)
+%     - Leveraging Large Language Models to Generate Answer Set Programs (2023)
+%           - \cite{ishay2023leveraginglargelanguagemodels}
+%           - 2307.07699
+%     - Logic-of-Thought: Empowering Large Language Models with Logic Programs for Solving Puzzles in Natural Language (2025)
+%           - \cite{li2025logicofthoughtempoweringlargelanguage}
+%           - 2505.16114
+
+ASP is a declarative programming language based on logic programming and non-monotonic reasoning where previous conclusions can be invalidated by new information. Instead of individual instructions, programs are described with logical rules and constraints and an ASP solver computes the solutions as stable models, referred to as answer sets, that satisfy them.
+
+There are many ways to represent product configuration using ASP, one such example being \textit{OOASP} \cite{falkner2015ooaspconnectingobjectorientedlogic}, offering an expressive object-oriented product configuration system. For use as a demonstration of LLM evaluation and ASP program generation and optimization a simpler approach is more suitable option. This simplification includes ASP \textit{facts} of form \texttt{descriptor(object)} with possible \textit{normal rules} \texttt{new\_descriptor(X) :- descriptor\_0(X), [not] descriptor\_1(X), ...} allowing new object descriptions to be resolved from initial instance object descriptions. These ASP program constraints offer flexibility without overwhelming the LLMs with semantic possibilities.
+
+Below is an example representing the model facts that objects \texttt{"car"} and \texttt{"scooter"} are both vehicles, represented with the predicate \texttt{vehicle}, and the scooter is slow moving, represented with the predicate \texttt{slow\_moving}. It also has the rule that if an object is a vehicle and not slow moving it is highway possible, represented with the predicate \texttt{highway\_possible}.
+
+\begin{lstlisting}[language=ASP]
+vehicle("scooter").
+vehicle("car").
+slow_moving("scooter").
+highway_possible(X) :- vehicle(X), not slow_moving(X).
+\end{lstlisting}
+
+Running this results in the answer set \texttt{\{ vehicle("bike"), vehicle("car"), slow\_moving("scooter"), highway\_possible("car") \}}. Given these facts and rules, \texttt{highway\_possible(car)} can be deduced, indicating the car is highway possible and, due to default negation, the scooter is not highway possible.
+
+% \vspace{-1.5em}
+\subsection{Complexity}
+
+% - A. Graded Expressivity Levels 
+%     - Inductive Learning of Logical Theories with LLMs: An Expressivity-Graded Analysis (2025)
+%           - \cite{gandarela2025inductivelearninglogicaltheories}
+%           - 2408.16779
+%     - Extended Version of: On the Structural Hardness of Answer Set Programming: Can Structure Efficiently Confine the Power of Disjunctions?
+%           - \cite{hecher2024extendedversionofstructural}
+%           - 2402.03539v1
+%     - 
+%           - \cite{}
+%           - 2402.03539v1
+
+There are many ways to evaluate complexity of an ASP program. In the paper \textit{Inductive Learning of Logical Theories with LLMs}, which investigates LLM based Prolog rule generation, this is approached as categories Chain, Rooted Directed Graph, Disjunctive Rooted Directed Graph, and Mixed \cite{gandarela2025inductivelearninglogicaltheories}. The Chain category is simplest in that every rule, except the root, deduces facts based on only one other rule, Rooted Directed Graph extends this where every rule can be relevant for several others by its head appearing in their bodies. Disjunctive Rooted Directed Graph extends this further by predicates appearing as head of multiple rules, facilitating disjunction. Mixed is the most complicated as it is a combination of each in addition to recursion, where a rule's head predicate can also appear in its body.
+
+As this work focuses specifically on correct answer set deduction and rule optimization, fact and rule features are used to represent complexity. These features include, number of possible predicates, terms, facts, rules, positive literals within each rule, and negative literals within each rule. These could be extended to include greater arity, or additional language features, such as choice rules and head disjunction for future work. 
+
+Another approach for future work would be from the specific perspective of solving complexity, focussing on solution space features such as, vector cover size, tree depth, feedback vertex set, clique width, tree width, among others \cite{hecher2024extendedversionofstructural}.
+
+\subsection{Dataset Generation}
+
+To test against the complexity principles proposed, synthetic data is generated by introducing new possible predicates and terms as needed. To keep the programs sufficiently complex, but manageable by the LLMs, only one stable model is expected and at least one atom must be deduced. The vehicle example above would be represented as shown below.
+
+\begin{lstlisting}[language=ASP]
+d0(o0).
+d0(o1).
+d1(o1).
+d2(X) :- d0(X), not d1(X).
+\end{lstlisting}
+
+This results in the answer set \texttt{\{\ d0(o0), d0(o1), d1(o1), d2(o0) \}}, corresponding to the vehicle example answer set.
+
+\section{Methodology}
+
+The ASP rule generation procedure functions by iteratively prompting the LLM, providing the facts and expected answer set. 
+
+\subsection{LLM Prompting}
+
+% - 4. Hybrid LLM + ASP Reasoning Pipelines
+%     - CLMASP: Coupling Large Language Models with Answer Set Programming for Robotic Task Planning (2024)
+%           - \cite{lin2024clmaspcouplinglargelanguage}
+%           - 2406.03367
+%     - Reliable Natural Language Understanding with Large Language Models and Answer Set Programming (2023)
+%           - \cite{Rajasekharan_2023}
+%           - 2302.03780v3
+%     - A Reliable Common-Sense Reasoning Socialbot Built Using LLMs and Goal-Directed ASP (2024)
+%           - \cite{ZENG_2024}
+%           - 2407.18498v1
+%     - Reliable Collaborative Conversational Agent System Based on LLMs and Answer Set Programming (2025)
+%           - \cite{zeng2025reliablecollaborativeconversationalagent}
+%           - 2505.06438
+
+% - 3. Fine-Tuning & Optimizing LLMs for ASP Code Generation
+%     - LLASP: Fine-tuning Large Language Models for Answer Set Programming (2024)
+%           - \cite{coppolillo2024llaspfinetuninglargelanguage}
+%           - 2407.18723
+
+% - B. Neuro-symbolic Loop Chain of Thought Pipeline
+%     - DSPy: Compiling Declarative Language Model Calls into Self-Improving Pipelines
+%           - khattab2023dspycompilingdeclarativelanguage
+%           - 2310.03714v1
+%     - Teaching LLMs to Plan: Logical Chain-of-Thought Instruction Tuning for Symbolic Planning (2025)
+%           - \cite{verma2025teachingllmsplanlogical}
+%           - 2509.13351
+%     - plasp 3: Towards Effective ASP Planning (2018)
+%           - \cite{DIMOPOULOS_2019}
+%           - 1812.04491v1
+%     - PEIRCE: Unifying Material and Formal Reasoning via LLM-Driven Neuro-Symbolic Refinement (2025)
+%           - \cite{quan2025peirceunifyingmaterialformal}
+%           - 2504.04110
+%     - Planning in the Dark: LLM-Symbolic Planning Pipeline without Experts (2025)
+%           - \cite{huang2024planningdarkllmsymbolicplanning}
+%           - 2409.15915
+
+LLM prompting 
+
+\subsection{Evaluation}
+
+however withholding, the rules used to generate the answer set
+
+% - 5. LLMs Evaluated or Constrained Using ASP
+%     - LLM-ARC: Enhancing LLMs with an Automated Reasoning Critic (2024)
+%           - \cite{kalyanpur2024llmarcenhancingllmsautomated}
+%           - 2406.17663
+%     - An Empirical Study of Conformal Prediction in LLM with ASP Scaffolds for Robust Reasoning (2025)
+%           - \cite{kaur2025empiricalstudyconformalprediction}
+%           - 2503.05439
+
+\section{Experiments}
+
+
+
+\subsection{Experimental Setup}
+
+
+
+\subsection{Results and Discussion}
+
+% - 1. Benchmarking & Evaluation of LLMs on ASP / Logic Programming
+%     - Can LLMs Solve ASP Problems? Insights from a Benchmarking Study (Extended Version) (2025)
+%           - \cite{ren2025llmssolveaspproblems}
+%           - 2507.19749
+
+\begin{table}[h]
+\centering
+\setlength{\tabcolsep}{4pt}
+
+\begin{minipage}{0.3\textwidth}
+    \centering
+    \begin{tabular}{lrr}
+    \toprule
+    LLM & Correct & Rules Matching \\
+    \midrule
+    gpt-5-mini & 119 & 11 \\
+    gpt-oss:20b & 116 & 11 \\
+    qwen3-coder:30b & 53 & 1 \\
+    \bottomrule
+    \end{tabular}
+    \centering
+\end{minipage}
+\hfill
+\begin{minipage}{0.3\textwidth}
+    \centering
+    \begin{tabular}{lr}
+    \toprule
+    LLM & Incorrect \\
+    \midrule
+    gpt-5-mini & 1 \\
+    gpt-oss:20b & 4 \\
+    qwen3-coder:30b & 67 \\
+    \bottomrule
+    \end{tabular}
+    \centering
+\end{minipage}
+
+\caption{LLM with Answer Set Correct and Incorrect Results, Rules Matching Indicates number of LLM Generated Programs that Match the Original }
+\label{tab:llm_results}
+\end{table}
+
+\begin{table}[h]
+\centering
+\setlength{\tabcolsep}{4pt}
+
+\begin{minipage}{0.3\textwidth}
+    \centering
+    \begin{tabular}{lrr}
+    \toprule
+    LLM & Rules & Correct \\
+    \midrule
+    gpt-5-mini & 0 & 59 \\
+    gpt-5-mini & 1 & 36 \\
+    gpt-5-mini & 2 & 24 \\
+    gpt-oss:20b & 0 & 58 \\
+    gpt-oss:20b & 1 & 34 \\
+    gpt-oss:20b & 2 & 24 \\
+    qwen3-coder:30b & -2 & 3 \\
+    qwen3-coder:30b & -1 & 7 \\
+    qwen3-coder:30b & 0 & 17 \\
+    qwen3-coder:30b & 1 & 15 \\
+    qwen3-coder:30b & 2 & 10 \\
+    \bottomrule
+    \end{tabular}
+    \centering
+\end{minipage}
+\hspace{0.3\textwidth}
+\begin{minipage}{0.3\textwidth}
+    \centering
+    \begin{tabular}{lrr}
+    \toprule
+    LLM & Rules & Incorrect \\
+    \midrule
+    gpt-5-mini & 0 & 1 \\
+    gpt-oss:20b & 0 & 2 \\
+    gpt-oss:20b & 1 & 2 \\
+    qwen3-coder:30b & -2 & 9 \\
+    qwen3-coder:30b & -1 & 11 \\
+    qwen3-coder:30b & 0 & 13 \\
+    qwen3-coder:30b & 1 & 13 \\
+    qwen3-coder:30b & 2 & 10 \\
+    \bottomrule
+    \end{tabular}
+    \centering
+\end{minipage}
+
+\caption{Number of Correct and Incorrect Answer Set Results by LLM and Number of Rules Fewer than Original (Larger is Better)}
+\label{tab:llm_rules}
+\end{table}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.495\textwidth]{diagrams/Correct_gpt-5-mini.pdf}
+    \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_gpt-5-mini.pdf}
+    \caption{Gpt-5-mini input literals to output literals for correct answer set response.}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.495\textwidth]{diagrams/Correct_gpt-oss:20b.pdf}
+    \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_gpt-oss:20b.pdf}
+    \caption{Gpt-oss:20b input literals to output literals for correct answer set response.}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.495\textwidth]{diagrams/Correct_qwen3-coder:30b.pdf}
+    \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_qwen3-coder:30b.pdf}
+    \caption{Qwen3-coder input literals to output literals for correct answer set response.}
+\end{figure}
+
+\subsection{Error Analysis}
+
+\subsection{Feature Importance}
+
+% - A. SHAP Values
+%     - Consistent Individualized Feature Attribution for Tree Ensembles
+%           - \cite{lundberg2019consistentindividualizedfeatureattribution}
+%           - 1802.03888
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{diagrams/xgb_importance.pdf}
+    \caption{XGBoost Feature Importance}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{diagrams/shap.pdf}
+    \caption{SHAP Feature Importance}
+\end{figure}
+
+\section{Related and Future Work}
+
+% - 6. LLMs + Learning / Induction over ASP
+%     - Question Answering with LLMs and Learning from Answer Sets (2025)
+%           - \cite{borroto2025questionansweringllmslearning}
+%           - 2509.16590
+%     - Declarative Knowledge Distillation from Large Language Models for Visual Question Answering Datasets (2024)
+%           - \cite{eiter2024declarativeknowledgedistillationlarge}
+%           - 2410.09428
+
+% - 7. Related Logic Programming (Non-ASP but Methodologically Relevant)
+%     - GOFAI meets Generative AI: Development of Expert Systems by means of Large Language Models (2025)
+%           - \cite{garridomerchán2025gofaimeetsgenerativeai}
+%           - 2507.13550
+%     - Socrates or Smartypants: Testing Logic Reasoning Capabilities of Large Language Models with Logic Programming-based Test Oracles (2025)
+%           - \cite{xu2025socratessmartypantstestinglogic}
+%           - 2504.12312
+
+% Allow for higher level arrity,
+% Choice rules 
+
+\section{Conclusion}
+
+
+
+\section{References}
+
+
+
+\bibliography{custom}
+\bibliographystyle{splncs04}
+
+\end{document}

@@ -1,1 +1,1 @@
-# LLM to ASP Modeling Protocol
+# LLM to ASP Modeling Protocol (LAMP)

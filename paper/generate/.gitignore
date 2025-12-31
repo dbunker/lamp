@@ -1,0 +1,10 @@
+*.aux
+*.blg
+*.log
+*.bbl
+*.out
+*.pdf
+*.ist
+*.glo
+*.acn
+watch.py
