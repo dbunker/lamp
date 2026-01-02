@@ -6,3 +6,6 @@
 *.pdf
 *.ist
 *.glo
+*.listing
+*.cls
+_minted

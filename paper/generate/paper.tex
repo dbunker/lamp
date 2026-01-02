@@ -13,11 +13,11 @@
 
 \usepackage{xcolor}
 
-\setlength{\parskip}{0.5em}
-
 \usepackage[T1]{fontenc}
 \usepackage{xcolor}
 \usepackage{listings}
+
+% \setlength{\parskip}{0.5em}
 
 \lstdefinelanguage{ASP}{
   sensitive=true,
@@ -45,17 +45,19 @@
 \authorrunning{D. Bunker}
 
 \institute{University of Potsdam}
-%\email{\{abc,lncs\}@uni-heidelberg.de}}
-%
+
 \maketitle
 
 \begin{abstract}
-Answer Set Programming (ASP) offers a compelling mechanism to represent product configuration. However, being able to deduce such programs that are sufficiently performant remains challenging for many users. In this area Large Language Models (LLMs) have the potential to bridge this gap. This work proposes a LLM to ASP Modeling Protocol (LAMP) system to deduce and optimize ASP rules based on provided instance facts and the expected stable models. This system also facilitates the evaluation of LLM capabilities in this regard of which gpt-oss, gpt-5-mini and qwen3-coder where selected for testing. To properly perform the evaluation a variety of ASP program complexities and potential optimizations were assessed including: varying the number of rules, number of positive and negative body literals, and number of predicates and terms. The evaluation of varying complexities also demonstrates which program features are most challenging for LLMs in ASP program generation. 
+Answer Set Programming (ASP) offers a compelling mechanism to represent product configuration. However, being able to deduce such programs that are sufficiently performant remains challenging for many users. In this area Large Language Models (LLMs) have the potential to bridge this gap. This work proposes a LLM to ASP Modeling Protocol (LAMP) system to deduce and optimize ASP rules based on provided instance facts and the expected stable models. This system also facilitates the evaluation of LLM capabilities in this regard of which gpt-oss, gpt-5-mini and qwen3-coder where selected for testing. To properly perform the evaluation a variety of ASP program complexities and potential optimizations were assessed including: varying the number of rules, number of positive and negative body literals, and number of predicates and terms. The evaluation of varying complexities also demonstrates which program features are most challenging for LLMs in ASP program generation.
 \end{abstract}
 
 \section{Introduction}
 
-% \textit{concretizer}
+% - 1. LLMs Generating Answer Set Programs (NL -> ASP, spec -> ASP)
+%     - Leveraging Large Language Models to Generate Answer Set Programs (2023)
+%           - \cite{ishay2023leveraginglargelanguagemodels}
+%           - 2307.07699
 
 Product configuration problems arise across many domains, including software and hardware customization, industrial manufacturing, service composition among others. These problems are characterized by combinatorial constraints that determine which combinations of components are valid. Answer Set Programming (ASP) models such problems, offering clear semantics based on stable models with expressive capabilities for constraints, defaults, and combinatorial reasoning.
 
@@ -65,7 +67,7 @@ LLMs can also be evaluated for logic programming abilities using such systems. I
 
 Similarly, the proposed LLM to ASP Modeling Protocol (LAMP) is designed to guide LLMs in deducing and optimizing ASP rules from given instance facts and expected stable models. LAMP provides a structured interaction protocol that enables refinement of ASP encodings, with the goal of improving both correctness and performance. Beyond proposing the system itself, LAMP is used as a framework for evaluating the capabilities of different LLMs in ASP program generation.
 
-The relevant research questions of this work are: 
+The relevant research questions of this work are:
 
 \noindent
 \textbf{RQ1.} Is a structured approach for LLM assisted ASP modeling possible using LAMP system?
@@ -83,14 +85,6 @@ This proposal investigates the current capabilities of Large Language Models (LL
 This section presents a method for applying ASP to product configuration that is suited for use with LLMs. This is followed by several ways to systematically vary the complexity, enabling an analysis of the LAMP process and prompting quality, LLM performance, and the specific features that pose the greatest challenges for LLMs. Finally, the process used to generate datasets of ASP programs for these experiments is outlined.
 
 \subsection{Answer Set Programming}
-
-% - 2. LLMs Generating Answer Set Programs (NL -> ASP, spec -> ASP)
-%     - Leveraging Large Language Models to Generate Answer Set Programs (2023)
-%           - \cite{ishay2023leveraginglargelanguagemodels}
-%           - 2307.07699
-%     - Logic-of-Thought: Empowering Large Language Models with Logic Programs for Solving Puzzles in Natural Language (2025)
-%           - \cite{li2025logicofthoughtempoweringlargelanguage}
-%           - 2505.16114
 
 ASP is a declarative programming language based on logic programming and non-monotonic reasoning where previous conclusions can be invalidated by new information. Instead of individual instructions, programs are described with logical rules and constraints and an ASP solver computes the solutions as stable models, referred to as answer sets, that satisfy them.
 
@@ -110,20 +104,17 @@ Running this results in the answer set \texttt{\{ vehicle("bike"), vehicle("car"
 % \vspace{-1.5em}
 \subsection{Complexity}
 
-% - A. Graded Expressivity Levels 
+% - A. Graded Expressivity Levels
 %     - Inductive Learning of Logical Theories with LLMs: An Expressivity-Graded Analysis (2025)
 %           - \cite{gandarela2025inductivelearninglogicaltheories}
 %           - 2408.16779
 %     - Extended Version of: On the Structural Hardness of Answer Set Programming: Can Structure Efficiently Confine the Power of Disjunctions?
 %           - \cite{hecher2024extendedversionofstructural}
 %           - 2402.03539v1
-%     - 
-%           - \cite{}
-%           - 2402.03539v1
 
 There are many ways to evaluate complexity of an ASP program. In the paper \textit{Inductive Learning of Logical Theories with LLMs}, which investigates LLM based Prolog rule generation, this is approached as categories Chain, Rooted Directed Graph, Disjunctive Rooted Directed Graph, and Mixed \cite{gandarela2025inductivelearninglogicaltheories}. The Chain category is simplest in that every rule, except the root, deduces facts based on only one other rule, Rooted Directed Graph extends this where every rule can be relevant for several others by its head appearing in their bodies. Disjunctive Rooted Directed Graph extends this further by predicates appearing as head of multiple rules, facilitating disjunction. Mixed is the most complicated as it is a combination of each in addition to recursion, where a rule's head predicate can also appear in its body.
 
-As this work focuses specifically on correct answer set deduction and rule optimization, fact and rule features are used to represent complexity. These features include, number of possible predicates, terms, facts, rules, positive literals within each rule, and negative literals within each rule. These could be extended to include greater arity, or additional language features, such as choice rules and head disjunction for future work. 
+As this work focuses specifically on correct answer set deduction and rule optimization, fact and rule features are used to represent complexity. These features include, number of possible predicates, terms, facts, rules, positive literals within each rule, and negative literals within each rule. These could be extended to include greater arity, or additional language features, such as choice rules and head disjunction for future work.
 
 Another approach for future work would be from the specific perspective of solving complexity, focussing on solution space features such as, vector cover size, tree depth, feedback vertex set, clique width, tree width, among others \cite{hecher2024extendedversionofstructural}.
 
@@ -142,9 +133,14 @@ This results in the answer set \texttt{\{\ d0(o0), d0(o1), d1(o1), d2(o0) \}}, c
 
 \section{Methodology}
 
-The ASP rule generation procedure functions by iteratively prompting the LLM, providing the facts and expected answer set. 
+The ASP rule generation procedure functions by iteratively prompting the LLM, providing the facts and expected answer set.
 
 \subsection{LLM Prompting}
+
+% - 2. LLMs Generating Answer Set Programs (NL -> ASP, spec -> ASP)
+%     - Logic-of-Thought: Empowering Large Language Models with Logic Programs for Solving Puzzles in Natural Language (2025)
+%           - \cite{li2025logicofthoughtempoweringlargelanguage}
+%           - 2505.16114
 
 % - 4. Hybrid LLM + ASP Reasoning Pipelines
 %     - CLMASP: Coupling Large Language Models with Answer Set Programming for Robotic Task Planning (2024)
@@ -166,27 +162,20 @@ The ASP rule generation procedure functions by iteratively prompting the LLM, pr
 %           - 2407.18723
 
 % - B. Neuro-symbolic Loop Chain of Thought Pipeline
-%     - DSPy: Compiling Declarative Language Model Calls into Self-Improving Pipelines
-%           - khattab2023dspycompilingdeclarativelanguage
+%     - DSPy: Compiling Declarative Language Model Calls into Self-Improving Pipelines (2023)
+%           - \cite{khattab2023dspycompilingdeclarativelanguage}
 %           - 2310.03714v1
-%     - Teaching LLMs to Plan: Logical Chain-of-Thought Instruction Tuning for Symbolic Planning (2025)
-%           - \cite{verma2025teachingllmsplanlogical}
-%           - 2509.13351
-%     - plasp 3: Towards Effective ASP Planning (2018)
-%           - \cite{DIMOPOULOS_2019}
-%           - 1812.04491v1
-%     - PEIRCE: Unifying Material and Formal Reasoning via LLM-Driven Neuro-Symbolic Refinement (2025)
-%           - \cite{quan2025peirceunifyingmaterialformal}
-%           - 2504.04110
-%     - Planning in the Dark: LLM-Symbolic Planning Pipeline without Experts (2025)
-%           - \cite{huang2024planningdarkllmsymbolicplanning}
-%           - 2409.15915
+%     - Dspy-based Neural-Symbolic Pipeline to Enhance Spatial Reasoning in LLMs (2024)
+%           - \cite{wang2024dspybasedneuralsymbolicpipelineenhance}
+%           - 2411.18564
 
-LLM prompting 
+LLM prompting has been shown to be effective in writing ASP programs in such areas as logic puzzle solving \cite{li2025logicofthoughtempoweringlargelanguage} and robotic task planning \cite{lin2024clmaspcouplinglargelanguage}. LLM and ASP based hybrid systems have even been shown to be effective in improving natural language understanding \cite{Rajasekharan_2023}, common sense reasoning \cite{ZENG_2024} and as collaborative conversations agents \cite{zeng2025reliablecollaborativeconversationalagent}.
+
+The prompt provided to the LLMs provides the instance atoms facts, such as \texttt{descriptor\_0(object\_0)}, expected ASP output format \texttt{predicate\_0(X) :- predicate\_1(X), [not] predicate\_2(X)...}, and the expected stable model, such as \texttt{d0(o0), d0(o1), ...}. The output is then parsed into ASP and run with the ASP solver Clingo. This can then be passed back if incorrect.
+
+As future work the prompt may be able to be optimized by adding examples or using DSPy \cite{khattab2023dspycompilingdeclarativelanguage} which tests many variations of the prompt with different examples to get the best result. This was demonstrated for spatial reasoning as a chain of thought reasoning system \cite{wang2024dspybasedneuralsymbolicpipelineenhance}. Another option would be to fine tune the LLM specifically for ASP code generation as was done with LLASP \cite{coppolillo2024llaspfinetuninglargelanguage}.
 
 \subsection{Evaluation}
-
-however withholding, the rules used to generate the answer set
 
 % - 5. LLMs Evaluated or Constrained Using ASP
 %     - LLM-ARC: Enhancing LLMs with an Automated Reasoning Critic (2024)
@@ -196,13 +185,15 @@ however withholding, the rules used to generate the answer set
 %           - \cite{kaur2025empiricalstudyconformalprediction}
 %           - 2503.05439
 
+The ASP programs generated are evaluated after being run via Clingo. The number of rules, complexity and how close it is to the expected stable model can then be assessed. This is similar to the process LLM-ARC employs as an actor-critic method, where the LLM Actor generates ASP, while the automated reasoning critic evaluates the code \cite{kalyanpur2024llmarcenhancingllmsautomated}. Other systems use ASP as a scaffolding for robust reasoning \cite{kaur2025empiricalstudyconformalprediction}.
+
 \section{Experiments}
 
-
+Experiments where conducted on the synthetic data with varying complexities as specified in the section \textit{ASP, Complexity and Datasets}. A variety of online and local open weight LLMs where selected for testing to get a broad view of capabilities.
 
 \subsection{Experimental Setup}
 
-
+A total of 120 synthetic ASP programs where created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAIs API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which where run locally using Ollama. All ASP solving and analysis was done using Clingo.
 
 \subsection{Results and Discussion}
 
@@ -210,6 +201,8 @@ however withholding, the rules used to generate the answer set
 %     - Can LLMs Solve ASP Problems? Insights from a Benchmarking Study (Extended Version) (2025)
 %           - \cite{ren2025llmssolveaspproblems}
 %           - 2507.19749
+
+Overall results are shown in table \ref{tab:llm_results}. Both \textit{gpt-5-mini} and \textit{gpt-oss:20b} perform very well, deducing the correct ASP rules to get the expected stable model in almost all cases. \textit{qwen3-coder:30b} performed significantly worse, deducing the correct rules in almost all cases. Although \textit{qwen3-coder:30b} is tuned for programming, it may not have been tuned for ASP, resulting in poorer performance. Of the cases the correct stable model was produced, most of the time the rules did not match the ones from the synthetic data.
 
 \begin{table}[h]
 \centering
@@ -243,9 +236,11 @@ however withholding, the rules used to generate the answer set
     \centering
 \end{minipage}
 
-\caption{LLM with Answer Set Correct and Incorrect Results, Rules Matching Indicates number of LLM Generated Programs that Match the Original }
+\caption{LLM with Answer Set Correct and Incorrect Results, Rules Matching Indicates number of LLM Generated Programs that Match the Original.}
 \label{tab:llm_results}
 \end{table}
+
+Table \ref{tab:llm_rules} shows the number of rules of deduced by the indicated LLM subtracted from normal of rules from the original synthetically generated data. The left table is for when the stable model is correct and the left is for incorrect. The rule count matches much of the time for both \texttt{gpt-5-mini} and \texttt{gpt-oss:20b}, but often optimizes to fewer rules reducing by as many as 2 rules 24 times for both. \texttt{qwen3-coder:30b} performs worse, creating more rules than the original in 10 cases.
 
 \begin{table}[h]
 \centering
@@ -255,7 +250,7 @@ however withholding, the rules used to generate the answer set
     \centering
     \begin{tabular}{lrr}
     \toprule
-    LLM & Rules & Correct \\
+    LLM & Rules Diff & Correct \\
     \midrule
     gpt-5-mini & 0 & 59 \\
     gpt-5-mini & 1 & 36 \\
@@ -277,7 +272,7 @@ however withholding, the rules used to generate the answer set
     \centering
     \begin{tabular}{lrr}
     \toprule
-    LLM & Rules & Incorrect \\
+    LLM & Rules Diff & Incorrect \\
     \midrule
     gpt-5-mini & 0 & 1 \\
     gpt-oss:20b & 0 & 2 \\
@@ -292,15 +287,18 @@ however withholding, the rules used to generate the answer set
     \centering
 \end{minipage}
 
-\caption{Number of Correct and Incorrect Answer Set Results by LLM and Number of Rules Fewer than Original (Larger is Better)}
+\caption{Number of Correct and Incorrect Answer Set Results by LLM and Number of Rules Fewer than Original (Larger is Better).}
 \label{tab:llm_rules}
 \end{table}
+
+Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals} and \ref{fig:gpt_oss_literals} compare the total number of literals in the original ASP against the total number of literals of the LLM generated rules for each LLM tested. The dot size indicates the number of examples with left for when the LLM got the correct stable model and right for incorrect. Figure \ref{fig:gpt_oss_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{qwen3-gpt\_oss\_literals:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3\_literals} shown in figure \ref{fig:qwen3_literals} had mixed results. Overall, the results corroborate with other benchmarking studies on the abilities of LLMs to generate ASP \cite{ren2025llmssolveaspproblems}.
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_gpt-5-mini.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_gpt-5-mini.pdf}
     \caption{Gpt-5-mini input literals to output literals for correct answer set response.}
+    \label{fig:gpt_5_literals}
 \end{figure}
 
 \begin{figure}[h!]
@@ -308,6 +306,7 @@ however withholding, the rules used to generate the answer set
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_gpt-oss:20b.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_gpt-oss:20b.pdf}
     \caption{Gpt-oss:20b input literals to output literals for correct answer set response.}
+    \label{fig:gpt_oss_literals}
 \end{figure}
 
 \begin{figure}[h!]
@@ -315,9 +314,8 @@ however withholding, the rules used to generate the answer set
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_qwen3-coder:30b.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_qwen3-coder:30b.pdf}
     \caption{Qwen3-coder input literals to output literals for correct answer set response.}
+    \label{fig:qwen3_literals}
 \end{figure}
-
-\subsection{Error Analysis}
 
 \subsection{Feature Importance}
 
@@ -326,19 +324,29 @@ however withholding, the rules used to generate the answer set
 %           - \cite{lundberg2019consistentindividualizedfeatureattribution}
 %           - 1802.03888
 
+Based on whether the LLM is able to get the correct stable model or not it is possible to deduced which ASP rule features are most difficult for LLMs to deduce thereby indicating higher complexity. To do this, the features of the original ASP program and the LLM deduced ASP program such as number of rules, number of new atoms inferred etc. are used to predict the likelihood of a getting the correct stable model using the tree based machine learning algorithm XGBoost.
+
+From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, or average improvement in the loss function from splits using that feature or cover, the average number of samples affected by splits using that feature. For this analysis weight is used, the number of times a feature is used to split across all trees \cite{lundberg2019consistentindividualizedfeatureattribution}.
+
+The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{atom\_diff\_llm}, or the number of new atoms infered by the LLMs program. This makes sense as the LLMs ASP not inferring atoms is a good indicator it won't arrive at the expected stable model. The next most important feature is \textit{total\_neg\_literals\_llm}, indicating that having a lot of negative literals adds complexity.
+
+A similar method that is somewhat more robust involves deriving the features SHAP values. Each feature's SHAP value is the average change in prediction caused by that feature taken over all possible ways that feature could have appeared in the model \cite{lundberg2019consistentindividualizedfeatureattribution}. SHAP values shown in figure \ref{fig:shap} show similar results to figure \ref{fig:importance}.
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width=1.0\textwidth]{diagrams/xgb_importance.pdf}
     \caption{XGBoost Feature Importance}
+    \label{fig:importance}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.8\textwidth]{diagrams/shap.pdf}
     \caption{SHAP Feature Importance}
+    \label{fig:shap}
 \end{figure}
 
-\section{Related and Future Work}
+\section{Related Work}
 
 % - 6. LLMs + Learning / Induction over ASP
 %     - Question Answering with LLMs and Learning from Answer Sets (2025)
@@ -347,6 +355,9 @@ however withholding, the rules used to generate the answer set
 %     - Declarative Knowledge Distillation from Large Language Models for Visual Question Answering Datasets (2024)
 %           - \cite{eiter2024declarativeknowledgedistillationlarge}
 %           - 2410.09428
+%     - Towards Automatic Composition of ASP Programs from Natural Language Specifications (2024)
+%           - \cite{borroto2024automaticcompositionaspprograms}
+%           - 2403.04541
 
 % - 7. Related Logic Programming (Non-ASP but Methodologically Relevant)
 %     - GOFAI meets Generative AI: Development of Expert Systems by means of Large Language Models (2025)
@@ -356,16 +367,39 @@ however withholding, the rules used to generate the answer set
 %           - \cite{xu2025socratessmartypantstestinglogic}
 %           - 2504.12312
 
-% Allow for higher level arrity,
-% Choice rules 
+% - 7. Planning
+%     - Teaching LLMs to Plan: Logical Chain-of-Thought Instruction Tuning for Symbolic Planning (2025)
+%           - \cite{verma2025teachingllmsplanlogical}
+%           - 2509.13351
+%     - plasp 3: Towards Effective ASP Planning (2018)
+%           - \cite{DIMOPOULOS_2019}
+%           - 1812.04491v1
+%     - PEIRCE: Unifying Material and Formal Reasoning via LLM-Driven Neuro-Symbolic Refinement (2025)
+%           - \cite{quan2025peirceunifyingmaterialformal}
+%           - 2504.04110
+%     - Planning in the Dark: LLM-Symbolic Planning Pipeline without Experts (2025)
+%           - \cite{huang2024planningdarkllmsymbolicplanning}
+%           - 2409.15915
+
+Recent work has explored the integration of LLMs and ASP with several approaches studying how LLMs can learn from or reason over ASP directly. Borroto et al. (2025) \cite{borroto2025questionansweringllmslearning} investigates question answering and inductive learning from answer sets, demonstrating how stable models can serve as supervision signals for LLMs. Declarative knowledge distillation techniques have also been proposed to transfer structured reasoning from LLMs into symbolic representations by Either et al. (2024) \cite{eiter2024declarativeknowledgedistillationlarge}. Similarly, Borroto et al. (2024) \cite{borroto2024automaticcompositionaspprograms} demonstrates automatic composition of ASP programs from natural language specifications, focusing on translating high level descriptions into executable ASP encodings.
+
+Beyond ASP specific research, logic programming has been used as a tool to evaluate and scaffold LLM reasoning. Hybrid GOFAI LLM systems show how expert systems can be rebuilt using LLM generated logic rules by Garrido et al. (2025) \cite{garridomerchán2025gofaimeetsgenerativeai}, while Xu et al. (2025) \cite{xu2025socratessmartypantstestinglogic} shows programming based test evaluators systematically assess LLM reasoning reliability . These works support the use of formal solvers, as in LAMP, to ground and validate LLM outputs.
+
+Planning provides another closely related line of research. Logical chain of thought tuning for symbolic planning by Verma et al. (2025) \cite{verma2025teachingllmsplanlogical} and LLM symbolic planning pipelines without expert input  by Huang et al. (2024) \cite{huang2024planningdarkllmsymbolicplanning} highlight the benefits of keeping solvers such as ASP planners in the loop. Established ASP planning benchmarks, including Plasp developed by Dimopoulos et al. \cite{DIMOPOULOS_2019}, offer realistic domains that could extend LAMP beyond product configuration. Neuro symbolic refinement frameworks such as PEIRCE further demonstrate how LLMs and formal reasoning systems can iteratively improve each other \cite{quan2025peirceunifyingmaterialformal} by Quan et al. (2025).
+
+\section{Future Work}
+
+Several directions for future work follow naturally. First, iterative prompting could be improved by more explicit chain of thought reasoning, potentially evaluating candidate rules across multiple instance fact sets per iteration, with Clingo acting as a tool within an LLM based agent loop. Prompt optimization frameworks such as DSPy could be used to automatically refine prompts and feedback strategies. Second, the synthetic datasets could be extended to richer ASP constructs, including higher arity predicates, choice rules, disjunction, and head disjunction, as well as more complex dependency structures such as those proposed by Gandarela et al. (2025) regarding logic program expressivity \cite{gandarela2025inductivelearninglogicaltheories}.
+
+Third, evaluation could move beyond synthetic configuration tasks to existing ASP datasets, including OOASP models, real world ASP encodings, planning benchmarks such as Plasp and PDDL to ASP translations, and domains like rail scheduling. Fourth, deeper natural language interfaces to ASP could be explored, covering bidirectional translation between text and ground facts, rules, stable models, and multiple natural languages. Finally, optimization remains a promising avenue, including other ways of transforming ASP into more efficient ASP, compiling ASP fragments to lower level code, such as C, and tighter integration with solver level optimizations such as those seen in the Non Ground Optimizer (NGO), enabling LLMs to reason not only about correctness but also about grounding and solving performance.
 
 \section{Conclusion}
 
+This work proposed a structured LLM to ASP Modeling Protocol (LAMP) designed to support the deduction and optimization of ASP rules from instance facts and expected stable models. The results show this as effective for guiding LLMs toward correct and often optimized ASP encodings. By constraining the modeling task and providing iterative feedback via an ASP solver, this system reduces the modeling burden associated with ASP while preserving  correctness.
 
+The tested models exhibited clear performance differences, with \textit{gpt-5-mini} and \textit{gpt-oss:20b} achieving solid stable model reconstruction, however \textit{qwen3-coder:30b} struggled despite its programming focus. These results highlight that strong general code generation ability does not necessarily translate to proficiency in logic programming, underscoring the value of ASP specific evaluation frameworks. Analysis of complexity features and feature importance, shows that the presence of negative literals and the ability to correctly infer new atoms are the strongest predictors of LLM success.
 
-\section{References}
-
-
+Beyond assisting users in ASP modeling, this protocol provides a system for probing LLM reasoning and logic programming capabilities. Future work includes extending to richer ASP constructs such as disjunction and choice rules, incorporating solver-level performance metrics, and exploring fine-tuned or neuro-symbolic hybrids to further improve robustness and scalability.
 
 \bibliography{custom}
 \bibliographystyle{splncs04}
