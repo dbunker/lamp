@@ -6,8 +6,14 @@ Answer Set Programming (ASP) offers a compelling mechanism to represent product 
 
 # Full Paper
 
-
+[LAMP Paper](/LAMP.pdf)
 
 # Running
 
+```
+uv run lamp.py
+```
 
+# Jupyter Notebook
+
+[Analysis](/stats.ipynb)

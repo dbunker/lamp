@@ -678,7 +678,6 @@ def main():
 
     # generate_benchmarks()
     # run_llms()
-
     aggregate_results()
 
 
