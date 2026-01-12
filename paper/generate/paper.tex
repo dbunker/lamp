@@ -17,7 +17,7 @@
 \usepackage{xcolor}
 \usepackage{listings}
 
-% \setlength{\parskip}{0.5em}
+\usepackage{hyperref}
 
 \lstdefinelanguage{ASP}{
   sensitive=true,
@@ -47,6 +47,9 @@
 \institute{University of Potsdam}
 
 \maketitle
+
+\thispagestyle{plain}
+\pagestyle{plain}
 
 \begin{abstract}
 Answer Set Programming (ASP) offers a compelling mechanism to represent product configuration. However, being able to deduce such programs that are sufficiently performant remains challenging for many users. In this area Large Language Models (LLMs) have the potential to bridge this gap. This work proposes a LLM to ASP Modeling Protocol (LAMP) system to deduce and optimize ASP rules based on provided instance facts and the expected stable models. This system also facilitates the evaluation of LLM capabilities in this regard of which gpt-oss, gpt-5-mini and qwen3-coder where selected for testing. To properly perform the evaluation a variety of ASP program complexities and potential optimizations were assessed including: varying the number of rules, number of positive and negative body literals, and number of predicates and terms. The evaluation of varying complexities also demonstrates which program features are most challenging for LLMs in ASP program generation.
@@ -240,7 +243,7 @@ Overall results are shown in table \ref{tab:llm_results}. Both \textit{gpt-5-min
 \label{tab:llm_results}
 \end{table}
 
-Table \ref{tab:llm_rules} shows the number of rules of deduced by the indicated LLM subtracted from normal of rules from the original synthetically generated data. The left table is for when the stable model is correct and the left is for incorrect. The rule count matches much of the time for both \texttt{gpt-5-mini} and \texttt{gpt-oss:20b}, but often optimizes to fewer rules reducing by as many as 2 rules 24 times for both. \texttt{qwen3-coder:30b} performs worse, creating more rules than the original in 10 cases.
+Table \ref{tab:llm_rules} shows the number of rules deduced by the LLM subtracted from the number of rules of the original synthetically generated data. The left table shows when the stable model is correct and the left is for incorrect. The rule count matches much of the time for both \texttt{gpt-5-mini} and \texttt{gpt-oss:20b}, but often optimizes to fewer rules reducing by as many as 2 rules 24 times for both. The LLM \texttt{qwen3-coder:30b} performs worse, creating more rules than the original in 10 cases.
 
 \begin{table}[h]
 \centering
@@ -291,7 +294,7 @@ Table \ref{tab:llm_rules} shows the number of rules of deduced by the indicated 
 \label{tab:llm_rules}
 \end{table}
 
-Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals} and \ref{fig:gpt_oss_literals} compare the total number of literals in the original ASP against the total number of literals of the LLM generated rules for each LLM tested. The dot size indicates the number of examples with left for when the LLM got the correct stable model and right for incorrect. Figure \ref{fig:gpt_oss_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{qwen3-gpt\_oss\_literals:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3\_literals} shown in figure \ref{fig:qwen3_literals} had mixed results. Overall, the results corroborate with other benchmarking studies on the abilities of LLMs to generate ASP \cite{ren2025llmssolveaspproblems}.
+Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals} and \ref{fig:qwen3_literals} compare the total number of literals in the original ASP against the total number of literals of the LLM generated rules for each LLM tested. The dot size indicates the number of examples with left for when the LLM got the correct stable model and right for incorrect. Figure \ref{fig:gpt_oss_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{qwen3-gpt\_oss\_literals:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3\_literals} shown in figure \ref{fig:qwen3_literals} had mixed results. Overall, the results corroborate with other benchmarking studies on the abilities of LLMs to generate ASP \cite{ren2025llmssolveaspproblems}.
 
 \begin{figure}[h!]
     \centering
