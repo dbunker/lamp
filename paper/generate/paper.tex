@@ -2,10 +2,16 @@
 % LLNCS macro package for Springer Computer Science proceedings;
 % Version 2.20 of 2017/10/04
 %
-%\documentclass[runningheads]{llncs}
-\documentclass{llncs}
+
+\documentclass[11pt,a4paper]{article}
 %
 \usepackage{graphicx}
+\usepackage{authblk}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\newtheorem{definition}{Definition}
 
 \usepackage{booktabs}
 \usepackage{caption}
@@ -42,9 +48,9 @@
 
 \author{David Bunker}
 
-\authorrunning{D. Bunker}
 
-\institute{University of Potsdam}
+
+\affil{University of Potsdam}
 
 \maketitle
 
@@ -83,7 +89,7 @@ The relevant research questions of this work are:
 
 This proposal investigates the current capabilities of Large Language Models (LLMs) regarding Answer Set Programming (ASP) and offers directions for future research at the intersection of artificial intelligence and constraint solving. Such a system can then be contrasted against similar systems such as those based on LLMs fine-tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, iterative scheduling and plan generation with LLMs and ASP \cite{lin2024clmaspcouplinglargelanguage}, and LLM based systems that can learn directly from ASP answer sets \cite{borroto2025questionansweringllmslearning}.
 
-\section{ASP, Complexity and Datasets}
+\section{Background}
 
 This section presents a method for applying ASP to product configuration that is suited for use with LLMs. This is followed by several ways to systematically vary the complexity, enabling an analysis of the LAMP process and prompting quality, LLM performance, and the specific features that pose the greatest challenges for LLMs. Finally, the process used to generate datasets of ASP programs for these experiments is outlined.
 
@@ -103,6 +109,27 @@ highway_possible(X) :- vehicle(X), not slow_moving(X).
 \end{lstlisting}
 
 Running this results in the answer set \texttt{\{ vehicle("bike"), vehicle("car"), slow\_moving("scooter"), highway\_possible("car") \}}. Given these facts and rules, \texttt{highway\_possible(car)} can be deduced, indicating the car is highway possible and, due to default negation, the scooter is not highway possible.
+
+This restricted fragment of ASP that LAMP operates over is formalized as follows.
+
+\begin{definition}[ASP Configuration Schema]
+An \emph{ASP Configuration Schema} is a tuple
+\[
+  \mathcal{S} \;=\; \langle\, \mathcal{D},\; \mathcal{T},\; \mathcal{P} \,\rangle
+\]
+where $\mathcal{D}$ is a finite set of descriptor predicates of arity~$1$,
+$\mathcal{T}$ is a finite set of object terms, and
+$\mathcal{P} \subseteq \mathcal{D} \times \mathcal{T}$ is the set of admissible predicate--term pairs.
+A \emph{fact} over $\mathcal{S}$ is any ground atom $d(t)$ with $d \in \mathcal{D}$ and $t \in \mathcal{T}$.
+A \emph{normal rule} over $\mathcal{S}$ is a rule of the form
+\[
+  d_0(X) \mathbin{:-} d_1(X),\,\ldots,\,d_k(X),\;
+             \mathbf{not}\; d_{k+1}(X),\,\ldots,\,\mathbf{not}\; d_n(X)
+\]
+where $d_0,\ldots,d_n \in \mathcal{D}$, $X$ is a universally quantified variable,
+$k \geq 1$ positive body literals precede all negative ones, and
+$d_0 \notin \{d_1,\ldots,d_k\}$ (the head is not trivially entailed by the positive body alone).
+\end{definition}
 
 % \vspace{-1.5em}
 \subsection{Complexity}
@@ -136,7 +163,27 @@ This results in the answer set \texttt{\{\ d0(o0), d0(o1), d1(o1), d2(o0) \}}, c
 
 \section{Methodology}
 
-The ASP rule generation procedure functions by iteratively prompting the LLM, providing the facts and expected answer set.
+The ASP rule generation procedure functions by iteratively prompting the LLM, providing the facts and expected answer set. The following is the formalization of the task that LAMP is designed to solve.
+
+\begin{definition}[LAMP Modeling Task]
+A \emph{LAMP Modeling Task} is a tuple
+\[
+  \mathcal{M} \;=\; \langle\, F,\; A^{*},\; \mathcal{S},\; \Phi \,\rangle
+\]
+where:
+\begin{itemize}
+  \item $F$ is a finite set of ground ASP facts over schema $\mathcal{S}$, called the \emph{instance facts};
+  \item $A^{*} \subseteq \mathit{HB}_{\mathcal{S}}$ is the \emph{expected stable model}, a finite set of ground atoms over the Herbrand base of $\mathcal{S}$ such that $F \subseteq A^{*}$ and $A^{*} \setminus F \neq \emptyset$ (at least one atom must be newly derived);
+  \item $\mathcal{S} = \langle \mathcal{D}, \mathcal{T}, \mathcal{P} \rangle$ is the ASP Configuration Schema (Definition~1) defining the admissible vocabulary; and
+  \item $\Phi$ is an \emph{output format constraint} specifying the syntactic form of candidate rules (e.g., arity-$1$ predicates, a single universally quantified variable, bounded numbers of positive and negative body literals).
+\end{itemize}
+A \emph{candidate program} $\Pi$ is a finite set of normal rules over $\mathcal{S}$ consistent with $\Phi$.
+$\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
+\[
+  AS\!\left(F \cup \Pi\right) \;=\; \bigl\{\, A^{*} \,\bigr\},
+\]
+i.e., the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
+\end{definition}
 
 \subsection{LLM Prompting}
 
@@ -176,6 +223,33 @@ LLM prompting has been shown to be effective in writing ASP programs in such are
 
 The prompt provided to the LLMs provides the instance atoms facts, such as \texttt{descriptor\_0(object\_0)}, expected ASP output format \texttt{predicate\_0(X) :- predicate\_1(X), [not] predicate\_2(X)...}, and the expected stable model, such as \texttt{d0(o0), d0(o1), ...}. The output is then parsed into ASP and run with the ASP solver Clingo. This can then be passed back if incorrect.
 
+\begin{definition}[LAMP Interaction Protocol]
+A \emph{LAMP Interaction Sequence} for task $\mathcal{M} = \langle F, A^{*}, \mathcal{S}, \Phi \rangle$
+is a finite sequence of pairs
+\[
+  \bigl\langle\,
+    (\Pi_0,\delta_0),\;
+    (\Pi_1,\delta_1),\;
+    \ldots,\;
+    (\Pi_n,\delta_n)
+  \,\bigr\rangle
+\]
+where each $\Pi_i$ is an LLM-generated candidate program derived from prompt $p_i$,
+and $\delta_i$ is the \emph{feedback signal} produced by running $F \cup \Pi_i$ through Clingo:
+\[
+  \delta_i \;=\;
+  \begin{cases}
+    \texttt{correct}
+      & \text{if } AS(F \cup \Pi_i) = \{A^{*}\}, \\[4pt]
+    \bigl\langle\, AS(F \cup \Pi_i),\; A^{*} \,\bigr\rangle
+      & \text{otherwise.}
+  \end{cases}
+\]
+The sequence terminates at step $n$ when $\delta_n = \texttt{correct}$ or a maximum iteration count is reached.
+Each subsequent prompt $p_{i+1}$ is constructed from $F$, $A^{*}$, $\Phi$, and $\delta_i$, enabling iterative refinement.
+The final output $\Pi_n$ is accepted as the deduced program if it is a solution to $\mathcal{M}$ (Definition~2).
+\end{definition}
+
 As future work the prompt may be able to be optimized by adding examples or using DSPy \cite{khattab2023dspycompilingdeclarativelanguage} which tests many variations of the prompt with different examples to get the best result. This was demonstrated for spatial reasoning as a chain of thought reasoning system \cite{wang2024dspybasedneuralsymbolicpipelineenhance}. Another option would be to fine tune the LLM specifically for ASP code generation as was done with LLASP \cite{coppolillo2024llaspfinetuninglargelanguage}.
 
 \subsection{Evaluation}
@@ -189,6 +263,23 @@ As future work the prompt may be able to be optimized by adding examples or usin
 %           - 2503.05439
 
 The ASP programs generated are evaluated after being run via Clingo. The number of rules, complexity and how close it is to the expected stable model can then be assessed. This is similar to the process LLM-ARC employs as an actor-critic method, where the LLM Actor generates ASP, while the automated reasoning critic evaluates the code \cite{kalyanpur2024llmarcenhancingllmsautomated}. Other systems use ASP as a scaffolding for robust reasoning \cite{kaur2025empiricalstudyconformalprediction}.
+
+Beyond correctness, LAMP also assesses whether the LLM has produced a more concise encoding than the original synthetic program, formalised as follows.
+
+\begin{definition}[LAMP Optimization Task]
+Given a LAMP Modeling Task $\mathcal{M} = \langle F, A^{*}, \mathcal{S}, \Phi \rangle$
+and a solution $\Pi$, define the \emph{complexity measure}
+\[
+  \mathit{cost}(\Pi)
+    \;=\;
+  |\Pi|
+    \;+\;
+  \sum_{r\,\in\,\Pi}
+    \bigl(\,\mathit{pos}(r) + \mathit{neg}(r)\,\bigr),
+\]
+where $|\Pi|$ is the number of rules in $\Pi$, and $\mathit{pos}(r)$, $\mathit{neg}(r)$ denote the counts of positive and negative body literals in rule $r$ respectively.
+A solution $\Pi^{*}$ is \emph{optimal} for $\mathcal{M}$ if there is no other solution $\Pi'$ to $\mathcal{M}$ such that $\mathit{cost}(\Pi') < \mathit{cost}(\Pi^{*})$.
+\end{definition}
 
 \section{Experiments}
 
