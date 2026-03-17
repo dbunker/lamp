@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Set, Tuple, Dict, Optional, Iterable
+import argparse
 import random
 import os
 import json
@@ -320,14 +321,21 @@ def generate_benchmark(config: ModelConfig, index):
 def generate_benchmarks():
 
     # Generate rules based on various configurations
+    predicates_range     = [5, 6]
+    possible_terms_range = [4, 5]
+    facts_range          = [4, 5]
+    rules_range          = [2, 3, 4, 5]
+    literals_range       = [2, 3]
+    neg_literals_range   = [0, 1, 2]
+
     index = 0
     for example_number in range(1):
-        for num_predicates in [4, 5]:
-            for num_possible_terms in [4, 5]:
-                for num_facts in [4, 5]:
-                    for num_rules in [1, 2, 3]:
-                        for num_literals in [1, 2, 3]:
-                            for num_neg_literals in [0, 1, 2]:
+        for num_predicates in predicates_range:
+            for num_possible_terms in possible_terms_range:
+                for num_facts in facts_range:
+                    for num_rules in rules_range:
+                        for num_literals in literals_range:
+                            for num_neg_literals in neg_literals_range:
 
                                 if num_literals <= num_neg_literals:
                                     continue
@@ -525,7 +533,7 @@ def run_ilasp_for_rules(
     original_stats: Dict,
     task_path: str,
     response_path: str,
-    rerun: bool = False
+    rerun: bool = True
 ) -> KnowledgeBase:
 
     if not os.path.exists(response_path) or rerun:
@@ -588,37 +596,102 @@ def run_ilasp():
 
 ########## Run LLM ##########
 
-def simple_prompt(facts: str, stable_model: str):
-    return f"""
-You are given the following ASP facts:
-{facts}
-And rules of the form
-predicate_0(X) :- predicate_1(X), not predicate_2(X), etc.
+def explicit_prompt(facts: str, stable_model: str) -> str:
+    return f"""You are given:
 
-That results in the stable model:
+1. An ASP program's facts (all rules have been removed).
+2. A target stable model that the original (complete) program produced.
+
+Your task is to reconstruct the missing rules.
+Each rule must conform strictly to this schematic form (for any predicate symbol d{{n}} and arity 1):
+
+d{{n}}(X) :- L1, L2, ..., Lk.
+
+where each literal Li is either d{{m}}(X) or not d{{m}}(X) for some predicate d{{m}}.
+
+Constraints:
+
+- Allowed predicates in rule bodies: only d{{m}}(X) (positive) or not d{{m}}(X) (default negation).
+- Allowed head predicates: only d{{n}}(X) (arity 1).
+- Variables: use only the single variable X (appearing in the head for safety).
+- No constants except those appearing in the given facts.
+- No aggregates, choice rules, disjunctions, or integrity constraints.
+- No facts (rules with empty bodies); only the provided facts are to remain facts.
+- The reconstructed rules, when combined with the given facts, must yield exactly the provided stable model under standard stable-model semantics.
+- Prefer the minimal set of rules (fewest total rules and literals) that achieves this.
+- If multiple minimal sets exist, output any one valid minimal set.
+
+Input:
+
+Facts (only):
+{facts}
+
+Target stable model:
 {stable_model}
 
-Deduce minimal set of these rules where each predicate can be one of [d0, d1, d2, etc.]
-Write the rules as the final lines of output.
+Output instructions (IMPORTANT):
+
+- You may include a brief "Reasoning:" section to explain your derivation.
+- After your reasoning, end your message with ONLY the rules, one per line, with no commentary, headers, or trailing text below them.
+- The last non-empty lines of your entire response must be exactly the rules in ASP syntax.
+
+If no rules are needed to obtain the target stable model from the facts, end with a single line:
+% no additional rules required
+
+If it is impossible to obtain exactly the target stable model using only the allowed rule schema, end with a single line:
+% no solution using the allowed rule schema
+
+Procedure you should follow (do not print these steps):
+1) Identify all d{{n}}/1 predicates appearing in the facts and in the target stable model.
+2) Hypothesize candidate rules of the allowed form that, together with the facts, yield exactly the target stable model.
+3) Test and prune candidates to ensure the result is stable and minimal.
+4) Output any reasoning you wish, then finish with ONLY the final rules, one per line.
+
+Example (illustrative only; do not reuse for the actual task):
+
+Facts:
+d1(a). d2(a).
+
+Target stable model:
+{{ d1(a), d2(a), d3(a) }}
+
+Acceptable output shape:
+Reasoning: From d1(a) and d2(a) we must derive d3(a); minimal positive rule suffices.
+
+d3(X) :- d1(X), d2(X).
+"""
+
+
+def feedback_prompt(facts: str, stable_model: str, actual_model: str) -> str:
+    return f"""Your previous rules produced the wrong stable model.
+
+Facts:
+{facts}
+
+Expected stable model:
+{stable_model}
+
+Actual stable model produced:
+{actual_model}
+
+Correct the rules so that, combined with the given facts, they yield exactly the expected stable model.
+Apply the same constraints as before: arity-1 predicates, single variable X, no choice rules or aggregates, minimal rule set.
+
+Output ONLY the corrected rules as the last non-empty lines of your response.
 """
 
 
 # Run through LLM to get new llm program with the same facts, but generated rules
-def run_llm_for_rules(client: LLM, original_kb: KnowledgeBase, original_stats: Dict, response_path: str, rerun=False) -> KnowledgeBase:
+def run_llm_for_rules(client: LLM, original_kb: KnowledgeBase, prompt: str, response_path: str, rerun=True) -> KnowledgeBase:
 
-    facts = ". ".join(str(fact) for fact in original_kb.facts)
-    stable_model = " ".join(original_stats["witnesses"][0]["atoms"])
-    
-    prompt = simple_prompt(facts, stable_model)
     logging.info(prompt)
-
     response = get_llm_response(client, prompt, response_path, rerun)
 
     lines = response.split("\n")
     new_rules = []
 
     for line_num in range(len(lines)-1, -1, -1):
-        
+
         rule_str = lines[line_num].replace("`", "").strip()
         if rule_str == "":
             continue
@@ -629,8 +702,7 @@ def run_llm_for_rules(client: LLM, original_kb: KnowledgeBase, original_stats: D
         except ValueError:
             break
 
-    llm_kb = KnowledgeBase(original_kb.facts, new_rules)
-    return llm_kb
+    return KnowledgeBase(original_kb.facts, new_rules)
 
 
 def number_files(path: str):
@@ -639,8 +711,8 @@ def number_files(path: str):
     return sum(1 for file in folder.iterdir() if file.is_file())
 
 
-# Run with clingo to see if stable model matches
-def run_llms():
+# Run with clingo to see if stable model matches, retrying with feedback on failure
+def run_llms(max_iter: int = 3, rerun=True):
 
     clients = [
         OllamaClient("gpt-oss:20b"),
@@ -655,14 +727,12 @@ def run_llms():
 
         for index in range(total_num):
 
-            run_index = 0
-
             orig_benchmark_path = f"data/orig_benchmarks/benchmark_{index}.lp"
             orig_solution_path = f"data/orig_solutions/solution_{index}.json"
 
-            llm_responses_path = f"data/llm_responses/{client.title}/response_{index}_{run_index}.txt"
-            llm_benchmarks_path = f"data/llm_benchmarks/{client.title}/benchmark_{index}_{run_index}.lp"
-            llm_solutions_path = f"data/llm_solutions/{client.title}/solution_{index}_{run_index}.json"
+            # Output paths always use index 0 for compatibility with aggregate_results()
+            llm_benchmarks_path = f"data/llm_benchmarks/{client.title}/benchmark_{index}_0.lp"
+            llm_solutions_path = f"data/llm_solutions/{client.title}/solution_{index}_0.json"
 
             # Original program
             program = read_file(orig_benchmark_path)
@@ -673,23 +743,35 @@ def run_llms():
             original_stats = json.loads(read_file(orig_solution_path))
             original_values = atoms_from_model(original_stats)
 
-            # Run LLM
-            llm_kb = run_llm_for_rules(client, original_kb, original_stats, llm_responses_path, False)
+            facts_str = ". ".join(str(fact) for fact in original_kb.facts)
+            stable_model_str = " ".join(original_stats["witnesses"][0]["atoms"])
+
+            llm_kb = None
+            llm_values: Set[Atom] = set()
+
+            for run_index in range(max_iter):
+
+                # Each iteration's raw LLM response is cached separately
+                llm_responses_path = f"data/llm_responses/{client.title}/response_{index}_{run_index}.txt"
+
+                if run_index == 0:
+                    prompt = explicit_prompt(facts_str, stable_model_str)
+                else:
+                    actual_model_str = " ".join(str(a) for a in llm_values)
+                    prompt = feedback_prompt(facts_str, stable_model_str, actual_model_str)
+
+                llm_kb = run_llm_for_rules(client, original_kb, prompt, llm_responses_path, rerun)
+                llm_stats = run_asp(str(llm_kb))
+                llm_values = atoms_from_model(llm_stats)
+
+                if original_values == llm_values:
+                    logging.info(f"Correct on iteration {run_index}: {llm_values}")
+                    break
+                else:
+                    logging.info(f"Iteration {run_index} failed. Expected: {original_values}, Got: {llm_values}")
+
             write_file(llm_benchmarks_path, str(llm_kb))
-
-            # Run LLM code on clingo and save
-            llm_stats = run_asp(str(llm_kb))
-            write_json(llm_solutions_path, llm_stats)
-            llm_values = atoms_from_model(llm_stats)
-
-            # If fails, retry saying what is incorrect
-            # Stop if passes or out of retries
-
-            if original_values != llm_values:
-                logging.info(f"Original: {original_values}")
-                logging.info(f"LLM:      {llm_values}")
-            else:
-                logging.info(f"Both: {original_values}")
+            write_json(llm_solutions_path, run_asp(str(llm_kb)))
 
 ########## Aggregate results ##########
 
@@ -740,7 +822,7 @@ def aggregate_results():
 
     for [model, kind] in models:
 
-        for index in range(120):
+        for index in range(total_num):
 
             run_index = 0
             if kind == "orig":
@@ -824,10 +906,20 @@ def main():
         format="%(levelname)s %(asctime)s\n%(message)s"
     )
 
-    # generate_benchmarks()
-    # run_llms()
-    run_ilasp()
-    aggregate_results()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("stage", choices=["generate", "ilasp", "llms", "aggregate"])
+    parser.add_argument("--max-iter", type=int, default=3)
+    parser.add_argument("--rerun", action="store_true")
+    args = parser.parse_args()
+
+    if args.stage == "generate":
+        generate_benchmarks()
+    elif args.stage == "ilasp":
+        run_ilasp()
+    elif args.stage == "llms":
+        run_llms(max_iter=args.max_iter, rerun=args.rerun)
+    elif args.stage == "aggregate":
+        aggregate_results()
 
 
 if __name__ == "__main__":
