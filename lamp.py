@@ -597,87 +597,34 @@ def run_ilasp():
 ########## Run LLM ##########
 
 def explicit_prompt(facts: str, stable_model: str) -> str:
-    return f"""You are given:
+    return f"""Reconstruct the missing ASP rules given only facts and a target stable model.
 
-1. An ASP program's facts (all rules have been removed).
-2. A target stable model that the original (complete) program produced.
+Rules must have the form: d{{n}}(X) :- [not] d{{m}}(X), ...
+- Single variable X only; no constants, aggregates, choice rules, or disjunctions
+- No new facts (empty-body rules)
+- Combined with the given facts, rules must yield exactly the target stable model
+- Prefer the minimal rule set (fewest rules and literals)
 
-Your task is to reconstruct the missing rules.
-Each rule must conform strictly to this schematic form (for any predicate symbol d{{n}} and arity 1):
+Facts: {facts}
+Target stable model: {stable_model}
 
-d{{n}}(X) :- L1, L2, ..., Lk.
+Output reasoning if helpful, then end with ONLY the rules, one per line.
+If no rules are needed: % no additional rules required
+If impossible under the schema: % no solution using the allowed rule schema
 
-where each literal Li is either d{{m}}(X) or not d{{m}}(X) for some predicate d{{m}}.
-
-Constraints:
-
-- Allowed predicates in rule bodies: only d{{m}}(X) (positive) or not d{{m}}(X) (default negation).
-- Allowed head predicates: only d{{n}}(X) (arity 1).
-- Variables: use only the single variable X (appearing in the head for safety).
-- No constants except those appearing in the given facts.
-- No aggregates, choice rules, disjunctions, or integrity constraints.
-- No facts (rules with empty bodies); only the provided facts are to remain facts.
-- The reconstructed rules, when combined with the given facts, must yield exactly the provided stable model under standard stable-model semantics.
-- Prefer the minimal set of rules (fewest total rules and literals) that achieves this.
-- If multiple minimal sets exist, output any one valid minimal set.
-
-Input:
-
-Facts (only):
-{facts}
-
-Target stable model:
-{stable_model}
-
-Output instructions (IMPORTANT):
-
-- You may include a brief "Reasoning:" section to explain your derivation.
-- After your reasoning, end your message with ONLY the rules, one per line, with no commentary, headers, or trailing text below them.
-- The last non-empty lines of your entire response must be exactly the rules in ASP syntax.
-
-If no rules are needed to obtain the target stable model from the facts, end with a single line:
-% no additional rules required
-
-If it is impossible to obtain exactly the target stable model using only the allowed rule schema, end with a single line:
-% no solution using the allowed rule schema
-
-Procedure you should follow (do not print these steps):
-1) Identify all d{{n}}/1 predicates appearing in the facts and in the target stable model.
-2) Hypothesize candidate rules of the allowed form that, together with the facts, yield exactly the target stable model.
-3) Test and prune candidates to ensure the result is stable and minimal.
-4) Output any reasoning you wish, then finish with ONLY the final rules, one per line.
-
-Example (illustrative only; do not reuse for the actual task):
-
-Facts:
-d1(a). d2(a).
-
-Target stable model:
-{{ d1(a), d2(a), d3(a) }}
-
-Acceptable output shape:
-Reasoning: From d1(a) and d2(a) we must derive d3(a); minimal positive rule suffices.
-
+Example — Facts: d1(a). d2(a). | Target: {{d1(a), d2(a), d3(a)}}
 d3(X) :- d1(X), d2(X).
 """
 
 
 def feedback_prompt(facts: str, stable_model: str, actual_model: str) -> str:
-    return f"""Your previous rules produced the wrong stable model.
+    return f"""Your rules produced the wrong stable model.
 
-Facts:
-{facts}
+Facts: {facts}
+Expected: {stable_model}
+Actual:   {actual_model}
 
-Expected stable model:
-{stable_model}
-
-Actual stable model produced:
-{actual_model}
-
-Correct the rules so that, combined with the given facts, they yield exactly the expected stable model.
-Apply the same constraints as before: arity-1 predicates, single variable X, no choice rules or aggregates, minimal rule set.
-
-Output ONLY the corrected rules as the last non-empty lines of your response.
+Output ONLY the corrected rules as the last lines of your response.
 """
 
 
@@ -740,7 +687,7 @@ def run_llms(max_iter: int = 3, rerun=True):
             original_kb = KnowledgeBase(original_kb.facts, [])
 
             # Original statistics
-            original_stats = json.loads(read_file(orig_solution_path))
+            original_stats = read_json(orig_solution_path)
             original_values = atoms_from_model(original_stats)
 
             facts_str = ". ".join(str(fact) for fact in original_kb.facts)
@@ -771,7 +718,7 @@ def run_llms(max_iter: int = 3, rerun=True):
                     logging.info(f"Iteration {run_index} failed. Expected: {original_values}, Got: {llm_values}")
 
             write_file(llm_benchmarks_path, str(llm_kb))
-            write_json(llm_solutions_path, run_asp(str(llm_kb)))
+            write_json(llm_solutions_path, llm_stats)
 
 ########## Aggregate results ##########
 
@@ -874,7 +821,7 @@ def aggregate_results():
             analysis_df.loc[len(analysis_df)] = new_row
 
     original_df = analysis_df[analysis_df["benchmark_name"] == "original"]
-    llm_df = analysis_df[~analysis_df["benchmark_name"].isin(["original"])]
+    llm_df = analysis_df[analysis_df["benchmark_name"] != "original"]
 
     joined_df = llm_df.merge(
         original_df,
