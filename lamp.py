@@ -321,10 +321,10 @@ def generate_benchmark(config: ModelConfig, index):
 def generate_benchmarks():
 
     # Generate rules based on various configurations
-    predicates_range     = [7, 5]
+    predicates_range     = [8, 6]
     possible_terms_range = [8, 6]
-    facts_range          = [9, 7]
-    rules_range          = [8, 6]
+    facts_range          = [8, 6, 4]
+    rules_range          = [9]
     literals_range       = [3, 2]
     neg_literals_range   = [2, 1, 0]
     min_derived_atoms_range = [3, 1]
