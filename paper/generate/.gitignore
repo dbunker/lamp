@@ -3,7 +3,6 @@
 *.log
 *.bbl
 *.out
-*.pdf
 *.ist
 *.glo
 *.listing

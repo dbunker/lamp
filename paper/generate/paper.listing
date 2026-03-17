@@ -1,4 +1,0 @@
-vehicle(scooter).
-vehicle(car).
-slow_moving(scooter).
-highway_possible(X) :- vehicle(X), not slow_moving(X).
