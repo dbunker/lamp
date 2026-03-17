@@ -30,7 +30,6 @@ class Atom:
         terms_str = ", ".join(str(arg) for arg in self.terms)
         return f"{self.pred}({terms_str})"
 
-
 @dataclass(frozen=True)
 class Literal:
     pos: bool
@@ -38,7 +37,6 @@ class Literal:
 
     def __str__(self):
         return f"{"" if self.pos else "not "}{self.atom}"
-
 
 @dataclass(frozen=True)
 class Rule:
@@ -51,7 +49,6 @@ class Rule:
 
         body_str = ", ".join(str(atom) for atom in self.body)
         return f"{self.head} :- {body_str}."
-
 
 @dataclass
 class KnowledgeBase:
@@ -128,7 +125,6 @@ class LLM(ABC):
     def get_content(self, full_response: str):
         pass
 
-
 class OpenAIClient(LLM):
     client: OpenAI
     title: str
@@ -165,7 +161,6 @@ class OpenAIClient(LLM):
     def get_content(self, full_response: str):
         
         return full_response["output"][1]["content"][0]["text"]
-
 
 class OllamaClient(LLM):
     client: Client
@@ -233,6 +228,8 @@ class ModelConfig:
     num_literals: int
     num_neg_literals: int
 
+    min_derived_atoms: int = 1
+
 # Generator creates instances and rules
 # d0(o0).
 # d0(o1).
@@ -295,18 +292,21 @@ def generate_benchmark(config: ModelConfig, index):
     model_stats = run_asp(str(kb))
 
     # Check for no more or less than one stable model
-    while (len(model_stats["witnesses"]) != 1 or 
-           len(model_stats["warnings"]) != 0 or 
-           len(kb.facts) == len(model_stats["witnesses"][0]["atoms"])):
+    def derived_atoms(stats):
+        return len(stats["witnesses"][0]["atoms"]) - len(kb.facts)
+
+    while (len(model_stats["witnesses"]) != 1 or
+           len(model_stats["warnings"]) != 0 or
+           derived_atoms(model_stats) < config.min_derived_atoms):
 
         if len(model_stats["witnesses"]) != 1:
-            logging.info(f"Not only 1 stable model: {model_stats["witnesses"]}")
+            logging.info(f"Not only 1 stable model: {model_stats['witnesses']}")
 
         elif len(model_stats["warnings"]) != 0:
-            logging.info(f"Has warnings: {model_stats["warnings"]}")
+            logging.info(f"Has warnings: {model_stats['warnings']}")
 
-        elif len(kb.facts) == len(model_stats["witnesses"][0]["atoms"]):
-            logging.info(f"Needs more atoms: {model_stats["witnesses"][0]["atoms"]}")
+        elif derived_atoms(model_stats) < config.min_derived_atoms:
+            logging.info(f"Too few derived atoms ({derived_atoms(model_stats)} < {config.min_derived_atoms}): {model_stats['witnesses'][0]['atoms']}")
 
         kb = generate_example(config)
         model_stats = run_asp(str(kb))
@@ -321,12 +321,13 @@ def generate_benchmark(config: ModelConfig, index):
 def generate_benchmarks():
 
     # Generate rules based on various configurations
-    predicates_range     = [5, 6]
-    possible_terms_range = [4, 5]
-    facts_range          = [4, 5]
-    rules_range          = [2, 3, 4, 5]
-    literals_range       = [2, 3]
-    neg_literals_range   = [0, 1, 2]
+    predicates_range     = [7, 5]
+    possible_terms_range = [8, 6]
+    facts_range          = [9, 7]
+    rules_range          = [8, 6]
+    literals_range       = [3, 2]
+    neg_literals_range   = [2, 1, 0]
+    min_derived_atoms_range = [3, 1]
 
     index = 0
     for example_number in range(1):
@@ -336,22 +337,24 @@ def generate_benchmarks():
                     for num_rules in rules_range:
                         for num_literals in literals_range:
                             for num_neg_literals in neg_literals_range:
+                                for min_derived_atoms in min_derived_atoms_range:
 
-                                if num_literals <= num_neg_literals:
-                                    continue
+                                    if num_literals <= num_neg_literals:
+                                        continue
 
-                                config = ModelConfig(
-                                    example_number,
-                                    num_predicates,
-                                    num_possible_terms,
-                                    num_facts,
-                                    num_rules,
-                                    num_literals,
-                                    num_neg_literals
-                                )
+                                    config = ModelConfig(
+                                        example_number,
+                                        num_predicates,
+                                        num_possible_terms,
+                                        num_facts,
+                                        num_rules,
+                                        num_literals,
+                                        num_neg_literals,
+                                        min_derived_atoms
+                                    )
 
-                                generate_benchmark(config, index)
-                                index += 1
+                                    generate_benchmark(config, index)
+                                    index += 1
 
 ########## Utilities ##########
 
