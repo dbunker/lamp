@@ -5,6 +5,7 @@ import os
 import json
 import re
 import time
+import subprocess
 import clingo
 from abc import ABC, abstractmethod
 from openai import OpenAI
@@ -446,6 +447,145 @@ def atoms_from_model(stats: Dict):
     values = stats["witnesses"][0]["atoms"]
     return set(parse_atom(value) for value in values)
 
+########## ILASP ##########
+
+class ILASPClient:
+    title: str
+    ilasp_path: str
+
+    def __init__(self, ilasp_path: str = "../ilasp/ILASP"):
+        self.ilasp_path = ilasp_path
+        self.title = "ilasp"
+
+    def run(self, task_path: str) -> str:
+        result = subprocess.run(
+            [self.ilasp_path, '--version=4', task_path],
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+        print(result.stdout)
+
+        return result.stdout
+
+
+def format_ilasp_task(original_kb: KnowledgeBase, original_stats: Dict) -> str:
+    facts = set(original_kb.facts)
+    stable_model_atoms = atoms_from_model(original_stats)
+
+    derived_atoms = stable_model_atoms - facts
+    derived_preds = set(a.pred for a in derived_atoms)
+    fact_preds = set(a.pred for a in facts)
+    all_preds = fact_preds | derived_preds
+
+    all_terms: Set[str] = set()
+    for atom in facts:
+        all_terms.update(atom.terms)
+
+    lines = []
+
+    for term in sorted(all_terms):
+        lines.append(f"#constant(obj, {term}).")
+    lines.append("")
+
+    for pred in sorted(derived_preds):
+        lines.append(f"#modeh({pred}(var(obj))).")
+    lines.append("")
+
+    for pred in sorted(all_preds):
+        lines.append(f"#modeb(1, {pred}(var(obj))).")
+        lines.append(f"#modeb(1, {pred}(var(obj)), (negative)).")
+    lines.append("")
+
+    inclusion = sorted(str(a) for a in derived_atoms)
+    exclusion = []
+    for pred in sorted(derived_preds):
+        for term in sorted(all_terms):
+            atom = Atom(pred, (term,))
+            if atom not in stable_model_atoms:
+                exclusion.append(str(atom))
+    context = [f"  {str(f)}." for f in sorted(facts, key=str)]
+
+    lines.append("#pos(eg1, {")
+    if inclusion:
+        lines.append("  " + ", ".join(inclusion))
+    lines.append("}, {")
+    if exclusion:
+        lines.append("  " + ", ".join(exclusion))
+    lines.append("}, {")
+    lines.extend(context)
+    lines.append("}).")
+
+    return "\n".join(lines)
+
+
+def run_ilasp_for_rules(
+    client: ILASPClient,
+    original_kb: KnowledgeBase,
+    original_stats: Dict,
+    task_path: str,
+    response_path: str,
+    rerun: bool = False
+) -> KnowledgeBase:
+
+    if not os.path.exists(response_path) or rerun:
+        task_str = format_ilasp_task(original_kb, original_stats)
+        write_file(task_path, task_str)
+        learned = client.run(task_path)
+        write_file(response_path, learned)
+    else:
+        learned = read_file(response_path)
+
+    new_rules = []
+    for line in learned.splitlines():
+        line = line.strip().rstrip(".")
+        if not line or line.startswith("%"):
+            continue
+        try:
+            new_rules.append(parse_rule(line))
+        except ValueError:
+            continue
+
+    return KnowledgeBase(original_kb.facts, new_rules)
+
+
+def run_ilasp():
+
+    client = ILASPClient()
+    total_num = number_files("data/orig_benchmarks")
+    logging.info(f"Run ILASP on {total_num} benchmarks")
+
+    for index in range(total_num):
+
+        orig_benchmark_path = f"data/orig_benchmarks/benchmark_{index}.lp"
+        orig_solution_path = f"data/orig_solutions/solution_{index}.json"
+
+        task_path = f"data/ilasp_tasks/task_{index}.las"
+        response_path = f"data/ilasp_responses/response_{index}.las"
+        ilasp_benchmarks_path = f"data/ilasp_benchmarks/benchmark_{index}.lp"
+        ilasp_solutions_path = f"data/ilasp_solutions/solution_{index}.json"
+
+        program = read_file(orig_benchmark_path)
+        original_kb = parse_kb(program)
+        original_kb = KnowledgeBase(original_kb.facts, [])
+
+        original_stats = read_json(orig_solution_path)
+        original_values = atoms_from_model(original_stats)
+
+        ilasp_kb = run_ilasp_for_rules(client, original_kb, original_stats, task_path, response_path, True)
+        write_file(ilasp_benchmarks_path, str(ilasp_kb))
+
+        ilasp_stats = run_asp(str(ilasp_kb))
+        write_json(ilasp_solutions_path, ilasp_stats)
+        ilasp_values = atoms_from_model(ilasp_stats)
+
+        if original_values != ilasp_values:
+            logging.info(f"Original: {original_values}")
+            logging.info(f"ILASP:    {ilasp_values}")
+        else:
+            logging.info(f"Both: {original_values}")
+
+
 ########## Run LLM ##########
 
 def simple_prompt(facts: str, stable_model: str):
@@ -586,10 +726,11 @@ def aggregate_results():
     })
 
     models = [
-        ["original", False],
-        ["gpt-oss:20b", True ],
-        ["gpt-5-mini", True ],
-        ["qwen3-coder:30b", True]
+        ["original", "orig"],
+        ["gpt-oss:20b", "llm"],
+        ["gpt-5-mini", "llm"],
+        ["qwen3-coder:30b", "llm"],
+        ["ilasp", "ilasp"],
     ]
 
     path = "data"
@@ -597,13 +738,20 @@ def aggregate_results():
     total_num = number_files(f"{path}/orig_benchmarks")
     logging.info(f"Aggregate {total_num}")
 
-    for [ model, is_llm ] in models:
+    for [model, kind] in models:
 
         for index in range(120):
 
             run_index = 0
-            benchmarks_path = f"{path}/llm_benchmarks/{model}/benchmark_{index}_{run_index}.lp" if is_llm else f"{path}/orig_benchmarks/benchmark_{index}.lp"
-            solutions_path = f"{path}/llm_solutions/{model}/solution_{index}_{run_index}.json" if is_llm else f"{path}/orig_solutions/solution_{index}.json" 
+            if kind == "orig":
+                benchmarks_path = f"{path}/orig_benchmarks/benchmark_{index}.lp"
+                solutions_path = f"{path}/orig_solutions/solution_{index}.json"
+            elif kind == "ilasp":
+                benchmarks_path = f"{path}/ilasp_benchmarks/benchmark_{index}.lp"
+                solutions_path = f"{path}/ilasp_solutions/solution_{index}.json"
+            else:
+                benchmarks_path = f"{path}/llm_benchmarks/{model}/benchmark_{index}_{run_index}.lp"
+                solutions_path = f"{path}/llm_solutions/{model}/solution_{index}_{run_index}.json"
 
             program = read_file(benchmarks_path)
             kb = parse_kb(program)
@@ -644,7 +792,7 @@ def aggregate_results():
             analysis_df.loc[len(analysis_df)] = new_row
 
     original_df = analysis_df[analysis_df["benchmark_name"] == "original"]
-    llm_df = analysis_df[analysis_df["benchmark_name"] != "original"]
+    llm_df = analysis_df[~analysis_df["benchmark_name"].isin(["original"])]
 
     joined_df = llm_df.merge(
         original_df,
@@ -678,6 +826,7 @@ def main():
 
     # generate_benchmarks()
     # run_llms()
+    run_ilasp()
     aggregate_results()
 
 
