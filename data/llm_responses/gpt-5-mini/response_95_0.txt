@@ -1,0 +1,82 @@
+{
+  "id": "resp_05a2f8a40c8995670069ba891186ec819f8338218518d42ee4",
+  "created_at": 1773832465.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_05a2f8a40c8995670069ba8911c940819fa342cdd04af79f7f",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_05a2f8a40c8995670069ba8915debc819fb57eb2bcd17c60a7",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Only d4(o4) is missing and d1(o4) is a fact, so derive d4(X) from d1(X).\n\nd4(X) :- d1(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 286,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 651,
+    "output_tokens_details": {
+      "reasoning_tokens": 576
+    },
+    "total_tokens": 937
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773832470,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

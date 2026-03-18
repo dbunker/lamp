@@ -1,0 +1,82 @@
+{
+  "id": "resp_053f513872ede2eb0069ba85c377f48190a1a1b4e05b3195f8",
+  "created_at": 1773831619.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_053f513872ede2eb0069ba85c3ca4481908c24b2fef89c7e4f",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_053f513872ede2eb0069ba85dfc4248190be9aec5525091f5d",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Only d3(o2) is missing. d3(X) :- d2(X). derives d3(o2) (from d2(o2)) and also d3(o5) (already a fact), and does not derive any atoms outside the target.\n\nd3(X) :- d2(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 256,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1670,
+    "output_tokens_details": {
+      "reasoning_tokens": 1600
+    },
+    "total_tokens": 1926
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773831649,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

@@ -1,0 +1,82 @@
+{
+  "id": "resp_058c2cf41129fd370069ba23268ab0819797e7bcfbe1f95741",
+  "created_at": 1773806374.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_058c2cf41129fd370069ba2326d27081979624cfed7f90a6ae",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_058c2cf41129fd370069ba233c9a3881979b98d140fd097c09",
+      "content": [
+        {
+          "annotations": [],
+          "text": "We need rules that derive:\n- for o9: d1,d3,d4,d7 (only o9 has d2)\n- for o7: d0,d8 (only o7 has d5 and d6 respectively)\n\nUsing the unique facts per constant, minimal rules use d2(X), d5(X), d6(X) as bodies.\n\nd1(X) :- d2(X).\nd3(X) :- d2(X).\nd4(X) :- d2(X).\nd7(X) :- d2(X).\nd0(X) :- d5(X).\nd8(X) :- d6(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 281,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2032,
+    "output_tokens_details": {
+      "reasoning_tokens": 1856
+    },
+    "total_tokens": 2313
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773806398,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

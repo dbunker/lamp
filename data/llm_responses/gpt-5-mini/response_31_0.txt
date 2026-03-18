@@ -1,0 +1,82 @@
+{
+  "id": "resp_09627ef0f71ae3cc0069ba24af58c0819484767517747285ad",
+  "created_at": 1773806767.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_09627ef0f71ae3cc0069ba24afa4b481949f04deb7e27ec94d",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_09627ef0f71ae3cc0069ba24d0b4548194aed7807ba873fb65",
+      "content": [
+        {
+          "annotations": [],
+          "text": "We need d9 for o2/o4 (from d8 on o2 and from d5\u2192d8\u2192d9 on o4), d8 for o4 (from d5), d7 for o2/o4 (from d8), d6 for o0 (from d4), and d1 only for o5 (d9 but not d8). The following rules minimally achieve exactly the target model.\n\nd8(X) :- d5(X).\nd9(X) :- d8(X).\nd7(X) :- d8(X).\nd6(X) :- d4(X).\nd1(X) :- d9(X), not d8(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 286,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2918,
+    "output_tokens_details": {
+      "reasoning_tokens": 2752
+    },
+    "total_tokens": 3204
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773806802,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

@@ -1,0 +1,82 @@
+{
+  "id": "resp_07488c4c9d3008f20069ba810d8e0c81a1a5cec18d1c2cddc9",
+  "created_at": 1773830413.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_07488c4c9d3008f20069ba810e13a081a1b9389cb22b0afdd2",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_07488c4c9d3008f20069ba813a256081a19454546f7522ef82",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Facts already provide all target atoms except d4(o1), d4(o4), d5(o1), d2(o4). Using d3 to produce d5 for o1 and o4, and then propagating from d5 to d2 and d4 yields exactly the required atoms and no extras.\n\nd5(X) :- d3(X).\nd2(X) :- d5(X).\nd4(X) :- d5(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 301,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 3263,
+    "output_tokens_details": {
+      "reasoning_tokens": 3136
+    },
+    "total_tokens": 3564
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773830459,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

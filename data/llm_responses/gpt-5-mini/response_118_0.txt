@@ -1,0 +1,82 @@
+{
+  "id": "resp_0b11914095f11ced0069ba8a780568819f9c0184d9b882a6a2",
+  "created_at": 1773832824.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_0b11914095f11ced0069ba8a784378819fbc807c8ed428f269",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_0b11914095f11ced0069ba8a873a78819fb7c14669a86c3234",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Only o0 has both d0 and d5 among the facts, so bodies using these restrict rules to o0. The following four rules (one per needed predicate) derive exactly the target atoms and no others.\n\nd1(X) :- d5(X).\nd2(X) :- d0(X).\nd4(X) :- d0(X).\nd3(X) :- d4(X), d5(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 261,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2420,
+    "output_tokens_details": {
+      "reasoning_tokens": 2304
+    },
+    "total_tokens": 2681
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773832839,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

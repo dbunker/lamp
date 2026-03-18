@@ -1,0 +1,82 @@
+{
+  "id": "resp_03961b0e035380ea0069ba89a2cd0c81968d83c8836a793611",
+  "created_at": 1773832610.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_03961b0e035380ea0069ba89a314908196955a7ae872654dfa",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_03961b0e035380ea0069ba89abd9b081969bb155e709362794",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Only o5 has both d0 and d4 among the facts, so deriving d1 and d2 from d0 and d4 will affect only o5. Then derive d3 from d1 and d2. These three rules produce exactly the target stable model.\n\nd2(X) :- d0(X), d4(X).\nd1(X) :- d0(X), d4(X).\nd3(X) :- d1(X), d2(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 266,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1499,
+    "output_tokens_details": {
+      "reasoning_tokens": 1344
+    },
+    "total_tokens": 1765
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773832620,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

@@ -1,0 +1,82 @@
+{
+  "id": "resp_05190cfd6b7c5bf50069ba85e237d8819da8bf4954c5f6f76a",
+  "created_at": 1773831650.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_05190cfd6b7c5bf50069ba85e2bd24819db9e149dbc46b43a0",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_05190cfd6b7c5bf50069ba85f56700819da5e8da7926957555",
+      "content": [
+        {
+          "annotations": [],
+          "text": "We have facts for o3: d1, d2, d3, and need d4(o3), d5(o3), d0(o3). Derive d4 from the conjunction of d1,d2,d3 on X, then derive d5 and d0 from d4. This produces exactly the target additional atoms and nothing extra.\n\nd4(X) :- d1(X), d2(X), d3(X).\nd5(X) :- d4(X).\nd0(X) :- d4(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 266,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1125,
+    "output_tokens_details": {
+      "reasoning_tokens": 960
+    },
+    "total_tokens": 1391
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773831671,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

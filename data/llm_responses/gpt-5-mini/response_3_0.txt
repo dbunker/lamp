@@ -1,0 +1,82 @@
+{
+  "id": "resp_01e4f7b7ea601c0a0069ba21dc64fc819e8a3c5d34e77e5442",
+  "created_at": 1773806044.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_01e4f7b7ea601c0a0069ba21dcab90819ebd737f642b7fdcd8",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_01e4f7b7ea601c0a0069ba21e51054819eb48e5b20aa4cb3ac",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Only d8(o8) is missing. Since d4(o8) is a fact, the minimal rule deriving exactly that atom is:\n\nd8(X) :- d4(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 286,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 657,
+    "output_tokens_details": {
+      "reasoning_tokens": 576
+    },
+    "total_tokens": 943
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773806053,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

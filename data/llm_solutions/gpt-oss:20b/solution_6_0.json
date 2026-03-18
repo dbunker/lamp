@@ -25,7 +25,7 @@
         "d8(o6)",
         "d9(o2)"
       ],
-      "time_seconds": 0.000111
+      "time_seconds": 9e-06
     }
   ],
   "warnings": [],
@@ -35,8 +35,8 @@
     "choices": 0.0,
     "atoms": 20.0,
     "rules": 20.0,
-    "time_total": 0.000741,
-    "time_solve": 0.000208,
+    "time_total": 0.00013,
+    "time_solve": 2.6e-05,
     "time_total_python": 0.0
   }
 }

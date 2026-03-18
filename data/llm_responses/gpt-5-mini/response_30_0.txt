@@ -1,0 +1,82 @@
+{
+  "id": "resp_0b78ce64d11c9fdd0069ba248f6e1c8190b5edded67082ad71",
+  "created_at": 1773806735.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_0b78ce64d11c9fdd0069ba248fcc588190bcd590af9faedda8",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_0b78ce64d11c9fdd0069ba24acd57c8190be95c033d9d12c9e",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Only the given atoms for each constant should trigger the new atoms. d6 and d2 must hold only for o1 (the only constant with d5), d7 must be derived for o5 but not o1 (both have d0, but o1 also has d5), and d8 must hold for o3 but not for o5 (both will have d7, but o5 has d0). The following rules achieve exactly the target model.\n\nd6(X) :- d5(X).\nd2(X) :- d5(X).\nd7(X) :- d0(X), not d5(X).\nd8(X) :- d7(X), not d0(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 271,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2529,
+    "output_tokens_details": {
+      "reasoning_tokens": 2368
+    },
+    "total_tokens": 2800
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773806766,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

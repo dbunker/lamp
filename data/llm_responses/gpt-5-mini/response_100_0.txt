@@ -1,0 +1,82 @@
+{
+  "id": "resp_08f4270e11314d5a0069ba8983637881a0ae117360dd67c8b5",
+  "created_at": 1773832579.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_08f4270e11314d5a0069ba8983a08881a087038b52571f83e0",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_08f4270e11314d5a0069ba8993be8481a0ba5cd7c160c20ce3",
+      "content": [
+        {
+          "annotations": [],
+          "text": "To obtain d5(o1), d1(o1), and d0(o5) from the given facts without producing any extra atoms, derive d5 and d1 from d3, and derive d0 from d2. These three rules are sufficient and minimal.\n\nd5(X) :- d3(X).\nd1(X) :- d3(X).\nd0(X) :- d2(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 266,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2085,
+    "output_tokens_details": {
+      "reasoning_tokens": 1984
+    },
+    "total_tokens": 2351
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773832596,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

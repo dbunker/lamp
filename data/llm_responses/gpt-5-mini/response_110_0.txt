@@ -1,0 +1,82 @@
+{
+  "id": "resp_04ef30e2678dcbd30069ba8a0b62b88192a137df9b96e93498",
+  "created_at": 1773832715.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_04ef30e2678dcbd30069ba8a0ba0ac8192944b5232b661dccc",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_04ef30e2678dcbd30069ba8a14e5988192b03730164a936232",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Reasoning:\n- To get d2(o3) we need a rule that fires only for o3. o3 is the only object with both d5 and d4, so d2(X) :- d5(X), d4(X).\n- To get d1(o1) and not d1(o3), use presence of d5 and absence of d4: d1(X) :- d5(X), not d4(X).\n- To obtain d4(o5) and d4(o0) from the existing d3 facts, use d4(X) :- d3(X).\nThese three rules derive exactly the target atoms and no extras.\n\nd2(X) :- d5(X), d4(X).\nd1(X) :- d5(X), not d4(X).\nd4(X) :- d3(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 261,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1695,
+    "output_tokens_details": {
+      "reasoning_tokens": 1472
+    },
+    "total_tokens": 1956
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773832726,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

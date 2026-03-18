@@ -1,0 +1,82 @@
+{
+  "id": "resp_0246f71f2934dd850069ba23673ea4819e9d04fbd012a5671d",
+  "created_at": 1773806439.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_0246f71f2934dd850069ba2367bbf8819eb22310985df06d1a",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_0246f71f2934dd850069ba237eef9c819eb70aadcae9d40ce0",
+      "content": [
+        {
+          "annotations": [],
+          "text": "We need to derive d2(o1), d5(o1), d5(o2), d3(o0), and d7(o0) only. Use existing facts to discriminate constants:\n\n- d2(o1) can be obtained from d9(o1).\n- d5 should hold for those with d2 but without d8 (gives o1 and o2; excludes o0 and o4 where d8 holds).\n- d3 should hold for those with d8 but without d4 (gives only o0; o4 has d4).\n- d7 follows from d3 (giving only o0).\n\nd2(X) :- d9(X).\nd5(X) :- d2(X), not d8(X).\nd3(X) :- d8(X), not d4(X).\nd7(X) :- d3(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 306,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1945,
+    "output_tokens_details": {
+      "reasoning_tokens": 1728
+    },
+    "total_tokens": 2251
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773806465,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

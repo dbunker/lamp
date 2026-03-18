@@ -1,0 +1,82 @@
+{
+  "id": "resp_0b32af6c4e4749b90069ba257473c881a1976e291da84e8d9b",
+  "created_at": 1773806964.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_0b32af6c4e4749b90069ba2574b0f081a189a9f94f6f88da3b",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_0b32af6c4e4749b90069ba258a3f9481a1bda5693bf4a215a2",
+      "content": [
+        {
+          "annotations": [],
+          "text": "We need d0 for o1,o7,o6; d1 for o4; d2 for o1,o7. d0(o1), d0(o7), d2(o1), d2(o7) follow from d3(X). d0(o6) must come from d5(X) but not from o4 (which has d4), so use not d4(X). d1(o4) follows from d4(X).\n\nd0(X) :- d3(X).\nd0(X) :- d5(X), not d4(X).\nd1(X) :- d4(X).\nd2(X) :- d3(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 311,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1987,
+    "output_tokens_details": {
+      "reasoning_tokens": 1792
+    },
+    "total_tokens": 2298
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773806987,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

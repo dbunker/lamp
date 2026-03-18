@@ -78,23 +78,45 @@ def parse_atom(atom_string: str) -> Atom:
     return Atom(pred, terms)
 
 
+def split_body_literals(body_str: str) -> list:
+    """Split body literals by commas, ignoring commas inside parentheses."""
+    parts = []
+    depth = 0
+    current = []
+    for ch in body_str:
+        if ch == '(':
+            depth += 1
+            current.append(ch)
+        elif ch == ')':
+            depth -= 1
+            current.append(ch)
+        elif ch == ',' and depth == 0:
+            parts.append(''.join(current))
+            current = []
+        else:
+            current.append(ch)
+    if current:
+        parts.append(''.join(current))
+    return parts
+
+
 def parse_rule(rule_string: str) -> Rule:
     rule_string = rule_string.strip().rstrip(".")
 
     if ":-" in rule_string:
         head_str, body_str = map(str.strip, rule_string.split(":-", 1))
         lits = []
-    
-        for part in body_str.split(","):
+
+        for part in split_body_literals(body_str):
 
             part = part.strip()
             pos = not part.startswith("not ")
-            if not pos: 
+            if not pos:
                 part = part[4:].strip()
             lits.append(Literal(pos, parse_atom(part)))
 
         return Rule(parse_atom(head_str), set(lits))
-    
+
     else:
         return Rule(parse_atom(rule_string), set())
 
@@ -388,7 +410,14 @@ def run_asp(program: str) -> Dict:
         warnings.append({"code": code.name, "message": message})
 
     ctl = clingo.Control(["-n", "0", "--warn=all"], logger=logger)
-    ctl.add("base", [], program)
+
+    try:
+        ctl.add("base", [], program)
+    except RuntimeError as err:
+        return {
+            "errors": str(err),
+            "witnesses": []
+        }
 
     try:
         ctl.ground([("base", [])])
@@ -464,20 +493,24 @@ class ILASPClient:
     title: str
     ilasp_path: str
 
-    def __init__(self, ilasp_path: str = "../ilasp/ILASP"):
+    def __init__(self, ilasp_path: str = "../ilasp/ILASP", max_literals: int = 3, max_rule_length: int = 5):
         self.ilasp_path = ilasp_path
+        self.max_literals = max_literals
+        self.max_rule_length = max_rule_length
         self.title = "ilasp"
 
-    def run(self, task_path: str) -> str:
-        result = subprocess.run(
-            [self.ilasp_path, '--version=4', task_path],
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
-        print(result.stdout)
-
-        return result.stdout
+    def run(self, task_path: str) -> str | None:
+        try:
+            result = subprocess.run(
+                [self.ilasp_path, '--version=4', f'-ml={self.max_literals}', f'--max-rule-length={self.max_rule_length}', task_path],
+                capture_output=True,
+                text=True,
+                timeout=180
+            )
+            logging.info(result.stdout)
+            return result.stdout
+        except subprocess.TimeoutExpired:
+            return None
 
 
 def format_ilasp_task(original_kb: KnowledgeBase, original_stats: Dict) -> str:
@@ -543,9 +576,14 @@ def run_ilasp_for_rules(
         task_str = format_ilasp_task(original_kb, original_stats)
         write_file(task_path, task_str)
         learned = client.run(task_path)
+        if learned is None:
+            write_file(response_path, "% TIMED OUT")
+            return None
         write_file(response_path, learned)
     else:
         learned = read_file(response_path)
+        if learned.strip() == "% TIMED OUT":
+            return None
 
     new_rules = []
     for line in learned.splitlines():
@@ -584,6 +622,12 @@ def run_ilasp():
         original_values = atoms_from_model(original_stats)
 
         ilasp_kb = run_ilasp_for_rules(client, original_kb, original_stats, task_path, response_path, True)
+
+        if ilasp_kb is None:
+            logging.info(f"ILASP timed out on benchmark {index}")
+            write_json(ilasp_solutions_path, {"timed_out": True})
+            continue
+
         write_file(ilasp_benchmarks_path, str(ilasp_kb))
 
         ilasp_stats = run_asp(str(ilasp_kb))
@@ -651,6 +695,9 @@ def run_llm_for_rules(client: LLM, original_kb: KnowledgeBase, prompt: str, resp
             new_rules.append(rule)
         except ValueError:
             break
+
+    if not new_rules:
+        logging.warning(f"PARSE ERROR: no rules extracted from response at {response_path!r}")
 
     return KnowledgeBase(original_kb.facts, new_rules)
 

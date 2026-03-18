@@ -1,0 +1,82 @@
+{
+  "id": "resp_0dc976d8569dddd80069ba85ad14488190ad929d0bf82c10b6",
+  "created_at": 1773831597.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_0dc976d8569dddd80069ba85ad9774819097a9f17df326c751",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_0dc976d8569dddd80069ba85c09c6481909e35426d8fcc85d2",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Facts give d2 at o3,o4; d3 at o1,o3,o5; d5 at o4. To derive exactly d1(o3), d4(o3), d4(o4), d0(o4) we can use:\n- d1 from both d2 and d3 (true only at o3),\n- d4 from d2 (true at o3 and o4),\n- d0 from d5 (true only at o4).\n\nd1(X) :- d2(X), d3(X).\nd4(X) :- d2(X).\nd0(X) :- d5(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 271,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1265,
+    "output_tokens_details": {
+      "reasoning_tokens": 1088
+    },
+    "total_tokens": 1536
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773831619,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

@@ -1,0 +1,82 @@
+{
+  "id": "resp_0f8359377c28e4190069ba8a6563848197a03d75ee2bd50d51",
+  "created_at": 1773832805.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_0f8359377c28e4190069ba8a65bfb08197b4cd01f35ae268c5",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_0f8359377c28e4190069ba8a763ee88197854c5363ac9ad610",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Reasoning:\n- From facts we need to derive d1 for o0,o2,o4 and d0 for o0,o1,o2,o5.\n- The following three positive rules propagate d1 and d0 between d3 and each other:\n  - d1(X) :- d3(X). yields d1(o0), d1(o2).\n  - d0(X) :- d1(X). yields d0(o1), d0(o5), and (via d1(o0,o2)) d0(o0), d0(o2).\n  - d1(X) :- d0(X). yields d1(o4) (from fact d0(o4)) and closes the mutual derivation.\n- These rules with the given facts produce exactly the target stable model.\n\nd1(X) :- d3(X).\nd0(X) :- d1(X).\nd1(X) :- d0(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 276,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2761,
+    "output_tokens_details": {
+      "reasoning_tokens": 2560
+    },
+    "total_tokens": 3037
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773832823,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

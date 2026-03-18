@@ -1,0 +1,82 @@
+{
+  "id": "resp_053a7b37d1d546250069ba887751a0819c971612a05dc7c059",
+  "created_at": 1773832311.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_053a7b37d1d546250069ba88779580819c8dbccc59950e2c7f",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_053a7b37d1d546250069ba8885a34c819c82d25f638db91654",
+      "content": [
+        {
+          "annotations": [],
+          "text": "We need d4(o5) derived (since only o0,o1 had d4 fact), d3 for o0 and o1 but not o5 (o5 has d1), and d5 for o1 and o5. The rules below derive exactly those atoms from the given facts.\n\nd4(X) :- d0(X).\nd3(X) :- d4(X), not d1(X).\nd5(X) :- d1(X).\nd5(X) :- d2(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 266,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2212,
+    "output_tokens_details": {
+      "reasoning_tokens": 2048
+    },
+    "total_tokens": 2478
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773832326,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

@@ -1,0 +1,82 @@
+{
+  "id": "resp_01d77707b3bab0770069ba859b76b88193b43b391f1696dcf4",
+  "created_at": 1773831579.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_01d77707b3bab0770069ba859bfe488193a3cc76f97b4a9ee8",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_01d77707b3bab0770069ba85aabd7c819381fa24a2a2dab1fe",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Only d2(o2) is missing from the facts. A single rule deriving d2(X) from an existing predicate that holds for o2 suffices. Using d3(X) (which holds for o2 and o5) yields the needed atom without introducing any new ones beyond the target.\n\nd2(X) :- d3(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 256,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1000,
+    "output_tokens_details": {
+      "reasoning_tokens": 896
+    },
+    "total_tokens": 1256
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773831596,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

@@ -1,0 +1,82 @@
+{
+  "id": "resp_011358ee9f746ceb0069ba889e9afc81a3b11e02a17da62cad",
+  "created_at": 1773832350.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_011358ee9f746ceb0069ba889ed87481a3975f0cb61b0b5ff8",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_011358ee9f746ceb0069ba88cd8ef881a384c61abd9f2611b8",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Reasoning (brief):\n- d1 should hold for o0 and o1 but not for o2; rule d1(X) :- d2(X), not d4(X) achieves that because o2 has d4 (fact) while o0,o1 do not.\n- d3(o0) must be derived but not d3(o1); use d3(X) :- d2(X), not d4(X), not d5(X) so o0 (d2, no d4, no d5) gets d3, o1 is excluded by d5.\n- d4 should hold for o4,o5 (they have d3 and no d2) but not for o0 (which will have d2); use d4(X) :- d3(X), not d2(X).\n- d0(o5) is produced similarly from d3 and absence of d2: d0(X) :- d3(X), not d2(X).\n\nFinal rules:\nd3(X) :- d2(X), not d4(X), not d5(X).\nd4(X) :- d3(X), not d2(X).\nd0(X) :- d3(X), not d2(X).\nd1(X) :- d2(X), not d4(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 311,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 7014,
+    "output_tokens_details": {
+      "reasoning_tokens": 6720
+    },
+    "total_tokens": 7325
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773832399,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

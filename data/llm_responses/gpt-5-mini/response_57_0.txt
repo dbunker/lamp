@@ -1,0 +1,82 @@
+{
+  "id": "resp_0d280fe798c09a5d0069ba7fe5a874819c8818a3d0ae037043",
+  "created_at": 1773830117.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_0d280fe798c09a5d0069ba7fe6311c819c93496a6f0ea71d5f",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_0d280fe798c09a5d0069ba801e7600819caa30f1ee5dc78559",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Reasoning: d0(o1) is obtained from the fact d5(o1), so add d0(X) :- d5(X). d2(o0) should hold when d0 holds but d4 does not, so add d2(X) :- d0(X), not d4(X). All required d3 facts (o0,o1,o3,o4) can be produced by a single rule that fires for every X (no d6 facts exist), so add d3(X) :- not d6(X). These three rules plus the facts yield exactly the target model.\n\nd0(X) :- d5(X).\nd2(X) :- d0(X), not d4(X).\nd3(X) :- not d6(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 276,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 5593,
+    "output_tokens_details": {
+      "reasoning_tokens": 5376
+    },
+    "total_tokens": 5869
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773830176,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

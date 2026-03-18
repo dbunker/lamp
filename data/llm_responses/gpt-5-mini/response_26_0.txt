@@ -1,0 +1,82 @@
+{
+  "id": "resp_0f7c9b52fd51367c0069ba23e505908191921cf6100da2d109",
+  "created_at": 1773806565.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_0f7c9b52fd51367c0069ba23e549e88191a8d768671531089b",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_0f7c9b52fd51367c0069ba2419414081919137e5e33ffd1da9",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Reasoning (brief):\n- d2(o5) must come from d7(o5) only -> d2(X) :- d7(X).\n- d9 for o4 and o5 follows from d2 -> d9(X) :- d2(X).\n- d8(o5) comes from d7(o5) -> d8(X) :- d7(X).\n- d3(o0) from d4(o0) -> d3(X) :- d4(X); d3(o5) needs both d7 and d5 -> d3(X) :- d7(X), d5(X).\n- d0(o4) should follow from d2 but exclude o5 (has d7) -> d0(X) :- d2(X), not d7(X).\n- d1 derived where d8 holds -> d1(X) :- d8(X).\n\nd2(X) :- d7(X).\nd9(X) :- d2(X).\nd8(X) :- d7(X).\nd3(X) :- d4(X).\nd3(X) :- d7(X), d5(X).\nd0(X) :- d2(X), not d7(X).\nd1(X) :- d8(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 326,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 4320,
+    "output_tokens_details": {
+      "reasoning_tokens": 4032
+    },
+    "total_tokens": 4646
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773806620,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

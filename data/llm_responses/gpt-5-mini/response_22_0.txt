@@ -1,0 +1,82 @@
+{
+  "id": "resp_052af0ea2840d2a20069ba2399d594819c90c42af5f9581411",
+  "created_at": 1773806489.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_052af0ea2840d2a20069ba239a1f3c819c96b57b133b4ae45c",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_052af0ea2840d2a20069ba23ad0e34819caa97de266cdd22ab",
+      "content": [
+        {
+          "annotations": [],
+          "text": "We need to derive d2(o5), d7(o4), and d8(o4) from the given facts without producing any other atoms. The following minimal rules do that:\n- d2(X) from d1(X) yields d2(o5).\n- d7(X) from d5(X) yields d7(o4).\n- d8(X) from d7(X) yields d8(o4) (and also matches the existing d8(o5)).\n\nd2(X) :- d1(X).\nd7(X) :- d5(X).\nd8(X) :- d7(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 296,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1740,
+    "output_tokens_details": {
+      "reasoning_tokens": 1600
+    },
+    "total_tokens": 2036
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773806510,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}

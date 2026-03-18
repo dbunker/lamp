@@ -1,0 +1,77 @@
+{
+  "satisfiable": true,
+  "witnesses": [
+    {
+      "index": 1,
+      "atoms": [
+        "d5(o1)",
+        "d2(o3)",
+        "d1(o5)",
+        "d0(o5)",
+        "d0(o4)",
+        "d0(o2)"
+      ],
+      "time_seconds": 7e-06
+    }
+  ],
+  "warnings": [
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:8:19-28: info: atom does not occur in any rule head:\n  e(o5,o3)\n"
+    },
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:9:19-28: info: atom does not occur in any rule head:\n  e(o5,o1)\n"
+    },
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:10:11-20: info: atom does not occur in any rule head:\n  e(o5,o2)\n"
+    },
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:11:11-20: info: atom does not occur in any rule head:\n  e(o5,o4)\n"
+    },
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:12:19-28: info: atom does not occur in any rule head:\n  e(o5,o4)\n"
+    },
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:13:11-20: info: atom does not occur in any rule head:\n  e(o5,o2)\n"
+    },
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:14:19-28: info: atom does not occur in any rule head:\n  e(o5,o1)\n"
+    },
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:15:11-20: info: atom does not occur in any rule head:\n  e(o5,o3)\n"
+    },
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:16:11-20: info: atom does not occur in any rule head:\n  e(o5,o5)\n"
+    },
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:17:11-20: info: atom does not occur in any rule head:\n  e(o5,o5)\n"
+    },
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:18:11-20: info: atom does not occur in any rule head:\n  e(o5,o5)\n"
+    },
+    {
+      "code": "AtomUndefined",
+      "message": "<block>:19:11-20: info: atom does not occur in any rule head:\n  e(o5,o5)\n"
+    }
+  ],
+  "statistics": {
+    "models_found": 1,
+    "conflicts": 0.0,
+    "choices": 0.0,
+    "atoms": 6.0,
+    "rules": 6.0,
+    "time_total": 0.000182,
+    "time_solve": 1.4e-05,
+    "time_total_python": 0.0
+  }
+}

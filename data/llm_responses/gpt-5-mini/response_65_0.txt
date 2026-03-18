@@ -1,0 +1,82 @@
+{
+  "id": "resp_0cc55bf0af537ec30069ba81803bb88196bfc3eb4a3c822c53",
+  "created_at": 1773830528.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_0cc55bf0af537ec30069ba81808e548196be2203228fd201a3",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_0cc55bf0af537ec30069ba819e46c48196931b31087f20435d",
+      "content": [
+        {
+          "annotations": [],
+          "text": "Only o0 has both d2 and d3 among the given facts, so d1 can be derived exactly for o0 by requiring d2(X) and d3(X). Then d0 should hold only for o0 as well; using d1(X) together with d2(X) (which o5 lacks) yields d0 only for o0.\n\nd1(X) :- d2(X), d3(X).\nd0(X) :- d1(X), d2(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 291,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2005,
+    "output_tokens_details": {
+      "reasoning_tokens": 1856
+    },
+    "total_tokens": 2296
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1773830559,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true
+}
