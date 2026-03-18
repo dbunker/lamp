@@ -1,31 +1,26 @@
-d3(o2).
-d0(o17).
-d11(o0).
-d4(o4).
-d10(o12).
-d7(o15).
-d13(o2).
-d5(o10).
-d10(o8).
-d1(o0).
+d12(o9).
+d2(o11).
+d3(o4).
+d0(o15).
+d9(o12).
+d5(o4).
+d9(o6).
+d3(o17).
+d12(o0).
+d6(o11).
 
-d6(X) :- d13(X), not d5(X), not d2(X).
-d10(X) :- d2(X), not d4(X), not d8(X).
-d1(X) :- not d13(X), not d9(X), d5(X).
-d7(X) :- d1(X), not d10(X), not d2(X).
-d12(X) :- d2(X), not d9(X), not d5(X).
-d10(X) :- not d2(X), not d11(X), d5(X).
-d1(X) :- not d0(X), not d10(X), d13(X).
-d8(X) :- not d10(X), d3(X), not d2(X).
-d10(X) :- not d12(X), not d3(X), d6(X).
-d1(X) :- d8(X), not d3(X), not d12(X).
-d2(X) :- not d0(X), not d6(X), d5(X).
-d8(X) :- not d12(X), d7(X), not d3(X).
-d8(X) :- not d1(X), not d11(X), d3(X).
-d7(X) :- d0(X), not d3(X), not d12(X).
-d9(X) :- not d1(X), d12(X), not d5(X).
-d6(X) :- d4(X), not d3(X), not d2(X).
-d9(X) :- not d10(X), not d6(X), d11(X).
-d9(X) :- d2(X), not d10(X), not d3(X).
-d1(X) :- not d8(X), not d4(X), d0(X).
-d8(X) :- not d0(X), d4(X), not d9(X).
+d5(X) :- not d1(X), d6(X), not d12(X).
+d9(X) :- not d1(X), d10(X), not d3(X).
+d4(X) :- d5(X), not d2(X), not d13(X).
+d7(X) :- d0(X), not d13(X), not d8(X).
+d10(X) :- d0(X), not d11(X), not d2(X).
+d11(X) :- d7(X), not d1(X), not d13(X).
+d7(X) :- not d3(X), not d6(X), d12(X).
+d6(X) :- d7(X), not d4(X), not d11(X).
+d1(X) :- d0(X), not d6(X), not d4(X).
+d9(X) :- d5(X), not d1(X), not d8(X).
+d8(X) :- not d6(X), not d9(X), d13(X).
+d12(X) :- d0(X), not d6(X), not d9(X).
+d4(X) :- d0(X), not d2(X), not d8(X).
+d13(X) :- not d6(X), d1(X), not d12(X).
+d2(X) :- d9(X), not d12(X), not d0(X).

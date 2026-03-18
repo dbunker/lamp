@@ -4,25 +4,23 @@
     {
       "index": 1,
       "atoms": [
-        "d9(o9)",
-        "d1(o13)",
-        "d1(o8)",
-        "d7(o8)",
-        "d3(o6)",
-        "d13(o2)",
-        "d2(o8)",
-        "d4(o13)",
-        "d10(o8)",
-        "d6(o13)",
-        "d8(o13)",
-        "d8(o8)",
+        "d4(o3)",
+        "d4(o7)",
+        "d10(o3)",
+        "d10(o7)",
+        "d9(o3)",
+        "d9(o7)",
+        "d8(o11)",
+        "d8(o7)",
+        "d3(o16)",
         "d5(o17)",
-        "d5(o8)",
-        "d11(o13)",
-        "d12(o13)",
-        "d12(o8)"
+        "d13(o7)",
+        "d6(o7)",
+        "d2(o13)",
+        "d2(o4)",
+        "d7(o7)"
       ],
-      "time_seconds": 1.1e-05
+      "time_seconds": 1e-05
     }
   ],
   "warnings": [],
@@ -30,10 +28,10 @@
     "models_found": 1,
     "conflicts": 0.0,
     "choices": 0.0,
-    "atoms": 20.0,
-    "rules": 18.0,
-    "time_total": 0.000321,
-    "time_solve": 2.4e-05,
+    "atoms": 17.0,
+    "rules": 16.0,
+    "time_total": 0.000238,
+    "time_solve": 2e-05,
     "time_total_python": 0.0
   }
 }

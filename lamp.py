@@ -367,7 +367,7 @@ def generate_benchmarks():
     predicates_range     = [14, 18]
     possible_terms_range = [14, 18]
     facts_range          = [10, 15]
-    rules_range          = [20]
+    rules_range          = [15]
     literals_range       = [2, 3]
     neg_literals_range   = [1, 2]
     min_derived_atoms_range = [5]
