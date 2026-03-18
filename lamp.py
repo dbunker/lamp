@@ -15,6 +15,7 @@ from ollama import Client
 import pandas as pd
 import logging
 
+DATA_FOLDER = "data_hard"
 
 ########## ASP Models ##########
 
@@ -203,7 +204,7 @@ class OllamaClient(LLM):
             }]
         )
 
-        full_response = json.loads(response.json())
+        full_response = json.loads(response.model_dump_json())
         response_content = full_response["message"]["content"]
 
         return [full_response, response_content]
@@ -333,8 +334,8 @@ def generate_benchmark(config: ModelConfig, index):
         kb = generate_example(config)
         model_stats = run_asp(str(kb))
 
-    benchmark_path = f"data/orig_benchmarks/benchmark_{index}.lp"
-    solution_path = f"data/orig_solutions/solution_{index}.json"
+    benchmark_path = f"{DATA_FOLDER}/orig_benchmarks/benchmark_{index}.lp"
+    solution_path = f"{DATA_FOLDER}/orig_solutions/solution_{index}.json"
 
     write_file(benchmark_path, str(kb))
     write_json(solution_path, model_stats)
@@ -343,13 +344,13 @@ def generate_benchmark(config: ModelConfig, index):
 def generate_benchmarks():
 
     # Generate rules based on various configurations
-    predicates_range     = [10, 6]
-    possible_terms_range = [10, 6]
-    facts_range          = [9, 6]
-    rules_range          = [11]
-    literals_range       = [3, 2]
-    neg_literals_range   = [2, 1, 0]
-    min_derived_atoms_range = [3, 1]
+    predicates_range     = [15]
+    possible_terms_range = [15]
+    facts_range          = [15]
+    rules_range          = [13]
+    literals_range       = [3]
+    neg_literals_range   = [1]
+    min_derived_atoms_range = [6]
 
     index = 0
     for example_number in range(1):
@@ -505,7 +506,7 @@ class ILASPClient:
                 [self.ilasp_path, '--version=4', f'-ml={self.max_literals}', f'--max-rule-length={self.max_rule_length}', task_path],
                 capture_output=True,
                 text=True,
-                timeout=180
+                timeout=120
             )
             logging.info(result.stdout)
             return result.stdout
@@ -601,18 +602,18 @@ def run_ilasp_for_rules(
 def run_ilasp():
 
     client = ILASPClient()
-    total_num = number_files("data/orig_benchmarks")
+    total_num = number_files(f"{DATA_FOLDER}/orig_benchmarks")
     logging.info(f"Run ILASP on {total_num} benchmarks")
 
     for index in range(total_num):
 
-        orig_benchmark_path = f"data/orig_benchmarks/benchmark_{index}.lp"
-        orig_solution_path = f"data/orig_solutions/solution_{index}.json"
+        orig_benchmark_path = f"{DATA_FOLDER}/orig_benchmarks/benchmark_{index}.lp"
+        orig_solution_path = f"{DATA_FOLDER}/orig_solutions/solution_{index}.json"
 
-        task_path = f"data/ilasp_tasks/task_{index}.las"
-        response_path = f"data/ilasp_responses/response_{index}.las"
-        ilasp_benchmarks_path = f"data/ilasp_benchmarks/benchmark_{index}.lp"
-        ilasp_solutions_path = f"data/ilasp_solutions/solution_{index}.json"
+        task_path = f"{DATA_FOLDER}/ilasp_tasks/task_{index}.las"
+        response_path = f"{DATA_FOLDER}/ilasp_responses/response_{index}.las"
+        ilasp_benchmarks_path = f"{DATA_FOLDER}/ilasp_benchmarks/benchmark_{index}.lp"
+        ilasp_solutions_path = f"{DATA_FOLDER}/ilasp_solutions/solution_{index}.json"
 
         program = read_file(orig_benchmark_path)
         original_kb = parse_kb(program)
@@ -712,24 +713,26 @@ def number_files(path: str):
 def run_llms(max_iter: int = 3, rerun=True):
 
     clients = [
-        OllamaClient("gpt-oss:20b"),
         OpenAIClient("gpt-5-mini"),
-        OllamaClient("qwen3-coder:30b")
+        OllamaClient("gpt-oss:20b"),
+        # OllamaClient("qwen3-coder:30b")
     ]
 
-    total_num = number_files("data/orig_benchmarks")
+    total_num = number_files(f"{DATA_FOLDER}/orig_benchmarks")
     logging.info(f"Run {total_num}")
 
     for client in clients:
 
         for index in range(total_num):
 
-            orig_benchmark_path = f"data/orig_benchmarks/benchmark_{index}.lp"
-            orig_solution_path = f"data/orig_solutions/solution_{index}.json"
+            logging.info(f"Run {client.title} iteration {index}")
+
+            orig_benchmark_path = f"{DATA_FOLDER}/orig_benchmarks/benchmark_{index}.lp"
+            orig_solution_path = f"{DATA_FOLDER}/orig_solutions/solution_{index}.json"
 
             # Output paths always use index 0 for compatibility with aggregate_results()
-            llm_benchmarks_path = f"data/llm_benchmarks/{client.title}/benchmark_{index}_0.lp"
-            llm_solutions_path = f"data/llm_solutions/{client.title}/solution_{index}_0.json"
+            llm_benchmarks_path = f"{DATA_FOLDER}/llm_benchmarks/{client.title}/benchmark_{index}_0.lp"
+            llm_solutions_path = f"{DATA_FOLDER}/llm_solutions/{client.title}/solution_{index}_0.json"
 
             # Original program
             program = read_file(orig_benchmark_path)
@@ -749,7 +752,7 @@ def run_llms(max_iter: int = 3, rerun=True):
             for run_index in range(max_iter):
 
                 # Each iteration's raw LLM response is cached separately
-                llm_responses_path = f"data/llm_responses/{client.title}/response_{index}_{run_index}.txt"
+                llm_responses_path = f"{DATA_FOLDER}/llm_responses/{client.title}/response_{index}_{run_index}.txt"
 
                 if run_index == 0:
                     prompt = explicit_prompt(facts_str, stable_model_str)
