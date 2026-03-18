@@ -15,7 +15,7 @@ from ollama import Client
 import pandas as pd
 import logging
 
-DATA_FOLDER = "data_hard"
+DATA_FOLDER = "data_hard_2"
 
 ########## ASP Models ##########
 
@@ -155,7 +155,7 @@ class OpenAIClient(LLM):
     def __init__(self, title):
         key_obj = json.loads(read_file("key.json"))
         key = key_obj["openai"]
-        self.client = OpenAI(api_key=key)
+        self.client = OpenAI(api_key=key, timeout=180)
         self.title = title
 
 
@@ -190,7 +190,7 @@ class OllamaClient(LLM):
     title: str
 
     def __init__(self, title):
-        self.client = Client()
+        self.client = Client(timeout=180)
         self.title = title
 
 
@@ -222,7 +222,11 @@ def get_llm_response(client: LLM, prompt: str, response_path: str, rerun: bool):
     # Check if output is already present, do not run if it is
     if not os.path.exists(response_path) or rerun:
 
-        [full_response, response_content] = client.send_prompt(prompt)
+        try:
+            [full_response, response_content] = client.send_prompt(prompt)
+        except Exception as e:
+            logging.warning(f"LLM call timed out or failed: {e}")
+            return None
 
         logging.info(full_response)
         write_json(response_path, full_response)
@@ -344,13 +348,29 @@ def generate_benchmark(config: ModelConfig, index):
 def generate_benchmarks():
 
     # Generate rules based on various configurations
-    predicates_range     = [15]
-    possible_terms_range = [15]
-    facts_range          = [15]
-    rules_range          = [13]
-    literals_range       = [3]
-    neg_literals_range   = [1]
-    min_derived_atoms_range = [6]
+    predicates_range     = [25, 18]
+    possible_terms_range = [25, 18]
+    facts_range          = [15, 20]
+    rules_range          = [40]
+    literals_range       = [3, 2]
+    neg_literals_range   = [2, 1]
+    min_derived_atoms_range = [8, 6]
+
+    predicates_range     = [25, 18]
+    possible_terms_range = [25, 18]
+    facts_range          = [15, 20]
+    rules_range          = [30]
+    literals_range       = [3, 2]
+    neg_literals_range   = [2, 1]
+    min_derived_atoms_range = [5]
+
+    predicates_range     = [14, 18]
+    possible_terms_range = [14, 18]
+    facts_range          = [10, 15]
+    rules_range          = [20]
+    literals_range       = [2, 3]
+    neg_literals_range   = [1, 2]
+    min_derived_atoms_range = [5]
 
     index = 0
     for example_number in range(1):
@@ -506,7 +526,7 @@ class ILASPClient:
                 [self.ilasp_path, '--version=4', f'-ml={self.max_literals}', f'--max-rule-length={self.max_rule_length}', task_path],
                 capture_output=True,
                 text=True,
-                timeout=120
+                timeout=180
             )
             logging.info(result.stdout)
             return result.stdout
@@ -682,6 +702,9 @@ def run_llm_for_rules(client: LLM, original_kb: KnowledgeBase, prompt: str, resp
     logging.info(prompt)
     response = get_llm_response(client, prompt, response_path, rerun)
 
+    if response is None:
+        return None
+
     lines = response.split("\n")
     new_rules = []
 
@@ -713,7 +736,7 @@ def number_files(path: str):
 def run_llms(max_iter: int = 3, rerun=True):
 
     clients = [
-        OpenAIClient("gpt-5-mini"),
+        # OpenAIClient("gpt-5-mini"),
         OllamaClient("gpt-oss:20b"),
         # OllamaClient("qwen3-coder:30b")
     ]
@@ -748,6 +771,7 @@ def run_llms(max_iter: int = 3, rerun=True):
 
             llm_kb = None
             llm_values: Set[Atom] = set()
+            timed_out = False
 
             for run_index in range(max_iter):
 
@@ -761,6 +785,11 @@ def run_llms(max_iter: int = 3, rerun=True):
                     prompt = feedback_prompt(facts_str, stable_model_str, actual_model_str)
 
                 llm_kb = run_llm_for_rules(client, original_kb, prompt, llm_responses_path, rerun)
+
+                if llm_kb is None:
+                    timed_out = True
+                    break
+
                 llm_stats = run_asp(str(llm_kb))
                 llm_values = atoms_from_model(llm_stats)
 
@@ -769,6 +798,11 @@ def run_llms(max_iter: int = 3, rerun=True):
                     break
                 else:
                     logging.info(f"Iteration {run_index} failed. Expected: {original_values}, Got: {llm_values}")
+
+            if timed_out:
+                logging.info(f"LLM timed out on benchmark {index}")
+                write_json(llm_solutions_path, {"timed_out": True})
+                continue
 
             write_file(llm_benchmarks_path, str(llm_kb))
             write_json(llm_solutions_path, llm_stats)

@@ -1,0 +1,59 @@
+{
+  "satisfiable": true,
+  "witnesses": [
+    {
+      "index": 1,
+      "atoms": [
+        "d5(o11)",
+        "d5(o13)",
+        "d5(o7)",
+        "d5(o4)",
+        "d1(o7)",
+        "d1(o9)",
+        "d4(o4)",
+        "d4(o7)",
+        "d4(o13)",
+        "d4(o11)",
+        "d4(o9)",
+        "d4(o6)",
+        "d4(o8)",
+        "d12(o6)",
+        "d12(o9)",
+        "d12(o8)",
+        "d3(o0)",
+        "d3(o11)",
+        "d3(o7)",
+        "d3(o13)",
+        "d11(o5)",
+        "d11(o2)",
+        "d7(o7)",
+        "d7(o11)",
+        "d7(o13)",
+        "d6(o11)",
+        "d0(o9)",
+        "d0(o11)",
+        "d0(o7)",
+        "d0(o13)",
+        "d8(o13)",
+        "d8(o11)",
+        "d2(o6)",
+        "d2(o7)",
+        "d2(o9)",
+        "d13(o12)",
+        "d9(o4)"
+      ],
+      "time_seconds": 2.6e-05
+    }
+  ],
+  "warnings": [],
+  "statistics": {
+    "models_found": 1,
+    "conflicts": 1.0,
+    "choices": 1.0,
+    "atoms": 49.0,
+    "rules": 58.0,
+    "time_total": 0.000316,
+    "time_solve": 4.3e-05,
+    "time_total_python": 0.0
+  }
+}
