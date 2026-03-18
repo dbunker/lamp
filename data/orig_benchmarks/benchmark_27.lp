@@ -1,8 +1,21 @@
-d1(o3).
-d3(o1).
-d3(o3).
 d2(o3).
-d2(o0).
+d7(o0).
+d6(o1).
+d4(o5).
+d5(o0).
+d7(o2).
+d9(o2).
+d6(o4).
+d3(o2).
 
-d0(X) :- d1(X), d3(X), d2(X).
-d3(X) :- d1(X), d2(X), d0(X).
+d0(X) :- d6(X), not d9(X).
+d7(X) :- d3(X), not d5(X).
+d0(X) :- not d3(X), d2(X).
+d6(X) :- d5(X), not d1(X).
+d6(X) :- not d5(X), d4(X).
+d5(X) :- not d8(X), d4(X).
+d5(X) :- d9(X), not d2(X).
+d1(X) :- d3(X), not d4(X).
+d9(X) :- not d1(X), d8(X).
+d6(X) :- not d0(X), d4(X).
+d8(X) :- d3(X), not d4(X).
