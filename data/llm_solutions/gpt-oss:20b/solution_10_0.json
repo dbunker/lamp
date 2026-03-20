@@ -16,17 +16,17 @@
         "d5(o1)",
         "d4(o1)"
       ],
-      "time_seconds": 1e-05
+      "time_seconds": 9e-06
     }
   ],
   "warnings": [
     {
       "code": "AtomUndefined",
-      "message": "<block>:11:14-19: info: atom does not occur in any rule head:\n  d6(X)\n"
+      "message": "<block>:11:21-26: info: atom does not occur in any rule head:\n  d6(X)\n"
     },
     {
       "code": "AtomUndefined",
-      "message": "<block>:12:14-19: info: atom does not occur in any rule head:\n  d3(X)\n"
+      "message": "<block>:12:21-26: info: atom does not occur in any rule head:\n  d3(X)\n"
     }
   ],
   "statistics": {
@@ -35,8 +35,8 @@
     "choices": 0.0,
     "atoms": 11.0,
     "rules": 11.0,
-    "time_total": 0.000137,
-    "time_solve": 2.1e-05,
+    "time_total": 0.000135,
+    "time_solve": 2e-05,
     "time_total_python": 0.0
   }
 }

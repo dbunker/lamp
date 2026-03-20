@@ -19,7 +19,7 @@
         "d7(o1)",
         "d9(o1)"
       ],
-      "time_seconds": 5.3e-05
+      "time_seconds": 4.6e-05
     }
   ],
   "warnings": [],
@@ -29,8 +29,8 @@
     "choices": 0.0,
     "atoms": 14.0,
     "rules": 14.0,
-    "time_total": 0.000299,
-    "time_solve": 5.9e-05,
+    "time_total": 0.000277,
+    "time_solve": 6e-05,
     "time_total_python": 0.0
   }
 }

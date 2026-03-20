@@ -10,4 +10,4 @@ d1(X) :- d2(X).
 d4(X) :- d3(X).
 d3(X) :- d2(X).
 d8(X) :- d5(X).
-d0(X) :- not d2(X), d1(X).
+d0(X) :- d1(X), not d2(X).

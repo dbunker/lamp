@@ -4,6 +4,6 @@ d1(o1).
 d0(o4).
 d3(o0).
 
-d1(X) :- not d3(X), d0(X).
+d1(X) :- d0(X), not d3(X).
 d0(X) :- d1(X).
 d1(X) :- d3(X).

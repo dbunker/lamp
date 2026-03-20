@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Pre-processing                          : 0.008s
-%% Hypothesis Space Generation             : 0.011s
+%% Hypothesis Space Generation             : 0.01s
 %% Conflict analysis                       : 0.005s
 %%   - Positive Examples                   : 0.005s
-%% Counterexample search                   : 0.002s
+%% Counterexample search                   : 0s
 %%   - CDOEs                               : 0s
 %%   - CDPIs                               : 0s
 %% Hypothesis Search                       : 0.002s

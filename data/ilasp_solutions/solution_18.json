@@ -15,7 +15,7 @@
         "d4(o1)",
         "d4(o2)"
       ],
-      "time_seconds": 5.2e-05
+      "time_seconds": 4.2e-05
     }
   ],
   "warnings": [],
@@ -25,8 +25,8 @@
     "choices": 0.0,
     "atoms": 10.0,
     "rules": 10.0,
-    "time_total": 0.000284,
-    "time_solve": 5.9e-05,
+    "time_total": 0.00024,
+    "time_solve": 4.9e-05,
     "time_total_python": 0.0
   }
 }

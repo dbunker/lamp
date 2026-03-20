@@ -11,37 +11,37 @@
         "d0(o4)",
         "d0(o2)"
       ],
-      "time_seconds": 7e-06
+      "time_seconds": 1.4e-05
     }
   ],
   "warnings": [
     {
       "code": "AtomUndefined",
-      "message": "<block>:8:19-28: info: atom does not occur in any rule head:\n  e(o5,o3)\n"
+      "message": "<block>:8:11-20: info: atom does not occur in any rule head:\n  e(o5,o3)\n"
     },
     {
       "code": "AtomUndefined",
-      "message": "<block>:9:19-28: info: atom does not occur in any rule head:\n  e(o5,o1)\n"
+      "message": "<block>:9:11-20: info: atom does not occur in any rule head:\n  e(o5,o1)\n"
     },
     {
       "code": "AtomUndefined",
-      "message": "<block>:10:11-20: info: atom does not occur in any rule head:\n  e(o5,o2)\n"
+      "message": "<block>:10:19-28: info: atom does not occur in any rule head:\n  e(o5,o2)\n"
     },
     {
       "code": "AtomUndefined",
-      "message": "<block>:11:11-20: info: atom does not occur in any rule head:\n  e(o5,o4)\n"
+      "message": "<block>:11:19-28: info: atom does not occur in any rule head:\n  e(o5,o4)\n"
     },
     {
       "code": "AtomUndefined",
-      "message": "<block>:12:19-28: info: atom does not occur in any rule head:\n  e(o5,o4)\n"
+      "message": "<block>:12:11-20: info: atom does not occur in any rule head:\n  e(o5,o4)\n"
     },
     {
       "code": "AtomUndefined",
-      "message": "<block>:13:11-20: info: atom does not occur in any rule head:\n  e(o5,o2)\n"
+      "message": "<block>:13:19-28: info: atom does not occur in any rule head:\n  e(o5,o2)\n"
     },
     {
       "code": "AtomUndefined",
-      "message": "<block>:14:19-28: info: atom does not occur in any rule head:\n  e(o5,o1)\n"
+      "message": "<block>:14:11-20: info: atom does not occur in any rule head:\n  e(o5,o1)\n"
     },
     {
       "code": "AtomUndefined",
@@ -70,8 +70,8 @@
     "choices": 0.0,
     "atoms": 6.0,
     "rules": 6.0,
-    "time_total": 0.000182,
-    "time_solve": 1.4e-05,
+    "time_total": 0.000258,
+    "time_solve": 2.4e-05,
     "time_total_python": 0.0
   }
 }

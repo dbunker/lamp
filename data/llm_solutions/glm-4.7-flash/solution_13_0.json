@@ -1,0 +1,29 @@
+{
+  "satisfiable": true,
+  "witnesses": [
+    {
+      "index": 1,
+      "atoms": [
+        "d5(o2)",
+        "d1(o2)",
+        "d7(o9)",
+        "d7(o6)",
+        "d8(o4)",
+        "d4(o2)",
+        "d3(o9)"
+      ],
+      "time_seconds": 9.3e-05
+    }
+  ],
+  "warnings": [],
+  "statistics": {
+    "models_found": 1,
+    "conflicts": 0.0,
+    "choices": 0.0,
+    "atoms": 7.0,
+    "rules": 7.0,
+    "time_total": 0.000625,
+    "time_solve": 0.000146,
+    "time_total_python": 0.0
+  }
+}

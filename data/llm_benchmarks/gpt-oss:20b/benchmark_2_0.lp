@@ -9,4 +9,4 @@ d7(o3).
 d1(o3).
 
 d9(X) :- d1(X), d7(X).
-d6(X) :- not d1(X), d0(X).
+d6(X) :- d0(X), not d1(X).

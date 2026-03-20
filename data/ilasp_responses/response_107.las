@@ -1,13 +1,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Pre-processing                          : 0.008s
-%% Hypothesis Space Generation             : 0.188s
-%% Conflict analysis                       : 0.946s
-%%   - Positive Examples                   : 0.946s
+%% Pre-processing                          : 0.007s
+%% Hypothesis Space Generation             : 0.187s
+%% Conflict analysis                       : 0.868s
+%%   - Positive Examples                   : 0.868s
 %% Counterexample search                   : 0.002s
 %%   - CDOEs                               : 0s
-%%   - CDPIs                               : 0.002s
-%% Hypothesis Search                       : 0.371s
-%% Total                                   : 1.55s
+%%   - CDPIs                               : 0.001s
+%% Hypothesis Search                       : 0.389s
+%% Total                                   : 1.49s
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 d2(V1) :- d0(V1).
 d0(V1) :- d3(V1).
