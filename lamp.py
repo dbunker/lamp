@@ -915,6 +915,21 @@ def aggregate_results():
         joined_df["rules_llm"] == joined_df["rules_original"]
     )
 
+    llm_models = {"gpt-oss:20b", "gpt-5-mini", "qwen3-coder:30b"}
+
+    def _later_success(row):
+        # solution_{index}_0.json always holds the final result; response_{index}_1.txt
+        # only exists when iteration 0 failed, so its presence + solution_match=True
+        # means the LLM succeeded on a later iteration.
+        if not row["solution_match"]:
+            return False
+        if row["benchmark_name_llm"] not in llm_models:
+            return False
+        path = f"data/llm_responses/{row['benchmark_name_llm']}/response_{row['example_index']}_1.txt"
+        return os.path.exists(path)
+
+    joined_df["later_success"] = joined_df.apply(_later_success, axis=1)
+
     num_true = joined_df["rules_match"].sum()
 
     logging.info(num_true)
