@@ -15,7 +15,8 @@ from ollama import Client
 import pandas as pd
 import logging
 
-DATA_FOLDER = "data_hard_2"
+DATA_FOLDER = "data"
+TIMEOUT = 120
 
 ########## ASP Models ##########
 
@@ -155,11 +156,9 @@ class OpenAIClient(LLM):
     def __init__(self, title):
         key_obj = json.loads(read_file("key.json"))
         key = key_obj["openai"]
-        self.client = OpenAI(api_key=key, timeout=180)
-        self.title = title
+        self.client = OpenAI(api_key=key, timeout=TIMEOUT)
 
-
-    def send_prompt(self, prompt: str) -> str:
+    def send_prompt(self, messages: list) -> str:
 
         # frequency_penalty=1.0,
         # presence_penalty=1.0,
@@ -167,10 +166,7 @@ class OpenAIClient(LLM):
 
         response = self.client.responses.create(
             model=self.title,
-            input=[{
-                "role": "user", 
-                "content": prompt
-            }],
+            input=messages,
             # max_output_tokens=1000
         )
 
@@ -190,43 +186,41 @@ class OllamaClient(LLM):
     title: str
 
     def __init__(self, title):
-        self.client = Client(timeout=180)
+        self.client = Client(timeout=TIMEOUT)
         self.title = title
 
 
-    def send_prompt(self, prompt: str) -> str:
+    def send_prompt(self, messages: list) -> str:
 
         response = self.client.chat(
-            model=self.title, 
-            messages=[{
-                "role": "user",
-                "content": prompt
-            }]
+            model=self.title,
+            messages=messages
         )
 
         full_response = json.loads(response.model_dump_json())
         response_content = full_response["message"]["content"]
 
         return [full_response, response_content]
-    
+
 
     def get_content(self, full_response):
 
         return full_response["message"]["content"]
 
 
-def get_llm_response(client: LLM, prompt: str, response_path: str, rerun: bool):
+def get_llm_response(client: LLM, messages: list, response_path: str, rerun: bool):
 
     logging.info(f"Run {client.title}")
 
     # Check if output is already present, do not run if it is
     if not os.path.exists(response_path) or rerun:
 
-        try:
-            [full_response, response_content] = client.send_prompt(prompt)
-        except Exception as e:
-            logging.warning(f"LLM call timed out or failed: {e}")
-            return None
+        # try:
+        [full_response, response_content] = client.send_prompt(messages)
+        
+        # except Exception as e:
+        #     logging.warning(f"LLM call timed out or failed: {e}")
+        #     return None
 
         logging.info(full_response)
         write_json(response_path, full_response)
@@ -348,29 +342,13 @@ def generate_benchmark(config: ModelConfig, index):
 def generate_benchmarks():
 
     # Generate rules based on various configurations
-    predicates_range     = [25, 18]
-    possible_terms_range = [25, 18]
-    facts_range          = [15, 20]
-    rules_range          = [40]
+    predicates_range     = [10, 6]
+    possible_terms_range = [10, 6]
+    facts_range          = [9, 6]
+    rules_range          = [11]
     literals_range       = [3, 2]
-    neg_literals_range   = [2, 1]
-    min_derived_atoms_range = [8, 6]
-
-    predicates_range     = [25, 18]
-    possible_terms_range = [25, 18]
-    facts_range          = [15, 20]
-    rules_range          = [30]
-    literals_range       = [3, 2]
-    neg_literals_range   = [2, 1]
-    min_derived_atoms_range = [5]
-
-    predicates_range     = [14, 18]
-    possible_terms_range = [14, 18]
-    facts_range          = [10, 15]
-    rules_range          = [15]
-    literals_range       = [2, 3]
-    neg_literals_range   = [1, 2]
-    min_derived_atoms_range = [5]
+    neg_literals_range   = [2, 1, 0]
+    min_derived_atoms_range = [3, 1]
 
     index = 0
     for example_number in range(1):
@@ -502,7 +480,7 @@ def expected_models(json_response: Dict) -> List[Atom]:
 
 
 def atoms_from_model(stats: Dict):
-    if len(stats["witnesses"]) == 0:
+    if "witnesses" not in stats or len(stats["witnesses"]) == 0:
         return set()
 
     values = stats["witnesses"][0]["atoms"]
@@ -526,7 +504,7 @@ class ILASPClient:
                 [self.ilasp_path, '--version=4', f'-ml={self.max_literals}', f'--max-rule-length={self.max_rule_length}', task_path],
                 capture_output=True,
                 text=True,
-                timeout=180
+                timeout=TIMEOUT
             )
             logging.info(result.stdout)
             return result.stdout
@@ -647,6 +625,9 @@ def run_ilasp():
         if ilasp_kb is None:
             logging.info(f"ILASP timed out on benchmark {index}")
             write_json(ilasp_solutions_path, {"timed_out": True})
+
+            # Use blank to indicate "% TIMED OUT" from ILASP response
+            write_file(ilasp_benchmarks_path, "")
             continue
 
         write_file(ilasp_benchmarks_path, str(ilasp_kb))
@@ -697,13 +678,15 @@ Output ONLY the corrected rules as the last lines of your response.
 
 
 # Run through LLM to get new llm program with the same facts, but generated rules
-def run_llm_for_rules(client: LLM, original_kb: KnowledgeBase, prompt: str, response_path: str, rerun=True) -> KnowledgeBase:
+def run_llm_for_rules(client: LLM, original_kb: KnowledgeBase, messages: list, response_path: str, rerun=True) -> KnowledgeBase:
 
-    logging.info(prompt)
-    response = get_llm_response(client, prompt, response_path, rerun)
+    logging.info(messages)
+    response = get_llm_response(client, messages, response_path, rerun)
 
     if response is None:
         return None
+
+    messages.append({"role": "assistant", "content": response})
 
     lines = response.split("\n")
     new_rules = []
@@ -736,9 +719,13 @@ def number_files(path: str):
 def run_llms(max_iter: int = 3, rerun=True):
 
     clients = [
-        # OpenAIClient("gpt-5-mini"),
+        OpenAIClient("gpt-5-mini"),
         OllamaClient("gpt-oss:20b"),
-        # OllamaClient("qwen3-coder:30b")
+        OllamaClient("qwen3-coder:30b"),
+        # OllamaClient("glm-4.7-flash"),
+        # OllamaClient("qwen3.5:27b"),
+        # OllamaClient("qwen3.5:9b"),
+        # OllamaClient("deepseek-r1:8b")
     ]
 
     total_num = number_files(f"{DATA_FOLDER}/orig_benchmarks")
@@ -772,6 +759,7 @@ def run_llms(max_iter: int = 3, rerun=True):
             llm_kb = None
             llm_values: Set[Atom] = set()
             timed_out = False
+            messages = []
 
             for run_index in range(max_iter):
 
@@ -779,12 +767,14 @@ def run_llms(max_iter: int = 3, rerun=True):
                 llm_responses_path = f"{DATA_FOLDER}/llm_responses/{client.title}/response_{index}_{run_index}.txt"
 
                 if run_index == 0:
-                    prompt = explicit_prompt(facts_str, stable_model_str)
+                    user_content = explicit_prompt(facts_str, stable_model_str)
                 else:
                     actual_model_str = " ".join(str(a) for a in llm_values)
-                    prompt = feedback_prompt(facts_str, stable_model_str, actual_model_str)
+                    user_content = feedback_prompt(facts_str, stable_model_str, actual_model_str)
 
-                llm_kb = run_llm_for_rules(client, original_kb, prompt, llm_responses_path, rerun)
+                messages.append({"role": "user", "content": user_content})
+
+                llm_kb = run_llm_for_rules(client, original_kb, messages, llm_responses_path, rerun)
 
                 if llm_kb is None:
                     timed_out = True
