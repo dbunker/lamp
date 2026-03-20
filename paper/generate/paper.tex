@@ -318,10 +318,10 @@ i.e., the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
 %           - \cite{lin2024clmaspcouplinglargelanguage}
 %           - 2406.03367
 %     - Reliable Natural Language Understanding with Large Language Models and Answer Set Programming (2023)
-%           - \cite{Rajasekharan_2023}
+%           - \cite{rajasekharan2023reliablenaturallanguageunderstanding}
 %           - 2302.03780v3
 %     - A Reliable Common-Sense Reasoning Socialbot Built Using LLMs and Goal-Directed ASP (2024)
-%           - \cite{ZENG_2024}
+%           - \cite{zeng2024reliablecommonsensereasoningsocialbot}
 %           - 2407.18498v1
 %     - Reliable Collaborative Conversational Agent System Based on LLMs and Answer Set Programming (2025)
 %           - \cite{zeng2025reliablecollaborativeconversationalagent}
@@ -340,7 +340,7 @@ i.e., the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
 %           - \cite{wang2024dspybasedneuralsymbolicpipelineenhance}
 %           - 2411.18564
 
-LLM prompting has been shown to be effective in writing ASP programs in such areas as logic puzzle solving \cite{li2025logicofthoughtempoweringlargelanguage} and robotic task planning \cite{lin2024clmaspcouplinglargelanguage}. LLM and ASP based hybrid systems have even been shown to be effective in improving natural language understanding \cite{Rajasekharan_2023}, common sense reasoning \cite{ZENG_2024} and as collaborative conversations agents \cite{zeng2025reliablecollaborativeconversationalagent}.
+LLM prompting has been shown to be effective in writing ASP programs in such areas as logic puzzle solving \cite{li2025logicofthoughtempoweringlargelanguage} and robotic task planning \cite{lin2024clmaspcouplinglargelanguage}. LLM and ASP based hybrid systems have even been shown to be effective in improving natural language understanding \cite{rajasekharan2023reliablenaturallanguageunderstanding}, common sense reasoning \cite{zeng2024reliablecommonsensereasoningsocialbot} and as collaborative conversations agents \cite{zeng2025reliablecollaborativeconversationalagent}.
 
 The prompt provided to the LLMs provides the instance atoms facts, such as \texttt{descriptor\_0(object\_0)}, expected ASP output format \texttt{predicate\_0(X) :- predicate\_1(X), [not] predicate\_2(X)...}, and the expected stable model, such as \texttt{d0(o0), d0(o1), ...}. The output is then parsed into ASP and run with the ASP solver Clingo. This can then be passed back if incorrect.
 
@@ -576,7 +576,7 @@ A similar method that is somewhat more robust involves deriving the features SHA
 
 % - 7. Related Logic Programming (Non-ASP but Methodologically Relevant)
 %     - GOFAI meets Generative AI: Development of Expert Systems by means of Large Language Models (2025)
-%           - \cite{garridomerchán2025gofaimeetsgenerativeai}
+%           - \cite{garridomerchán2026gofaimeetsgenerativeai}
 %           - 2507.13550
 %     - Socrates or Smartypants: Testing Logic Reasoning Capabilities of Large Language Models with Logic Programming-based Test Oracles (2025)
 %           - \cite{xu2025socratessmartypantstestinglogic}
@@ -587,7 +587,7 @@ A similar method that is somewhat more robust involves deriving the features SHA
 %           - \cite{verma2025teachingllmsplanlogical}
 %           - 2509.13351
 %     - plasp 3: Towards Effective ASP Planning (2018)
-%           - \cite{DIMOPOULOS_2019}
+%           - \cite{dimopoulos2018plasp3effectiveasp}
 %           - 1812.04491v1
 %     - PEIRCE: Unifying Material and Formal Reasoning via LLM-Driven Neuro-Symbolic Refinement (2025)
 %           - \cite{quan2025peirceunifyingmaterialformal}
@@ -598,9 +598,9 @@ A similar method that is somewhat more robust involves deriving the features SHA
 
 Recent work has explored the integration of LLMs and ASP with several approaches studying how LLMs can learn from or reason over ASP directly. Borroto et al. (2025) \cite{borroto2025questionansweringllmslearning} investigates question answering and inductive learning from answer sets, demonstrating how stable models can serve as supervision signals for LLMs. Declarative knowledge distillation techniques have also been proposed to transfer structured reasoning from LLMs into symbolic representations by Either et al. (2024) \cite{eiter2024declarativeknowledgedistillationlarge}. Similarly, Borroto et al. (2024) \cite{borroto2024automaticcompositionaspprograms} demonstrates automatic composition of ASP programs from natural language specifications, focusing on translating high level descriptions into executable ASP encodings.
 
-Beyond ASP specific research, logic programming has been used as a tool to evaluate and scaffold LLM reasoning. Hybrid GOFAI LLM systems show how expert systems can be rebuilt using LLM generated logic rules by Garrido et al. (2025) \cite{garridomerchán2025gofaimeetsgenerativeai}, while Xu et al. (2025) \cite{xu2025socratessmartypantstestinglogic} shows programming based test evaluators systematically assess LLM reasoning reliability . These works support the use of formal solvers, as in LAMP, to ground and validate LLM outputs.
+Beyond ASP specific research, logic programming has been used as a tool to evaluate and scaffold LLM reasoning. Hybrid GOFAI LLM systems show how expert systems can be rebuilt using LLM generated logic rules by Garrido et al. (2025) \cite{garridomerchán2026gofaimeetsgenerativeai}, while Xu et al. (2025) \cite{xu2025socratessmartypantstestinglogic} shows programming based test evaluators systematically assess LLM reasoning reliability . These works support the use of formal solvers, as in LAMP, to ground and validate LLM outputs.
 
-Planning provides another closely related line of research. Logical chain of thought tuning for symbolic planning by Verma et al. (2025) \cite{verma2025teachingllmsplanlogical} and LLM symbolic planning pipelines without expert input  by Huang et al. (2024) \cite{huang2024planningdarkllmsymbolicplanning} highlight the benefits of keeping solvers such as ASP planners in the loop. Established ASP planning benchmarks, including Plasp developed by Dimopoulos et al. \cite{DIMOPOULOS_2019}, offer realistic domains that could extend LAMP beyond product configuration. Neuro symbolic refinement frameworks such as PEIRCE further demonstrate how LLMs and formal reasoning systems can iteratively improve each other \cite{quan2025peirceunifyingmaterialformal} by Quan et al. (2025).
+Planning provides another closely related line of research. Logical chain of thought tuning for symbolic planning by Verma et al. (2025) \cite{verma2025teachingllmsplanlogical} and LLM symbolic planning pipelines without expert input  by Huang et al. (2024) \cite{huang2024planningdarkllmsymbolicplanning} highlight the benefits of keeping solvers such as ASP planners in the loop. Established ASP planning benchmarks, including Plasp developed by Dimopoulos et al. \cite{dimopoulos2018plasp3effectiveasp}, offer realistic domains that could extend LAMP beyond product configuration. Neuro symbolic refinement frameworks such as PEIRCE further demonstrate how LLMs and formal reasoning systems can iteratively improve each other \cite{quan2025peirceunifyingmaterialformal} by Quan et al. (2025).
 
 \section{Future Work}
 
