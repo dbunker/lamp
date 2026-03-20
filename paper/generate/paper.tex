@@ -120,23 +120,21 @@ Running this results in the answer set \texttt{\{ vehicle("bike"), vehicle("car"
 
 This restricted fragment of ASP that LAMP operates over is formalized as follows.
 
-\begin{definition}[ASP Configuration Schema]
-An \emph{ASP Configuration Schema} is a tuple
+\begin{definition}[Complexity Category]
+A \emph{Complexity Category} is a tuple
 \[
-  \mathcal{S} \;=\; \langle\, \mathcal{D},\; \mathcal{T},\; \mathcal{P} \,\rangle
+  \mathcal{C} \;=\; \langle\, \mathcal{D},\; \mathcal{T},\; F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle
 \]
-where $\mathcal{D}$ is a finite set of descriptor predicates of arity~$1$,
-$\mathcal{T}$ is a finite set of object terms, and
-$\mathcal{P} \subseteq \mathcal{D} \times \mathcal{T}$ is the set of admissible predicate--term pairs.
-A \emph{fact} over $\mathcal{S}$ is any ground atom $d(t)$ with $d \in \mathcal{D}$ and $t \in \mathcal{T}$.
-A \emph{normal rule} over $\mathcal{S}$ is a rule of the form
-\[
-  d_0(X) \mathbin{:-} d_1(X),\,\ldots,\,d_k(X),\;
-             \mathbf{not}\; d_{k+1}(X),\,\ldots,\,\mathbf{not}\; d_n(X)
-\]
-where $d_0,\ldots,d_n \in \mathcal{D}$, $X$ is a universally quantified variable,
-$k \geq 1$ positive body literals precede all negative ones, and
-$d_0 \notin \{d_1,\ldots,d_k\}$ (the head is not trivially entailed by the positive body alone).
+where:
+\begin{itemize}
+  \item $\mathcal{D}$ is the set of \emph{descriptors} (possible predicates);
+  \item $\mathcal{T}$ is the set of \emph{objects} (possible terms);
+  \item $F \in \mathbb{N}$ is the number of \emph{instance facts};
+  \item $R \in \mathbb{N}$ is the maximum number of \emph{rules};
+  \item $L^+ \in \mathbb{N}$ is the maximum number of \emph{positive literals} in each rule body;
+  \item $L^- \in \mathbb{N}$ is the maximum number of \emph{negative literals} in each rule body; and
+  \item $A_{\min} \in \mathbb{N}$ is the \emph{minimum derived atoms}, the minimum number of atoms that must be derived from running ASP beyond the instance facts.
+\end{itemize}
 \end{definition}
 
 % \vspace{-1.5em}
@@ -241,7 +239,7 @@ This results in the answer set \texttt{\{\ d0(o0), d0(o1), d1(o1), d2(o0) \}}, c
     \node[proc=clingo, minimum width=3.0cm, below=0.8cm of parse]
       (clingonode) {\textbf{Clingo Solver}};
     \node[decision, below=0.8cm of clingonode]
-      (check) {\textbf{Evaluate for Optimality}};
+      (check) {\textbf{Evaluate Validity}};
     \node[proc=clingo, minimum width=3.0cm, left=2.2cm of check]
       (feedback) {Generate Feedback $\delta_i$};
     \node[proc=evalcol, minimum width=3.2cm, right=2.2cm of check]
@@ -285,19 +283,22 @@ This results in the answer set \texttt{\{\ d0(o0), d0(o1), d1(o1), d2(o0) \}}, c
 
 The ASP rule generation procedure functions by iteratively prompting the LLM, providing the facts and expected answer set. The following is the formalization of the task that LAMP is designed to solve.
 
-\begin{definition}[LAMP Modeling Task]
-A \emph{LAMP Modeling Task} is a tuple
+\begin{definition}[LAMP Instance]
+An \emph{instance} of a complexity category $\mathcal{C}$ as input into LAMP is a tuple
 \[
-  \mathcal{M} \;=\; \langle\, F,\; A^{*},\; \mathcal{S},\; \Phi \,\rangle
+  \mathcal{M} \;=\; \langle\, F,\; A^{*},\; \Phi \,\rangle
 \]
 where:
 \begin{itemize}
-  \item $F$ is a finite set of ground ASP facts over schema $\mathcal{S}$, called the \emph{instance facts};
-  \item $A^{*} \subseteq \mathit{HB}_{\mathcal{S}}$ is the \emph{expected stable model}, a finite set of ground atoms over the Herbrand base of $\mathcal{S}$ such that $F \subseteq A^{*}$ and $A^{*} \setminus F \neq \emptyset$ (at least one atom must be newly derived);
-  \item $\mathcal{S} = \langle \mathcal{D}, \mathcal{T}, \mathcal{P} \rangle$ is the ASP Configuration Schema (Definition~1) defining the admissible vocabulary; and
-  \item $\Phi$ is an \emph{output format constraint} specifying the syntactic form of candidate rules (e.g., arity-$1$ predicates, a single universally quantified variable, bounded numbers of positive and negative body literals).
+  \item $F$ is the \emph{instance facts}, a set of ground atoms with any descriptor over any object (e.g.\ \texttt{d0(o0)});
+  \item $A^{*}$ is the \emph{output stable model}, a set of ground atoms derived by the ASP output program, which must include all instance facts and at least $A_{\min}$ additional derived atoms; and
+  \item $\Phi$ is the \emph{output format}, a set of at most $R$ rules with ungrounded atoms of the form
+    \[
+      \texttt{d\{m\}(X) :- [not] d\{a\}(X), \ldots}
+    \]
+    with at most $L^+$ positive and $L^-$ negative body literals per rule.
 \end{itemize}
-A \emph{candidate program} $\Pi$ is a finite set of normal rules over $\mathcal{S}$ consistent with $\Phi$.
+A \emph{candidate program} $\Pi$ is a finite set of rules consistent with $\Phi$.
 $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
 \[
   AS\!\left(F \cup \Pi\right) \;=\; \bigl\{\, A^{*} \,\bigr\},
