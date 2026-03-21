@@ -14,7 +14,7 @@
         "d5(o1)",
         "d5(o5)"
       ],
-      "time_seconds": 5e-05
+      "time_seconds": 3.8e-05
     }
   ],
   "warnings": [],
@@ -24,7 +24,7 @@
     "choices": 0.0,
     "atoms": 9.0,
     "rules": 9.0,
-    "time_total": 0.000234,
+    "time_total": 0.000208,
     "time_solve": 4.3e-05,
     "time_total_python": 0.0
   }

@@ -26,8 +26,8 @@
     "choices": 0.0,
     "atoms": 11.0,
     "rules": 11.0,
-    "time_total": 0.000228,
-    "time_solve": 4.7e-05,
+    "time_total": 0.000221,
+    "time_solve": 4.5e-05,
     "time_total_python": 0.0
   }
 }

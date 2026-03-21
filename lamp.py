@@ -16,7 +16,7 @@ import pandas as pd
 import logging
 
 DATA_FOLDER = "data"
-TIMEOUT = 120
+TIMEOUT = 420
 
 ########## ASP Models ##########
 
@@ -799,6 +799,48 @@ def run_llms(max_iter: int = 3, rerun=True):
 
 ########## Aggregate results ##########
 
+# 7 minutes
+ILASP_TIMEOUT_SECONDS = 420
+ 
+_ilasp_total_re = re.compile(r"%%\s+Total\s*:\s*([\d.]+)s")
+
+
+def _get_llm_time(model: str, index: int, path: str) -> float:
+    """Sum wall-clock seconds across all iteration response files for one benchmark."""
+    total = 0.0
+    run_index = 0
+    while True:
+        response_path = f"{path}/llm_responses/{model}/response_{index}_{run_index}.txt"
+        if not os.path.exists(response_path):
+            break
+        try:
+            data = read_json(response_path)
+            if "total_duration" in data:
+                # Ollama: nanoseconds to seconds
+                total += data["total_duration"] / 1e9
+            elif "created_at" in data and "completed_at" in data:
+                # OpenAI: unix timestamps in seconds
+                total += data["completed_at"] - data["created_at"]
+        except Exception:
+            pass
+        run_index += 1
+    return total
+
+
+def _get_ilasp_time(index: int, path: str) -> float:
+    """Return ILASP wall-clock seconds for one benchmark (300 if timed out)."""
+    response_path = f"{path}/ilasp_responses/response_{index}.las"
+    if not os.path.exists(response_path):
+        return 0.0
+    content = read_file(response_path)
+    if "TIMED OUT" in content:
+        return ILASP_TIMEOUT_SECONDS
+    match = _ilasp_total_re.search(content)
+    if match:
+        return float(match.group(1))
+    return 0.0
+
+
 def aggregate_results():
 
     analysis_df = pd.DataFrame(columns=[
@@ -813,7 +855,8 @@ def aggregate_results():
         "solution_atoms",
         "num_solution_atoms",
         "rules",
-        "facts"
+        "facts",
+        "time_seconds"
     ])
 
     analysis_df = analysis_df.astype({
@@ -828,7 +871,8 @@ def aggregate_results():
         "solution_atoms": "object",
         "num_solution_atoms": "int64",
         "rules": "object",
-        "facts": "object"
+        "facts": "object",
+        "time_seconds": "float64"
     })
 
     models = [
@@ -880,6 +924,13 @@ def aggregate_results():
 
             solution_atoms = atoms_from_model(metrics)
 
+            if kind == "llm":
+                time_seconds = _get_llm_time(model, index, path)
+            elif kind == "ilasp":
+                time_seconds = _get_ilasp_time(index, path)
+            else:
+                time_seconds = 0.0
+
             new_row = {
                 "benchmark_name": model,
                 "example_index": index,
@@ -892,7 +943,8 @@ def aggregate_results():
                 "solution_atoms": solution_atoms,
                 "num_solution_atoms": len(solution_atoms),
                 "rules": kb.rules,
-                "facts": kb.facts
+                "facts": kb.facts,
+                "time_seconds": time_seconds
             }
 
             analysis_df.loc[len(analysis_df)] = new_row
