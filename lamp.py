@@ -70,13 +70,13 @@ def parse_atom(atom_string: str) -> Atom:
     match = atom_re.fullmatch(atom_string)
     if not match:
         raise ValueError(f"Not an Atom: {atom_string!r}")
-    
+
     pred, terms_str = match.groups()
     terms = tuple(a.strip() for a in terms_str.split(",")) if terms_str else ()
-    
+
     if len(terms) == 1 and terms[0] == "":
         terms = ()
-    
+
     return Atom(pred, terms)
 
 
@@ -722,10 +722,6 @@ def run_llms(max_iter: int = 3, rerun=True):
         OpenAIClient("gpt-5-mini"),
         OllamaClient("gpt-oss:20b"),
         OllamaClient("qwen3-coder:30b"),
-        # OllamaClient("glm-4.7-flash"),
-        # OllamaClient("qwen3.5:27b"),
-        # OllamaClient("qwen3.5:9b"),
-        # OllamaClient("deepseek-r1:8b")
     ]
 
     total_num = number_files(f"{DATA_FOLDER}/orig_benchmarks")
@@ -856,7 +852,7 @@ def aggregate_results():
         "num_solution_atoms",
         "rules",
         "facts",
-        "time_seconds"
+        "time_seconds",
     ])
 
     analysis_df = analysis_df.astype({
@@ -872,7 +868,7 @@ def aggregate_results():
         "num_solution_atoms": "int64",
         "rules": "object",
         "facts": "object",
-        "time_seconds": "float64"
+        "time_seconds": "float64",
     })
 
     models = [
@@ -944,7 +940,7 @@ def aggregate_results():
                 "num_solution_atoms": len(solution_atoms),
                 "rules": kb.rules,
                 "facts": kb.facts,
-                "time_seconds": time_seconds
+                "time_seconds": time_seconds,
             }
 
             analysis_df.loc[len(analysis_df)] = new_row
@@ -956,7 +952,7 @@ def aggregate_results():
         original_df,
         on="example_index",
         how="inner",
-        suffixes=("_llm", "_original")
+        suffixes=("_llm", "_original"),
     )
 
     joined_df["solution_match"] = (
