@@ -823,6 +823,14 @@ def _get_llm_time(model: str, index: int, path: str) -> float:
     return total
 
 
+def _get_llm_iter_count(model: str, index: int, path: str) -> int:
+    """Count how many LLM iterations were used for one benchmark."""
+    count = 0
+    while os.path.exists(f"{path}/llm_responses/{model}/response_{index}_{count}.txt"):
+        count += 1
+    return count
+
+
 def _get_ilasp_time(index: int, path: str) -> float:
     """Return ILASP wall-clock seconds for one benchmark (300 if timed out)."""
     response_path = f"{path}/ilasp_responses/response_{index}.las"
@@ -850,9 +858,14 @@ def aggregate_results():
         "total_neg_literals",
         "solution_atoms",
         "num_solution_atoms",
+        "num_derived_atoms",
         "rules",
         "facts",
         "time_seconds",
+        "iter_count",
+        "solver_conflicts",
+        "solver_choices",
+        "solver_time_solve",
     ])
 
     analysis_df = analysis_df.astype({
@@ -866,9 +879,14 @@ def aggregate_results():
         "total_neg_literals": "int64",
         "solution_atoms": "object",
         "num_solution_atoms": "int64",
+        "num_derived_atoms": "int64",
         "rules": "object",
         "facts": "object",
         "time_seconds": "float64",
+        "iter_count": "int64",
+        "solver_conflicts": "float64",
+        "solver_choices": "float64",
+        "solver_time_solve": "float64",
     })
 
     models = [
@@ -922,10 +940,15 @@ def aggregate_results():
 
             if kind == "llm":
                 time_seconds = _get_llm_time(model, index, path)
+                iter_count = _get_llm_iter_count(model, index, path)
             elif kind == "ilasp":
                 time_seconds = _get_ilasp_time(index, path)
+                iter_count = 1
             else:
                 time_seconds = 0.0
+                iter_count = 0
+
+            solver = metrics.get("statistics", {})
 
             new_row = {
                 "benchmark_name": model,
@@ -938,9 +961,14 @@ def aggregate_results():
                 "total_neg_literals": len(neg_literals),
                 "solution_atoms": solution_atoms,
                 "num_solution_atoms": len(solution_atoms),
+                "num_derived_atoms": len(solution_atoms) - len(kb.facts),
                 "rules": kb.rules,
                 "facts": kb.facts,
                 "time_seconds": time_seconds,
+                "iter_count": iter_count,
+                "solver_conflicts": solver.get("conflicts"),
+                "solver_choices": solver.get("choices"),
+                "solver_time_solve": solver.get("time_solve"),
             }
 
             analysis_df.loc[len(analysis_df)] = new_row
@@ -977,6 +1005,24 @@ def aggregate_results():
         return os.path.exists(path)
 
     joined_df["later_success"] = joined_df.apply(_later_success, axis=1)
+
+    def _atom_metrics(row):
+        llm = row["solution_atoms_llm"]
+        orig = row["solution_atoms_original"]
+        intersection = len(llm & orig)
+        precision = intersection / len(llm) if llm else 0.0
+        recall = intersection / len(orig) if orig else 0.0
+        denom = precision + recall
+        f1 = 2 * precision * recall / denom if denom > 0 else 0.0
+        return pd.Series({
+            "atom_precision": precision,
+            "atom_recall": recall,
+            "atom_f1": f1,
+            "num_extra_atoms": len(llm - orig),
+            "num_missing_atoms": len(orig - llm),
+        })
+
+    joined_df[["atom_precision", "atom_recall", "atom_f1", "num_extra_atoms", "num_missing_atoms"]] = joined_df.apply(_atom_metrics, axis=1)
 
     num_true = joined_df["rules_match"].sum()
 
