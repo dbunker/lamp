@@ -1,14 +1,32 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Pre-processing                          : 0.007s
-%% Hypothesis Space Generation             : 0.073s
-%% Conflict analysis                       : 0.144s
-%%   - Positive Examples                   : 0.144s
+%%                                Iteration 1                                 %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                Iteration 2                                 %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Pre-processing                          : 0.008s
+%% Hypothesis Space Generation             : 0.076s
+%% Conflict analysis                       : 0.155s
+%%   - Positive Examples                   : 0.155s
 %% Counterexample search                   : 0.002s
 %%   - CDOEs                               : 0s
 %%   - CDPIs                               : 0s
-%% Hypothesis Search                       : 0.043s
-%% Total                                   : 0.277s
+%% Hypothesis Search                       : 0.044s
+%% Total                                   : 0.293s
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Searching for counterexample... 
+%% Found positive counterexample: eg1 (a total of 1 counterexamples found) 
+%% Found hypothesis: [18, 31, 35, 320] 9 
+%% d3(V1) :- d4(V1). 
+%% d0(V1) :- d5(V1). 
+%% d3(V1) :- d0(V1). 
+%% d2(V1) :- d0(V1); not d4(V1). 
+%% Searching for counterexample... 
+%%  
+%%  
+%% Final Hypothesis: 
+%%  
 d3(V1) :- d4(V1).
 d0(V1) :- d5(V1).
 d3(V1) :- d0(V1).

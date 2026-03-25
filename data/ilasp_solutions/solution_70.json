@@ -18,7 +18,7 @@
         "d3(o4)",
         "d3(o2)"
       ],
-      "time_seconds": 3.7e-05
+      "time_seconds": 3.9e-05
     }
   ],
   "warnings": [],
@@ -28,8 +28,9 @@
     "choices": 0.0,
     "atoms": 13.0,
     "rules": 13.0,
-    "time_total": 0.000224,
-    "time_solve": 4.4e-05,
+    "time_total": 0.000265,
+    "time_solve": 5.3e-05,
     "time_total_python": 0.0
-  }
+  },
+  "hypothesis_space_size": 1192
 }

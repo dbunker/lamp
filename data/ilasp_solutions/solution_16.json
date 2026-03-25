@@ -21,7 +21,7 @@
         "d2(o8)",
         "d2(o6)"
       ],
-      "time_seconds": 4.5e-05
+      "time_seconds": 4.3e-05
     }
   ],
   "warnings": [],
@@ -31,8 +31,9 @@
     "choices": 0.0,
     "atoms": 16.0,
     "rules": 16.0,
-    "time_total": 0.000286,
-    "time_solve": 5.8e-05,
+    "time_total": 0.000282,
+    "time_solve": 5.7e-05,
     "time_total_python": 0.0
-  }
+  },
+  "hypothesis_space_size": 5922
 }

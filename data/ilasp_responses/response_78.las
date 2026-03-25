@@ -1,14 +1,33 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                Iteration 1                                 %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                Iteration 2                                 %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Pre-processing                          : 0.008s
-%% Hypothesis Space Generation             : 0.223s
-%% Conflict analysis                       : 1.378s
-%%   - Positive Examples                   : 1.378s
+%% Hypothesis Space Generation             : 0.222s
+%% Conflict analysis                       : 1.343s
+%%   - Positive Examples                   : 1.343s
 %% Counterexample search                   : 0.002s
 %%   - CDOEs                               : 0s
-%%   - CDPIs                               : 0.001s
-%% Hypothesis Search                       : 0.559s
-%% Total                                   : 2.214s
+%%   - CDPIs                               : 0s
+%% Hypothesis Search                       : 0.541s
+%% Total                                   : 2.163s
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Searching for counterexample... 
+%% Found positive counterexample: eg1 (a total of 1 counterexamples found) 
+%% Found hypothesis: [68, 80, 82, 88, 90] 10 
+%% d3(V1) :- d5(V1). 
+%% d4(V1) :- d3(V1). 
+%% d0(V1) :- d3(V1). 
+%% d1(V1) :- d0(V1). 
+%% d2(V1) :- d3(V1). 
+%% Searching for counterexample... 
+%%  
+%%  
+%% Final Hypothesis: 
+%%  
 d3(V1) :- d5(V1).
 d4(V1) :- d3(V1).
 d0(V1) :- d3(V1).
