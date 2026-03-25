@@ -837,7 +837,49 @@ def run_llms(max_iter: int = 3, rerun=True):
 # 7 minutes
 ILASP_TIMEOUT_SECONDS = 420
  
-_ilasp_total_re = re.compile(r"%%\s+Total\s*:\s*([\d.]+)s")
+_ilasp_phase_re = {
+    "time_seconds":                   re.compile(r"%%\s+Total\s*:\s*([\d.]+)s"),
+    "ilasp_time_preprocessing":       re.compile(r"%%\s+Pre-processing\s*:\s*([\d.]+)s"),
+    "ilasp_time_hypothesis_space_gen":re.compile(r"%%\s+Hypothesis Space Generation\s*:\s*([\d.]+)s"),
+    "ilasp_time_conflict_analysis":   re.compile(r"%%\s+Conflict analysis\s*:\s*([\d.]+)s"),
+    "ilasp_time_counterexample_search":re.compile(r"%%\s+Counterexample search\s*:\s*([\d.]+)s"),
+    "ilasp_time_hypothesis_search":   re.compile(r"%%\s+Hypothesis Search\s*:\s*([\d.]+)s"),
+}
+_ilasp_iteration_re = re.compile(r"%%\s+Iteration\s+(\d+)\s+%%")
+_ilasp_counterexample_re = re.compile(r"a total of (\d+) counterexamples found")
+
+_ILASP_METRICS_NONE = {
+    "ilasp_cdilp_iterations": None,
+    "ilasp_counterexample_count": None,
+    "ilasp_time_preprocessing": None,
+    "ilasp_time_hypothesis_space_gen": None,
+    "ilasp_time_conflict_analysis": None,
+    "ilasp_time_counterexample_search": None,
+    "ilasp_time_hypothesis_search": None,
+}
+
+
+def _get_ilasp_metrics(index: int, path: str) -> dict:
+    """Parse ILASP response file for timing phases, iteration count, and counterexample count."""
+    response_path = f"{path}/ilasp_responses/response_{index}.las"
+    if not os.path.exists(response_path):
+        return _ILASP_METRICS_NONE.copy()
+    content = read_file(response_path)
+    if "TIMED OUT" in content:
+        return {**_ILASP_METRICS_NONE, "time_seconds": float(ILASP_TIMEOUT_SECONDS)}
+
+    result = {}
+    for key, pattern in _ilasp_phase_re.items():
+        m = pattern.search(content)
+        result[key] = float(m.group(1)) if m else None
+
+    iterations = _ilasp_iteration_re.findall(content)
+    result["ilasp_cdilp_iterations"] = max(int(n) for n in iterations) if iterations else None
+
+    m = _ilasp_counterexample_re.search(content)
+    result["ilasp_counterexample_count"] = int(m.group(1)) if m else None
+
+    return result
 
 
 def _get_llm_time(model: str, index: int, path: str) -> float:
@@ -877,18 +919,43 @@ def _get_llm_iter_count(model: str, index: int, path: str) -> int:
     return count
 
 
-def _get_ilasp_time(index: int, path: str) -> float:
-    """Return ILASP wall-clock seconds for one benchmark (300 if timed out)."""
-    response_path = f"{path}/ilasp_responses/response_{index}.las"
-    if not os.path.exists(response_path):
-        return 0.0
-    content = read_file(response_path)
-    if "TIMED OUT" in content:
-        return ILASP_TIMEOUT_SECONDS
-    match = _ilasp_total_re.search(content)
-    if match:
-        return float(match.group(1))
-    return 0.0
+def _get_llm_char_counts(model: str, index: int, path: str) -> dict:
+    """Sum thinking and content character/token counts across all iterations for one benchmark."""
+    thinking_chars = None
+    thinking_tokens = None
+    content_chars = None
+    run_index = 0
+    while True:
+        response_path = f"{path}/llm_responses/{model}/response_{index}_{run_index}.txt"
+        if not os.path.exists(response_path):
+            break
+        try:
+            data = read_json(response_path)
+            if "message" in data:
+                # Ollama: thinking and content are plain text
+                thinking = data["message"].get("thinking") or ""
+                content = data["message"].get("content") or ""
+                thinking_chars = (thinking_chars or 0) + len(thinking)
+                content_chars = (content_chars or 0) + len(content)
+            elif "output" in data:
+                # OpenAI: thinking is encrypted; use reasoning_tokens as proxy
+                tokens = (data.get("usage") or {}).get("output_tokens_details", {}).get("reasoning_tokens")
+                if tokens is not None:
+                    thinking_tokens = (thinking_tokens or 0) + tokens
+                for item in data.get("output", []):
+                    if item.get("type") == "message":
+                        for block in item.get("content", []):
+                            if block.get("type") == "output_text":
+                                content_chars = (content_chars or 0) + len(block.get("text", ""))
+        except Exception:
+            pass
+        run_index += 1
+    return {
+        "llm_thinking_chars": thinking_chars,
+        "llm_thinking_tokens": thinking_tokens,
+        "llm_content_chars": content_chars,
+    }
+
 
 
 def aggregate_results():
@@ -948,12 +1015,18 @@ def aggregate_results():
             if kind == "llm":
                 time_seconds = _get_llm_time(model, index, path)
                 iter_count = _get_llm_iter_count(model, index, path)
+                ilasp_metrics = _ILASP_METRICS_NONE.copy()
+                llm_chars = _get_llm_char_counts(model, index, path)
             elif kind == "ilasp":
-                time_seconds = _get_ilasp_time(index, path)
+                ilasp_metrics = _get_ilasp_metrics(index, path)
+                time_seconds = ilasp_metrics.pop("time_seconds") or 0.0
                 iter_count = 1
+                llm_chars = {"llm_thinking_chars": None, "llm_thinking_tokens": None, "llm_content_chars": None}
             else:
                 time_seconds = 0.0
                 iter_count = 0
+                ilasp_metrics = _ILASP_METRICS_NONE.copy()
+                llm_chars = {"llm_thinking_chars": None, "llm_thinking_tokens": None, "llm_content_chars": None}
 
             solver = metrics.get("statistics", {})
 
@@ -977,6 +1050,8 @@ def aggregate_results():
                 "solver_choices": solver.get("choices"),
                 "solver_time_solve": solver.get("time_solve"),
                 "hypothesis_space_size": metrics.get("hypothesis_space_size"),
+                **ilasp_metrics,
+                **llm_chars,
             }
 
             rows.append(new_row)
@@ -1001,6 +1076,16 @@ def aggregate_results():
         "solver_choices": "float64",
         "solver_time_solve": "float64",
         "hypothesis_space_size": "float64",
+        "ilasp_cdilp_iterations": "float64",
+        "ilasp_counterexample_count": "float64",
+        "ilasp_time_preprocessing": "float64",
+        "ilasp_time_hypothesis_space_gen": "float64",
+        "ilasp_time_conflict_analysis": "float64",
+        "ilasp_time_counterexample_search": "float64",
+        "ilasp_time_hypothesis_search": "float64",
+        "llm_thinking_chars": "float64",
+        "llm_thinking_tokens": "float64",
+        "llm_content_chars": "float64",
     })
 
     original_df = analysis_df[analysis_df["benchmark_name"] == "original"]
