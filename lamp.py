@@ -14,9 +14,13 @@ from pathlib import Path
 from ollama import Client
 import pandas as pd
 import logging
+from math import comb
 
 DATA_FOLDER = "data"
 TIMEOUT = 420
+SEARCH_SPACE_DEMO_LIMIT = 30000
+
+SPACE_TIMEOUT = 30
 
 ########## ASP Models ##########
 
@@ -504,7 +508,7 @@ class ILASPClient:
     def run(self, task_path: str) -> str | None:
         try:
             result = subprocess.run(
-                [self.ilasp_path, '--version=4', f'-ml={self.max_literals}', f'--max-rule-length={self.max_rule_length}', task_path],
+                [self.ilasp_path, '--version=4', f'-ml={self.max_literals}', f'--max-rule-length={self.max_rule_length}', '-d', task_path],
                 capture_output=True,
                 text=True,
                 timeout=TIMEOUT
@@ -514,6 +518,17 @@ class ILASPClient:
         except subprocess.TimeoutExpired:
             return None
 
+    def run_search_space(self, task_path: str) -> str | None:
+        try:
+            result = subprocess.run(
+                [self.ilasp_path, '--version=4', f'-ml={self.max_literals}', f'--max-rule-length={self.max_rule_length}', '-s', task_path],
+                capture_output=True,
+                text=True,
+                timeout=TIMEOUT
+            )
+            return result.stdout
+        except subprocess.TimeoutExpired:
+            return None
 
 def format_ilasp_task(original_kb: KnowledgeBase, original_stats: Dict) -> str:
     facts = set(original_kb.facts)
@@ -563,6 +578,15 @@ def format_ilasp_task(original_kb: KnowledgeBase, original_stats: Dict) -> str:
     lines.append("}).")
 
     return "\n".join(lines)
+
+
+def hypothesis_space_size(original_kb: KnowledgeBase, original_stats: Dict, max_literals: int) -> int:
+    facts = set(original_kb.facts)
+    derived_preds = set(a.pred for a in atoms_from_model(original_stats) - facts)
+    all_preds = set(a.pred for a in facts) | derived_preds
+    n_h = len(derived_preds)
+    n_b = 2 * len(all_preds)  # positive + negative modeb for each predicate
+    return n_h * sum(comb(n_b, k) for k in range(1, max_literals + 1))
 
 
 def run_ilasp_for_rules(
@@ -623,11 +647,21 @@ def run_ilasp():
         original_stats = read_json(orig_solution_path)
         original_values = atoms_from_model(original_stats)
 
+        h_size = hypothesis_space_size(original_kb, original_stats, client.max_literals)
+        logging.info(f"Benchmark {index}: |H| = {h_size}")
+
         ilasp_kb = run_ilasp_for_rules(client, original_kb, original_stats, task_path, response_path, True)
+
+        if h_size <= SEARCH_SPACE_DEMO_LIMIT:
+            search_space_path = f"{DATA_FOLDER}/ilasp_search_spaces/search_space_{index}.las"
+            if not os.path.exists(search_space_path):
+                os.makedirs(f"{DATA_FOLDER}/ilasp_search_spaces", exist_ok=True)
+                search_space = client.run_search_space(task_path)
+                write_file(search_space_path, search_space if search_space is not None else "% TIMED OUT")
 
         if ilasp_kb is None:
             logging.info(f"ILASP timed out on benchmark {index}")
-            write_json(ilasp_solutions_path, {"timed_out": True})
+            write_json(ilasp_solutions_path, {"timed_out": True, "hypothesis_space_size": h_size})
 
             # Use blank to indicate "% TIMED OUT" from ILASP response
             write_file(ilasp_benchmarks_path, "")
@@ -636,6 +670,7 @@ def run_ilasp():
         write_file(ilasp_benchmarks_path, str(ilasp_kb))
 
         ilasp_stats = run_asp(str(ilasp_kb))
+        ilasp_stats["hypothesis_space_size"] = h_size
         write_json(ilasp_solutions_path, ilasp_stats)
         ilasp_values = atoms_from_model(ilasp_stats)
 
@@ -941,6 +976,7 @@ def aggregate_results():
                 "solver_conflicts": solver.get("conflicts"),
                 "solver_choices": solver.get("choices"),
                 "solver_time_solve": solver.get("time_solve"),
+                "hypothesis_space_size": metrics.get("hypothesis_space_size"),
             }
 
             rows.append(new_row)
@@ -964,6 +1000,7 @@ def aggregate_results():
         "solver_conflicts": "float64",
         "solver_choices": "float64",
         "solver_time_solve": "float64",
+        "hypothesis_space_size": "float64",
     })
 
     original_df = analysis_df[analysis_df["benchmark_name"] == "original"]
