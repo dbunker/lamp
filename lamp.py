@@ -26,7 +26,7 @@ class Atom:
     terms: Tuple[str, ...]
 
     def is_ground(self) -> bool:
-        return all(not arg[0].islower() for arg in self.terms)
+        return all(arg[0].islower() for arg in self.terms)
 
     def __str__(self):
         terms_str = ", ".join(str(arg) for arg in self.terms)
@@ -38,7 +38,7 @@ class Literal:
     atom: Atom
 
     def __str__(self):
-        return f"{"" if self.pos else "not "}{self.atom}"
+        return f"{'not ' if not self.pos else ''}{self.atom}"
 
 @dataclass(frozen=True)
 class Rule:
@@ -154,6 +154,7 @@ class OpenAIClient(LLM):
     title: str
 
     def __init__(self, title):
+        self.title = title
         key_obj = json.loads(read_file("key.json"))
         key = key_obj["openai"]
         self.client = OpenAI(api_key=key, timeout=TIMEOUT)
@@ -282,7 +283,7 @@ def generate_example(config: ModelConfig) -> KnowledgeBase:
     for rule_id in range(config.num_rules):
 
         head_predicate = random.sample(list(predicates), 1)[0]
-        head = Atom(head_predicate, "X")
+        head = Atom(head_predicate, ("X",))
         remaining_pred = list(predicates - set([head_predicate]))
 
         body = set()
@@ -290,7 +291,7 @@ def generate_example(config: ModelConfig) -> KnowledgeBase:
 
             # Select an unused atom
             to_ground_pred = random.sample(remaining_pred, 1)[0]
-            atom = Atom(to_ground_pred, "X")
+            atom = Atom(to_ground_pred, ("X",))
 
             # Ensure at least one positive and 
             if config.num_literals <= config.num_neg_literals:
@@ -393,7 +394,7 @@ def read_file(path_str: str) -> str:
     return Path(path_str).read_text()
 
 
-def read_json(path_str: str) -> str:
+def read_json(path_str: str) -> Dict:
     return json.loads(read_file(path_str))
 
 ########## Run Clingo ##########
