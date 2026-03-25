@@ -808,6 +808,7 @@ _ilasp_total_re = re.compile(r"%%\s+Total\s*:\s*([\d.]+)s")
 def _get_llm_time(model: str, index: int, path: str) -> float:
     """Sum wall-clock seconds across all iteration response files for one benchmark."""
     total = 0.0
+    found_any = False
     run_index = 0
     while True:
         response_path = f"{path}/llm_responses/{model}/response_{index}_{run_index}.txt"
@@ -818,13 +819,19 @@ def _get_llm_time(model: str, index: int, path: str) -> float:
             if "total_duration" in data:
                 # Ollama: nanoseconds to seconds
                 total += data["total_duration"] / 1e9
+                found_any = True
             elif "wall_time_seconds" in data:
-                # OpenAI: wall-clock seconds recorded during the call
+                # OpenAI (new): wall-clock seconds recorded during the call
                 total += data["wall_time_seconds"]
+                found_any = True
+            elif "created_at" in data and "completed_at" in data:
+                # OpenAI (existing cached): unix timestamps in seconds
+                total += data["completed_at"] - data["created_at"]
+                found_any = True
         except Exception:
             pass
         run_index += 1
-    return total
+    return total if found_any else float("nan")
 
 
 def _get_llm_iter_count(model: str, index: int, path: str) -> int:
