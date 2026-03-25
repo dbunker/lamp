@@ -173,14 +173,15 @@ class OpenAIClient(LLM):
 
         full_response = json.loads(response.model_dump_json())
         logging.info(json.dumps(full_response, indent=2))
-        response_content = full_response["output"][1]["content"][0]["text"]
+        msg_item = next(item for item in full_response["output"] if item.get("type") == "message")
+        response_content = msg_item["content"][0]["text"]
 
         return [full_response, response_content]
 
 
     def get_content(self, full_response: str):
-        
-        return full_response["output"][1]["content"][0]["text"]
+        msg_item = next(item for item in full_response["output"] if item.get("type") == "message")
+        return msg_item["content"][0]["text"]
 
 class OllamaClient(LLM):
     client: Client
@@ -216,12 +217,13 @@ def get_llm_response(client: LLM, messages: list, response_path: str, rerun: boo
     # Check if output is already present, do not run if it is
     if not os.path.exists(response_path) or rerun:
 
-        # try:
-        [full_response, response_content] = client.send_prompt(messages)
-        
-        # except Exception as e:
-        #     logging.warning(f"LLM call timed out or failed: {e}")
-        #     return None
+        try:
+            _llm_call_start = time.time()
+            [full_response, response_content] = client.send_prompt(messages)
+            full_response["wall_time_seconds"] = time.time() - _llm_call_start
+        except Exception as e:
+            logging.warning(f"LLM call timed out or failed: {e}")
+            return None
 
         logging.info(full_response)
         write_json(response_path, full_response)
@@ -754,6 +756,7 @@ def run_llms(max_iter: int = 3, rerun=True):
             stable_model_str = " ".join(original_stats["witnesses"][0]["atoms"])
 
             llm_kb = None
+            llm_stats = None
             llm_values: Set[Atom] = set()
             timed_out = False
             messages = []
@@ -815,9 +818,9 @@ def _get_llm_time(model: str, index: int, path: str) -> float:
             if "total_duration" in data:
                 # Ollama: nanoseconds to seconds
                 total += data["total_duration"] / 1e9
-            elif "created_at" in data and "completed_at" in data:
-                # OpenAI: unix timestamps in seconds
-                total += data["completed_at"] - data["created_at"]
+            elif "wall_time_seconds" in data:
+                # OpenAI: wall-clock seconds recorded during the call
+                total += data["wall_time_seconds"]
         except Exception:
             pass
         run_index += 1
@@ -886,7 +889,8 @@ def aggregate_results():
             possible_terms = set()
             for fact in kb.facts:
                 predicates.add(fact.pred)
-                possible_terms.add(fact.terms[0])
+                if fact.terms:
+                    possible_terms.add(fact.terms[0])
 
             pos_literals = set()
             neg_literals = set()
