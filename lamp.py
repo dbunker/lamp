@@ -847,47 +847,7 @@ def _get_ilasp_time(index: int, path: str) -> float:
 
 def aggregate_results():
 
-    analysis_df = pd.DataFrame(columns=[
-        "benchmark_name",
-        "example_index",
-        "num_predicates",
-        "num_possible_terms",
-        "num_facts",
-        "num_rules",
-        "total_pos_literals",
-        "total_neg_literals",
-        "solution_atoms",
-        "num_solution_atoms",
-        "num_derived_atoms",
-        "rules",
-        "facts",
-        "time_seconds",
-        "iter_count",
-        "solver_conflicts",
-        "solver_choices",
-        "solver_time_solve",
-    ])
-
-    analysis_df = analysis_df.astype({
-        "benchmark_name": "string",
-        "example_index": "int64",
-        "num_predicates": "int64",
-        "num_possible_terms": "int64",
-        "num_facts": "int64",
-        "num_rules": "int64",
-        "total_pos_literals": "int64",
-        "total_neg_literals": "int64",
-        "solution_atoms": "object",
-        "num_solution_atoms": "int64",
-        "num_derived_atoms": "int64",
-        "rules": "object",
-        "facts": "object",
-        "time_seconds": "float64",
-        "iter_count": "int64",
-        "solver_conflicts": "float64",
-        "solver_choices": "float64",
-        "solver_time_solve": "float64",
-    })
+    rows = []
 
     models = [
         ["original", "orig"],
@@ -971,7 +931,28 @@ def aggregate_results():
                 "solver_time_solve": solver.get("time_solve"),
             }
 
-            analysis_df.loc[len(analysis_df)] = new_row
+            rows.append(new_row)
+
+    analysis_df = pd.DataFrame(rows).astype({
+        "benchmark_name": "string",
+        "example_index": "int64",
+        "num_predicates": "int64",
+        "num_possible_terms": "int64",
+        "num_facts": "int64",
+        "num_rules": "int64",
+        "total_pos_literals": "int64",
+        "total_neg_literals": "int64",
+        "solution_atoms": "object",
+        "num_solution_atoms": "int64",
+        "num_derived_atoms": "int64",
+        "rules": "object",
+        "facts": "object",
+        "time_seconds": "float64",
+        "iter_count": "int64",
+        "solver_conflicts": "float64",
+        "solver_choices": "float64",
+        "solver_time_solve": "float64",
+    })
 
     original_df = analysis_df[analysis_df["benchmark_name"] == "original"]
     llm_df = analysis_df[analysis_df["benchmark_name"] != "original"]
