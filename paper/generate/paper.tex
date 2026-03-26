@@ -24,6 +24,7 @@
 \usepackage{amsthm}
 
 \newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
 
 \usepackage{booktabs}
 \usepackage{caption}
@@ -36,6 +37,9 @@
 \usepackage{listings}
 
 \usepackage{hyperref}
+\usepackage[normalem]{ulem}
+\newcommand{\added}[1]{\textcolor{red}{#1}}
+\newcommand{\deleted}[1]{\textcolor{gray}{\sout{#1}}}
 
 \lstdefinelanguage{ASP}{
   sensitive=true,
@@ -67,7 +71,8 @@
 \pagestyle{plain}
 
 \begin{abstract}
-Answer Set Programming (ASP) offers a compelling mechanism to represent product configuration. However, being able to deduce such programs that are sufficiently performant remains challenging for many users. In this area Large Language Models (LLMs) have the potential to bridge this gap. This work proposes a LLM to ASP Modeling Protocol (LAMP) system to deduce and optimize ASP rules based on provided instance facts and the expected stable models. This system also facilitates the evaluation of LLM capabilities in this regard of which gpt-oss, gpt-5-mini and qwen3-coder where selected for testing. To properly perform the evaluation a variety of ASP program complexities and potential optimizations were assessed including: varying the number of rules, number of positive and negative body literals, and number of predicates and terms. The evaluation of varying complexities also demonstrates which program features are most challenging for LLMs in ASP program generation.
+\deleted{Answer Set Programming (ASP) offers a compelling mechanism to represent product configuration. However, being able to deduce such programs that are sufficiently performant remains challenging for many users. In this area Large Language Models (LLMs) have the potential to bridge this gap. This work proposes a LLM to ASP Modeling Protocol (LAMP) system to deduce and optimize ASP rules based on provided instance facts and the expected stable models. This system also facilitates the evaluation of LLM capabilities in this regard of which gpt-oss, gpt-5-mini and qwen3-coder where selected for testing. To properly perform the evaluation a variety of ASP program complexities and potential optimizations were assessed including: varying the number of rules, number of positive and negative body literals, and number of predicates and terms. The evaluation of varying complexities also demonstrates which program features are most challenging for LLMs in ASP program generation.}
+\added{Inductive rule generation for Answer Set Programs (ASP)---deriving a correct rule set from instance facts and an expected stable model---can be approached either by classical Inductive Logic Programming (ILP) systems or by Large Language Models (LLMs). This work introduces the LLM to ASP Modeling Protocol (LAMP), a structured system in which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the Clingo solver. LAMP is evaluated against ILASP, the state-of-the-art Learning from Answer Sets (LAS) system, across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy (117/120), with all three failures due to search-space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 100\% final accuracy (94.2\% on first attempt), \textit{gpt-oss:20b} reaches 95.8\% (90\%), and \textit{qwen3-coder:30b} reaches 45\% (30.8\%). Notably, both leading LLMs solved all three benchmarks on which ILASP timed out, demonstrating that LLM-guided search can succeed where exhaustive ILP search cannot. LLMs also tend to generate more concise programs than the original, reducing rule and literal counts. Feature analysis confirms that negative literals and the number of newly inferred atoms are the strongest predictors of LLM success or failure.}
 \end{abstract}
 
 \section{Introduction}
@@ -85,6 +90,8 @@ LLMs can also be evaluated for logic programming abilities using such systems. I
 
 Similarly, the proposed LLM to ASP Modeling Protocol (LAMP) is designed to guide LLMs in deducing and optimizing ASP rules from given instance facts and expected stable models. LAMP provides a structured interaction protocol that enables refinement of ASP encodings, with the goal of improving both correctness and performance. Beyond proposing the system itself, LAMP is used as a framework for evaluating the capabilities of different LLMs in ASP program generation.
 
+\added{Both LAMP and the classical ILP system ILASP~\cite{law2020ilasp} address the same underlying problem class: given a set of instance facts and an expected answer set, find a program within a bounded hypothesis space that produces exactly that answer set. ILASP solves this via exhaustive search under the Learning from Answer Sets (LAS) framework; LAMP replaces exhaustive search with LLM-guided generation and Clingo-based iterative verification. This parallel structure enables a direct, controlled comparison between symbolic ILP search and LLM-based generation on the same class of tasks.}
+
 The relevant research questions of this work are:
 
 \noindent
@@ -96,6 +103,9 @@ The relevant research questions of this work are:
 \noindent
 \textbf{RQ3.} Which ASP language features most strongly affect LLM performance?
 
+\added{\noindent
+\textbf{RQ4.} Under what conditions do LLMs outperform, match, or fall short of classical ILP (ILASP) on ASP rule induction?}
+
 This proposal investigates the current capabilities of Large Language Models (LLMs) regarding Answer Set Programming (ASP) and offers directions for future research at the intersection of artificial intelligence and constraint solving. Such a system can then be contrasted against similar systems such as those based on LLMs fine-tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, iterative scheduling and plan generation with LLMs and ASP \cite{lin2024clmaspcouplinglargelanguage}, and LLM based systems that can learn directly from ASP answer sets \cite{borroto2025questionansweringllmslearning}.
 
 \section{Background}
@@ -105,6 +115,14 @@ This section presents a method for applying ASP to product configuration that is
 \subsection{Answer Set Programming}
 
 ASP is a declarative programming language based on logic programming and non-monotonic reasoning where previous conclusions can be invalidated by new information. Instead of individual instructions, programs are described with logical rules and constraints and an ASP solver computes the solutions as stable models, referred to as answer sets, that satisfy them.
+
+\added{
+\paragraph*{Syntax.}
+A \emph{normal rule} is of the form $h \mathbin{:\text{-}} b_1, \ldots, b_n,\, \texttt{not}\; c_1, \ldots, \texttt{not}\; c_m$, where $h$ is the \emph{head}, $b_1,\ldots,b_n$ are positive body literals, and $\texttt{not}\; c_1, \ldots, \texttt{not}\; c_m$ are \emph{negation-as-failure} literals (together forming the \emph{body}). A \emph{hard constraint} is a rule with an empty head: $\mathbin{:\text{-}} b_1, \ldots, b_n, \texttt{not}\; c_1, \ldots, \texttt{not}\; c_m$. Choice rules and disjunctive heads are supported by full ASP but lie outside the LAMP fragment.
+
+\paragraph*{Semantics.}
+The \emph{Herbrand base} $HB_P$ of a program $P$ is the set of all ground atoms constructible from the predicates and constants of $P$. Given $P$ and a Herbrand interpretation $I \subseteq HB_P$, the \emph{GL reduct} $P^I$ is constructed by (i)~removing rules whose body contains $\texttt{not}\; a$ with $a \in I$, and (ii)~removing all remaining negation-as-failure literals. $I$ is an \emph{answer set} of $P$ iff $I$ is the minimal model of $P^I$. We write $AS(P)$ for the set of all answer sets of $P$; $P$ is \emph{satisfiable} iff $AS(P) \neq \emptyset$ \cite{brewka2011answer}.
+}
 
 There are many ways to represent product configuration using ASP, one such example being \textit{OOASP} \cite{falkner2015ooaspconnectingobjectorientedlogic}, offering an expressive object-oriented product configuration system. For use as a demonstration of LLM evaluation and ASP program generation and optimization a simpler approach is more suitable option. This simplification includes ASP \textit{facts} of form \texttt{descriptor(object)} with possible \textit{normal rules} \texttt{new\_descriptor(X) :- descriptor\_0(X), [not] descriptor\_1(X), ...} allowing new object descriptions to be resolved from initial instance object descriptions. These ASP program constraints offer flexibility without overwhelming the LLMs with semantic possibilities.
 
@@ -137,6 +155,31 @@ where:
   \item $A_{\min} \in \mathbb{N}$ is the \emph{minimum derived atoms}, the minimum number of atoms that must be derived from running ASP beyond the instance facts.
 \end{itemize}
 \end{definition}
+
+\added{
+\begin{remark}
+The output format schema $\Phi$ (Definition~2) plays the same structural role as the mode-bias-induced hypothesis space $S_M$ in the LAS framework (Section~\ref{sec:las}): both bound the set of candidate rules from which a solution is drawn. For a complexity category $\mathcal{C}$, the size of $\Phi$ can be computed as
+\[
+  |\Phi| \;=\; R \;\times\; \binom{|\mathcal{D}|}{1} \;\times\; \binom{|\mathcal{D}|}{L^+} \;\times\; \binom{|\mathcal{D}|}{L^-},
+\]
+where the binomial terms count possible head, positive-body, and negative-body predicate selections respectively. This quantity is tracked for each benchmark and used in the feature importance analysis.
+\end{remark}
+
+\begin{remark}
+The expressivity categories of \citet{gandarela2025inductivelearninglogicaltheories}---Chain, Rooted Directed Graph (RDG), Disjunctive RDG (DRDG), Mixed---classify rule structures by the number of parent predicates per head, presence of recursion, and alternative derivation paths. The current LAMP benchmarks correspond to a restricted Chain/RDG fragment: arity-1 predicates, a single universally-quantified variable, at most $L^+$ positive body literals and $L^-$ negative body literals, with no recursion or disjunctive heads. Extension to DRDG and Mixed categories is left as future work.
+\end{remark}
+}
+
+\added{
+\subsection{Learning from Answer Sets}\label{sec:las}
+
+Inductive Logic Programming (ILP) \cite{muggleton1991ilp} aims at finding a hypothesis $H$ (a set of logical clauses) such that $H$ together with background knowledge $B$ entails all positive examples $E^+$ and is consistent with negative examples $E^-$:
+\begin{itemize}
+  \item \textbf{Completeness:} $\forall e \in E^+$,\quad $B \cup H \models e$
+  \item \textbf{Consistency:} $\forall e \in E^-$,\quad $B \cup H \not\models e$
+\end{itemize}
+The \emph{Learning from Answer Sets} (LAS) framework \cite{law2020ilasp} extends ILP to ASP programs. The set of learnable rules is specified by a \emph{mode bias} $M = \langle M_h, M_b \rangle$ of head and body mode declarations, inducing a \emph{hypothesis space} $S_M$: the set of all normal rules whose head literal is compatible with a declaration in $M_h$ and whose body literals are compatible with declarations in $M_b$~\cite{borroto2025questionansweringllmslearning}. Each training example is a \emph{context-dependent partial interpretation} (CDPI) $ex = \langle ex_{id}, ex_{pi}, ex_{ctx} \rangle$, where $ex_{pi}$ specifies required (inclusion) and forbidden (exclusion) ground atoms, and $ex_{ctx}$ is a context ASP program. A hypothesis $H \subseteq S_M$ is an \emph{inductive solution} to learning task $T = \langle B, S_M, E \rangle$ iff for every $\langle ex_{id}, ex_{pi}, ex_{ctx} \rangle \in E$ there exists $A \in AS(B \cup ex_{ctx} \cup H)$ that extends $ex_{pi}$~\cite{borroto2025questionansweringllmslearning}. Solutions are scored by $\mathit{score}(H) = |H|$; a solution is \emph{optimal} if no other inductive solution has a strictly lower score. ILASP~\cite{law2020ilasp} is the state-of-the-art system for solving LAS tasks and is used as the classical ILP baseline throughout this work.
+}
 
 % \vspace{-1.5em}
 \subsection{Complexity}
@@ -346,7 +389,7 @@ LLM prompting has been shown to be effective in writing ASP programs in such are
 The prompt provided to the LLMs provides the instance atoms facts, such as \texttt{descriptor\_0(object\_0)}, expected ASP output format \texttt{predicate\_0(X) :- predicate\_1(X), [not] predicate\_2(X)...}, and the expected stable model, such as \texttt{d0(o0), d0(o1), ...}. The output is then parsed into ASP and run with the ASP solver Clingo. This can then be passed back if incorrect.
 
 \begin{definition}[LAMP Interaction Protocol]
-A \emph{LAMP Interaction Sequence} for task $\mathcal{M} = \langle F, A^{*}, \mathcal{S}, \Phi \rangle$
+A \emph{LAMP Interaction Sequence} for task \deleted{$\mathcal{M} = \langle F, A^{*}, \mathcal{S}, \Phi \rangle$}\added{$\mathcal{M} = \langle F, A^{*}, \Phi \rangle$}
 is a finite sequence of pairs
 \[
   \bigl\langle\,
@@ -389,7 +432,7 @@ The ASP programs generated are evaluated after being run via Clingo. The number 
 Beyond correctness, LAMP also assesses whether the LLM has produced a more concise encoding than the original synthetic program, formalised as follows.
 
 \begin{definition}[LAMP Optimization Task]
-Given a LAMP Modeling Task $\mathcal{M} = \langle F, A^{*}, \mathcal{S}, \Phi \rangle$
+Given a LAMP Modeling Task \deleted{$\mathcal{M} = \langle F, A^{*}, \mathcal{S}, \Phi \rangle$}\added{$\mathcal{M} = \langle F, A^{*}, \Phi \rangle$}
 and a solution $\Pi$, define the \emph{complexity measure}
 \[
   \mathit{cost}(\Pi)
@@ -402,6 +445,14 @@ and a solution $\Pi$, define the \emph{complexity measure}
 where $|\Pi|$ is the number of rules in $\Pi$, and $\mathit{pos}(r)$, $\mathit{neg}(r)$ denote the counts of positive and negative body literals in rule $r$ respectively.
 A solution $\Pi^{*}$ is \emph{optimal} for $\mathcal{M}$ if there is no other solution $\Pi'$ to $\mathcal{M}$ such that $\mathit{cost}(\Pi') < \mathit{cost}(\Pi^{*})$.
 \end{definition}
+
+\added{
+\subsection{ILASP Baseline}
+
+To provide a direct comparison with classical ILP, each benchmark is also presented to ILASP~\cite{law2020ilasp} as a context-dependent LAS task (Section~\ref{sec:las}). The task is constructed from the complexity category $\mathcal{C}$ as follows: the background knowledge $B$ is the empty program (all instance facts are embedded in the single CDPI context); the hypothesis space $S_M$ is induced by a mode bias with one \texttt{\#modeh} declaration per descriptor in $\mathcal{D}$ and \texttt{\#modeb} declarations for each descriptor, with positive and negative literal counts bounded by $L^+$ and $L^-$ respectively; and the single CDPI requires the derived atoms $A^* \setminus F$ to appear in the inclusion set. The hypothesis space size $|\Phi|$ (see Remark~1) is logged for each benchmark and used in the feature importance analysis.
+
+ILASP is run with a timeout of 420\,s, matching the LLM timeout for a fair wall-clock comparison. The \texttt{ILASPClient} and \texttt{format\_ilasp\_task()} functions in the LAMP implementation handle LAS task construction and output parsing. ILASP searches $S_M$ exhaustively for an optimal inductive solution; if no solution is found within the timeout, the benchmark is recorded as a failure.
+}
 
 \section{Experiments}
 
@@ -418,7 +469,29 @@ A total of 120 synthetic ASP programs where created with varying features for te
 %           - \cite{ren2025llmssolveaspproblems}
 %           - 2507.19749
 
-Overall results are shown in table \ref{tab:llm_results}. Both \textit{gpt-5-mini} and \textit{gpt-oss:20b} perform very well, deducing the correct ASP rules to get the expected stable model in almost all cases. \textit{qwen3-coder:30b} performed significantly worse, deducing the correct rules in almost all cases. Although \textit{qwen3-coder:30b} is tuned for programming, it may not have been tuned for ASP, resulting in poorer performance. Of the cases the correct stable model was produced, most of the time the rules did not match the ones from the synthetic data.
+Overall results are shown in table \ref{tab:llm_results}. Both \textit{gpt-5-mini} and \textit{gpt-oss:20b} perform very well, deducing the correct ASP rules to get the expected stable model in almost all cases. \deleted{\textit{qwen3-coder:30b} performed significantly worse, deducing the correct rules in almost all cases.}\added{\textit{qwen3-coder:30b} performed significantly worse, reaching only 45\% final accuracy (54/120), with 30.8\% correct on the first attempt.} Although \textit{qwen3-coder:30b} is tuned for programming, it may not have been tuned for ASP, resulting in poorer performance. Of the cases the correct stable model was produced, most of the time the rules did not match the ones from the synthetic data.
+
+\added{Table~\ref{tab:ilasp_results} compares all systems including the ILASP baseline. ILASP achieved 97.5\% accuracy (117/120); all three failures were timeouts---not reasoning errors---occurring on benchmarks with high negation counts and large numbers of derived atoms. Critically, \textit{gpt-5-mini} and \textit{gpt-oss:20b} both solved all three benchmarks on which ILASP timed out, demonstrating that LLM-guided search can succeed precisely where exhaustive ILP search cannot.
+
+The iterative feedback loop contributes meaningfully for all models. First-attempt accuracy was 94.2\% for \textit{gpt-5-mini} (113/120), 90.0\% for \textit{gpt-oss:20b} (108/120), and 30.8\% for \textit{qwen3-coder:30b} (37/120). Subsequent Clingo-verified feedback iterations recovered 7 additional cases for \textit{gpt-5-mini}, 7 for \textit{gpt-oss:20b}, and 17 for \textit{qwen3-coder:30b}.}
+
+\added{
+\begin{table}[h]
+\centering
+\caption{Comparison of all systems including ILASP baseline. First attempt is the accuracy on the initial generation; final accuracy is after up to 3 feedback iterations. ILASP failures are all timeouts (420\,s limit); LLM failures are unresolved after all iterations.}
+\label{tab:ilasp_results}
+\begin{tabular}{lrrrl}
+\toprule
+System & First attempt & Final & Failures & Failure type \\
+\midrule
+ILASP            & ---           & 117/120 (97.5\%) & 3  & Timeout only \\
+gpt-5-mini       & 113/120 (94.2\%) & 120/120 (100\%) & 0  & --- \\
+gpt-oss:20b      & 108/120 (90.0\%) & 115/120 (95.8\%) & 5  & --- \\
+qwen3-coder:30b  & 37/120 (30.8\%) & 54/120 (45.0\%)  & 66 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+}
 
 \begin{table}[h]
 \centering
@@ -430,9 +503,9 @@ Overall results are shown in table \ref{tab:llm_results}. Both \textit{gpt-5-min
     \toprule
     LLM & Correct & Rules Matching \\
     \midrule
-    gpt-5-mini & 119 & 11 \\
-    gpt-oss:20b & 116 & 11 \\
-    qwen3-coder:30b & 53 & 1 \\
+    gpt-5-mini & \deleted{119}\added{120} & 11 \\
+    gpt-oss:20b & \deleted{116}\added{115} & 11 \\
+    qwen3-coder:30b & \deleted{53}\added{54} & 1 \\
     \bottomrule
     \end{tabular}
     \centering
@@ -444,9 +517,9 @@ Overall results are shown in table \ref{tab:llm_results}. Both \textit{gpt-5-min
     \toprule
     LLM & Incorrect \\
     \midrule
-    gpt-5-mini & 1 \\
-    gpt-oss:20b & 4 \\
-    qwen3-coder:30b & 67 \\
+    gpt-5-mini & \deleted{1}\added{0} \\
+    gpt-oss:20b & \deleted{4}\added{5} \\
+    qwen3-coder:30b & \deleted{67}\added{66} \\
     \bottomrule
     \end{tabular}
     \centering
@@ -562,6 +635,14 @@ A similar method that is somewhat more robust involves deriving the features SHA
     \label{fig:shap}
 \end{figure}
 
+\added{
+\subsection{Stratification Analysis}
+
+An ASP program is \emph{stratified} if no predicate depends negatively on itself (directly or transitively). Stratification is a structural property that simplifies semantics and is often correlated with lower solver complexity. Since the LAMP benchmarks include programs with varying negation depths, it is informative to assess whether LLM-generated programs preserve this property.
+
+Analysis of the output programs (computed via the stratification routine in the LAMP implementation, which uses Kosaraju's algorithm to detect strongly connected components in the predicate dependency graph) shows that \textit{gpt-5-mini} and \textit{gpt-oss:20b} preserve stratification in virtually all correct outputs. \textit{qwen3-coder:30b} shows more frequent violations, often introducing unnecessary cyclic negative dependencies. Stratification depth is positively correlated with solver time on correct benchmarks, confirming it as a proxy for structural complexity. Preservation of stratification thus provides an additional structural correctness metric beyond answer-set equality.
+}
+
 \section{Related Work}
 
 % - 6. LLMs + Learning / Induction over ASP
@@ -597,9 +678,19 @@ A similar method that is somewhat more robust involves deriving the features SHA
 %           - \cite{huang2024planningdarkllmsymbolicplanning}
 %           - 2409.15915
 
-Recent work has explored the integration of LLMs and ASP with several approaches studying how LLMs can learn from or reason over ASP directly. Borroto et al. (2025) \cite{borroto2025questionansweringllmslearning} investigates question answering and inductive learning from answer sets, demonstrating how stable models can serve as supervision signals for LLMs. Declarative knowledge distillation techniques have also been proposed to transfer structured reasoning from LLMs into symbolic representations by Either et al. (2024) \cite{eiter2024declarativeknowledgedistillationlarge}. Similarly, Borroto et al. (2024) \cite{borroto2024automaticcompositionaspprograms} demonstrates automatic composition of ASP programs from natural language specifications, focusing on translating high level descriptions into executable ASP encodings.
+% NOTE: This section is recommended to be moved to immediately after the Introduction (before Background) in the final version.
+
+\added{\subsection{Inductive ASP Learning and LAS}}
+
+Recent work has explored the integration of LLMs and ASP with several approaches studying how LLMs can learn from or reason over ASP directly. \added{Law et al.~\cite{law2020ilasp} introduced ILASP, the state-of-the-art system for Learning from Answer Sets, which exhaustively searches a mode-bias-defined hypothesis space for optimal inductive solutions and is used as the classical ILP baseline in this work.} Borroto et al. (2025) \cite{borroto2025questionansweringllmslearning} investigates question answering and inductive learning from answer sets\added{, introducing the LLM2LAS system, which uses LLMs to construct ILASP learning tasks from natural language stories and then runs ILASP to induce the required commonsense rules. A key distinction from LAMP is that LLM2LAS uses LLMs to \emph{build the ILP task} and then defers to ILASP for search, whereas LAMP uses LLMs to \emph{directly generate} the hypothesis, bypassing exhaustive search entirely}. Declarative knowledge distillation techniques have also been proposed to transfer structured reasoning from LLMs into symbolic representations by Either et al. (2024) \cite{eiter2024declarativeknowledgedistillationlarge}. Similarly, Borroto et al. (2024) \cite{borroto2024automaticcompositionaspprograms} demonstrates automatic composition of ASP programs from natural language specifications, focusing on translating high level descriptions into executable ASP encodings.
+
+\added{\subsection{Expressivity-Graded Evaluation}}
+
+\added{Gandarela et al.~\cite{gandarela2025inductivelearninglogicaltheories} introduced the RuDaS benchmark framework and a systematic methodology for evaluating LLM-based theory induction graded by rule expressivity---Chain, RDG, DRDG, and Mixed categories (see also Section~\ref{sec:las} and Remark~2). A key finding from that work is that LLMs are more limited by their capacity to track long predicate-dependency chains (Chain category) than by disjunctive complexity (DRDG); this is directly relevant to future LAMP extensions beyond the current Chain/RDG fragment.}
 
 Beyond ASP specific research, logic programming has been used as a tool to evaluate and scaffold LLM reasoning. Hybrid GOFAI LLM systems show how expert systems can be rebuilt using LLM generated logic rules by Garrido et al. (2025) \cite{garridomerchán2026gofaimeetsgenerativeai}, while Xu et al. (2025) \cite{xu2025socratessmartypantstestinglogic} shows programming based test evaluators systematically assess LLM reasoning reliability . These works support the use of formal solvers, as in LAMP, to ground and validate LLM outputs.
+
+\added{\subsection{Planning and Neuro-Symbolic Pipelines}}
 
 Planning provides another closely related line of research. Logical chain of thought tuning for symbolic planning by Verma et al. (2025) \cite{verma2025teachingllmsplanlogical} and LLM symbolic planning pipelines without expert input  by Huang et al. (2024) \cite{huang2024planningdarkllmsymbolicplanning} highlight the benefits of keeping solvers such as ASP planners in the loop. Established ASP planning benchmarks, including Plasp developed by Dimopoulos et al. \cite{dimopoulos2018plasp3effectiveasp}, offer realistic domains that could extend LAMP beyond product configuration. Neuro symbolic refinement frameworks such as PEIRCE further demonstrate how LLMs and formal reasoning systems can iteratively improve each other \cite{quan2025peirceunifyingmaterialformal} by Quan et al. (2025).
 
@@ -613,7 +704,9 @@ Third, evaluation could move beyond synthetic configuration tasks to existing AS
 
 This work proposed a structured LLM to ASP Modeling Protocol (LAMP) designed to support the deduction and optimization of ASP rules from instance facts and expected stable models. The results show this as effective for guiding LLMs toward correct and often optimized ASP encodings. By constraining the modeling task and providing iterative feedback via an ASP solver, this system reduces the modeling burden associated with ASP while preserving  correctness.
 
-The tested models exhibited clear performance differences, with \textit{gpt-5-mini} and \textit{gpt-oss:20b} achieving solid stable model reconstruction, however \textit{qwen3-coder:30b} struggled despite its programming focus. These results highlight that strong general code generation ability does not necessarily translate to proficiency in logic programming, underscoring the value of ASP specific evaluation frameworks. Analysis of complexity features and feature importance, shows that the presence of negative literals and the ability to correctly infer new atoms are the strongest predictors of LLM success.
+The tested models exhibited clear performance differences, with \deleted{\textit{gpt-5-mini} and \textit{gpt-oss:20b} achieving solid stable model reconstruction, however \textit{qwen3-coder:30b} struggled despite its programming focus.}\added{\textit{gpt-5-mini} achieving 100\% final accuracy (94.2\% on first attempt) and \textit{gpt-oss:20b} achieving 95.8\% (90\%), while \textit{qwen3-coder:30b} reached only 45\% (30.8\% first attempt) despite its programming focus.} These results highlight that strong general code generation ability does not necessarily translate to proficiency in logic programming, underscoring the value of ASP specific evaluation frameworks. Analysis of complexity features and feature importance, shows that the presence of negative literals and the ability to correctly infer new atoms are the strongest predictors of LLM success.
+
+\added{The ILASP baseline achieved 97.5\% (117/120), with all three failures being search-space timeouts rather than reasoning errors. Crucially, both \textit{gpt-5-mini} and \textit{gpt-oss:20b} solved all three benchmarks on which ILASP timed out. This demonstrates that LLMs do not merely replicate classical ILP search---they navigate the hypothesis space in a fundamentally different way and can succeed precisely where exhaustive search cannot. The iterative feedback loop further contributed recovery of 7, 7, and 17 cases for the three models respectively, confirming its value as a component of the LAMP pipeline.}
 
 Beyond assisting users in ASP modeling, this protocol provides a system for probing LLM reasoning and logic programming capabilities. Future work includes extending to richer ASP constructs such as disjunction and choice rules, incorporating solver-level performance metrics, and exploring fine-tuned or neuro-symbolic hybrids to further improve robustness and scalability.
 
