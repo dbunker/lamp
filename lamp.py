@@ -1030,6 +1030,13 @@ def aggregate_results():
 
             solver = metrics.get("statistics", {})
 
+            search_space_path = f"{path}/ilasp_search_spaces/search_space_{index}.las"
+            if os.path.exists(search_space_path):
+                with open(search_space_path) as _f:
+                    search_space_lines = sum(1 for _ in _f)
+            else:
+                search_space_lines = None
+
             new_row = {
                 "benchmark_name": model,
                 "example_index": index,
@@ -1050,6 +1057,7 @@ def aggregate_results():
                 "solver_choices": solver.get("choices"),
                 "solver_time_solve": solver.get("time_solve"),
                 "hypothesis_space_size": metrics.get("hypothesis_space_size"),
+                "search_space_line_count": search_space_lines,
                 **ilasp_metrics,
                 **llm_chars,
             }
@@ -1076,6 +1084,7 @@ def aggregate_results():
         "solver_choices": "float64",
         "solver_time_solve": "float64",
         "hypothesis_space_size": "float64",
+        "search_space_line_count": "float64",
         "ilasp_cdilp_iterations": "float64",
         "ilasp_counterexample_count": "float64",
         "ilasp_time_preprocessing": "float64",
