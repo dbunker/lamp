@@ -538,6 +538,33 @@ qwen3-coder:30b  & 30.8 &  45.0 & 14.2 & 17 \\
 \end{table}
 }
 
+\added{
+Figure~\ref{fig:timing_boxplot} shows the per-benchmark wall-clock time distribution for each system as a box plot. \textit{gpt-5-mini} is the fastest LLM with a median of 18\,s and a maximum of 137\,s, reflecting the low latency of the API-hosted model. \textit{gpt-oss:20b} is slowest (median 50.8\,s, max 369.6\,s) due to the larger locally-run model size. ILASP has a highly bimodal distribution: the median is just 0.66\,s (most benchmarks are trivially solved by exhaustive search) but three benchmarks hit the 420\,s ceiling, pulling the maximum to that value. \textit{qwen3-coder:30b} shows a near-uniform distribution with a median of 40.3\,s and a maximum near the 420\,s timeout (417.8\,s), consistent with the model spending maximum iteration budget on hard cases it ultimately fails to solve. Table~\ref{tab:timing} gives the aggregate statistics.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.72\textwidth]{diagrams/timing_boxplot.pdf}
+    \caption{Per-benchmark wall-clock time distribution per system (seconds). Boxes show the interquartile range; whiskers extend to the full range. ILASP failures are capped at the 420\,s timeout. Produced from \texttt{stats.ipynb} cell~5.}
+    \label{fig:timing_boxplot}
+\end{figure}
+
+\begin{table}[h]
+\centering
+\caption{Wall-clock time per system (seconds). LLM times accumulate all feedback iterations; ILASP timeouts are recorded as 420\,s. Produced from \texttt{stats.ipynb} cell~5.}
+\label{tab:timing}
+\begin{tabular}{lrrrr}
+\toprule
+Model & Total (s) & Mean (s) & Median (s) & Max (s) \\
+\midrule
+gpt-5-mini       & 2837.00 & 23.64 & 18.00 & 137.00 \\
+gpt-oss:20b      & 8579.97 & 71.50 & 50.78 & 369.64 \\
+qwen3-coder:30b  & 5319.65 & 44.33 & 40.32 & 417.77 \\
+ILASP            & 1917.36 & 15.98 &  0.66 & 420.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+}
+
 \begin{table}[h]
 \centering
 \setlength{\tabcolsep}{4pt}
