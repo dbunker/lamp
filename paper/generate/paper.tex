@@ -293,13 +293,13 @@ where:
 \begin{itemize}
   \item $F$ is the \emph{instance facts}, a set of $|\mathcal{C}.F|$ ground atoms of the form $d(o)$ with descriptor $d \in \mathcal{D}$ and object $o \in \mathcal{T}$ (e.g.\ \texttt{d0(o0)});
   \item $A^{*}$ is the \emph{output stable model}, a set of ground atoms derived by the ASP output program, which must include all instance facts and at least $A_{\min}$ additional derived atoms; and
-  \item $\Phi$ is the \emph{output format schema}, a set of at most $R$ ASP rules, each of the form
+  \item $\Phi$ is the \emph{output format schema}, a set of $|\Phi| \leq R$ fully-specified ASP rules defining the candidate pool from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
     \[
       d_h(X) \;:\text{-}\; p_1(X),\; \ldots,\; p_{k}(X),\; \texttt{not}\; n_1(X),\; \ldots,\; \texttt{not}\; n_{m}(X).
     \]
-    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, $X$ is a single universally-quantified variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals.
+    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, $X$ is a single universally-quantified variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals (bounds from $\mathcal{C}$, Definition~1).
 \end{itemize}
-A \emph{candidate program} $\Pi$ is a finite set of rules consistent with $\Phi$.
+A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$; its rules thus inherit the structural constraints of $\mathcal{C}$ via $\Phi$.
 $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
 \[
   AS\!\left(F \cup \Pi\right) \;=\; \bigl\{\, A^{*} \,\bigr\},

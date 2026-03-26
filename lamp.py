@@ -1203,6 +1203,11 @@ def aggregate_results():
             max_body_size = max(body_sizes) if body_sizes else 0
             avg_body_size = sum(body_sizes) / len(body_sizes) if body_sizes else 0.0
 
+            neg_body_sizes = [sum(1 for lit in r.body if not lit.pos) for r in kb.rules]
+            pos_body_sizes = [sum(1 for lit in r.body if lit.pos) for r in kb.rules]
+            avg_neg_body_size = sum(neg_body_sizes) / len(neg_body_sizes) if neg_body_sizes else 0.0
+            avg_pos_body_size = sum(pos_body_sizes) / len(pos_body_sizes) if pos_body_sizes else 0.0
+
             all_atoms = list(kb.facts) + [r.head for r in kb.rules] + [lit.atom for r in kb.rules for lit in r.body]
             max_pred_arity = max((len(a.terms) for a in all_atoms), default=0)
 
@@ -1271,6 +1276,8 @@ def aggregate_results():
                 "num_positive_cycles": strat["num_positive_cycles"],
                 "max_body_size": max_body_size,
                 "avg_body_size": avg_body_size,
+                "avg_neg_body_size": avg_neg_body_size,
+                "avg_pos_body_size": avg_pos_body_size,
                 "max_predicate_arity": max_pred_arity,
                 "num_unique_vars": num_unique_vars,
                 "num_recursive_rules": num_recursive_rules,
@@ -1285,6 +1292,8 @@ def aggregate_results():
                 "solver_conflicts": solver.get("conflicts"),
                 "solver_choices": solver.get("choices"),
                 "solver_time_solve": solver.get("time_solve"),
+                "solver_ground_atoms": solver.get("atoms"),
+                "solver_ground_rules": solver.get("rules"),
                 "hypothesis_space_size": metrics.get("hypothesis_space_size"),
                 "search_space_line_count": search_space_lines,
                 **ilasp_metrics,
@@ -1312,6 +1321,8 @@ def aggregate_results():
         "solver_conflicts": "float64",
         "solver_choices": "float64",
         "solver_time_solve": "float64",
+        "solver_ground_atoms": "float64",
+        "solver_ground_rules": "float64",
         "hypothesis_space_size": "float64",
         "search_space_line_count": "float64",
         "ilasp_cdilp_iterations": "float64",
@@ -1329,6 +1340,8 @@ def aggregate_results():
         "num_positive_cycles": "int64",
         "max_body_size": "int64",
         "avg_body_size": "float64",
+        "avg_neg_body_size": "float64",
+        "avg_pos_body_size": "float64",
         "max_predicate_arity": "int64",
         "num_unique_vars": "int64",
         "num_recursive_rules": "int64",
