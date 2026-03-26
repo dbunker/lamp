@@ -998,7 +998,8 @@ def compute_stratification(rules: list) -> dict:
                 neg_edges[h].add(q)
 
     if not all_preds:
-        return {"is_stratified": True, "stratification_depth": 0, "num_negative_cycles": 0}
+        return {"is_stratified": True, "stratification_depth": 0, "num_negative_cycles": 0,
+                "num_sccs": 0, "max_scc_size": 0, "is_tight": True, "num_positive_cycles": 0}
 
     # Kosaraju's SCC on the full dependency graph (positive + negative edges combined).
     all_preds_list = list(all_preds)
@@ -1059,6 +1060,22 @@ def compute_stratification(rules: list) -> dict:
             if scc_id[p] == scc_id[q]:
                 sccs_with_neg_cycle.add(scc_id[p])
     num_negative_cycles = len(sccs_with_neg_cycle)
+
+    # SCC sizes
+    scc_sizes: dict[int, int] = {}
+    for p in all_preds:
+        scc_sizes[scc_id[p]] = scc_sizes.get(scc_id[p], 0) + 1
+    max_scc_size = max(scc_sizes.values()) if scc_sizes else 0
+
+    # Positive cycles: SCCs with an internal positive edge
+    sccs_with_pos_cycle: set = set()
+    for p, qs in pos_edges.items():
+        for q in qs:
+            if scc_id[p] == scc_id[q]:
+                sccs_with_pos_cycle.add(scc_id[p])
+    num_positive_cycles = len(sccs_with_pos_cycle)
+    is_tight = num_positive_cycles == 0
+
     is_stratified = num_negative_cycles == 0
 
     if not is_stratified:
@@ -1066,6 +1083,10 @@ def compute_stratification(rules: list) -> dict:
             "is_stratified": False,
             "stratification_depth": 0,
             "num_negative_cycles": num_negative_cycles,
+            "num_sccs": num_sccs,
+            "max_scc_size": max_scc_size,
+            "is_tight": is_tight,
+            "num_positive_cycles": num_positive_cycles,
         }
 
     # Compute strata via topological sort on SCC condensation DAG.
@@ -1118,6 +1139,10 @@ def compute_stratification(rules: list) -> dict:
         "is_stratified": True,
         "stratification_depth": stratification_depth,
         "num_negative_cycles": 0,
+        "num_sccs": num_sccs,
+        "max_scc_size": max_scc_size,
+        "is_tight": is_tight,
+        "num_positive_cycles": num_positive_cycles,
     }
 
 
@@ -1174,6 +1199,33 @@ def aggregate_results():
                     else:
                         neg_literals.add(literal.atom)
 
+            body_sizes = [len(r.body) for r in kb.rules]
+            max_body_size = max(body_sizes) if body_sizes else 0
+            avg_body_size = sum(body_sizes) / len(body_sizes) if body_sizes else 0.0
+
+            all_atoms = list(kb.facts) + [r.head for r in kb.rules] + [lit.atom for r in kb.rules for lit in r.body]
+            max_pred_arity = max((len(a.terms) for a in all_atoms), default=0)
+
+            unique_vars: set = set()
+            for r in kb.rules:
+                for term in r.head.terms:
+                    if term[0].isupper():
+                        unique_vars.add(term)
+                for lit in r.body:
+                    for term in lit.atom.terms:
+                        if term[0].isupper():
+                            unique_vars.add(term)
+            num_unique_vars = len(unique_vars)
+
+            num_recursive_rules = sum(
+                1 for r in kb.rules
+                if any(lit.atom.pred == r.head.pred for lit in r.body)
+            )
+            ratio_neg_rules = (
+                sum(1 for r in kb.rules if any(not lit.pos for lit in r.body)) / len(kb.rules)
+                if kb.rules else 0.0
+            )
+
             solution_atoms = atoms_from_model(metrics)
 
             if kind == "llm":
@@ -1213,6 +1265,16 @@ def aggregate_results():
                 "is_stratified": strat["is_stratified"],
                 "stratification_depth": strat["stratification_depth"],
                 "num_negative_cycles": strat["num_negative_cycles"],
+                "num_sccs": strat["num_sccs"],
+                "max_scc_size": strat["max_scc_size"],
+                "is_tight": strat["is_tight"],
+                "num_positive_cycles": strat["num_positive_cycles"],
+                "max_body_size": max_body_size,
+                "avg_body_size": avg_body_size,
+                "max_predicate_arity": max_pred_arity,
+                "num_unique_vars": num_unique_vars,
+                "num_recursive_rules": num_recursive_rules,
+                "ratio_neg_rules": ratio_neg_rules,
                 "solution_atoms": solution_atoms,
                 "num_solution_atoms": len(solution_atoms),
                 "num_derived_atoms": len(solution_atoms) - len(kb.facts),
@@ -1262,6 +1324,15 @@ def aggregate_results():
         "llm_thinking_chars": "float64",
         "llm_thinking_tokens": "float64",
         "llm_content_chars": "float64",
+        "num_sccs": "int64",
+        "max_scc_size": "int64",
+        "num_positive_cycles": "int64",
+        "max_body_size": "int64",
+        "avg_body_size": "float64",
+        "max_predicate_arity": "int64",
+        "num_unique_vars": "int64",
+        "num_recursive_rules": "int64",
+        "ratio_neg_rules": "float64",
     })
 
     original_df = analysis_df[analysis_df["benchmark_name"] == "original"]
