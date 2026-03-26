@@ -958,6 +958,169 @@ def _get_llm_char_counts(model: str, index: int, path: str) -> dict:
 
 
 
+def compute_stratification(rules: list) -> dict:
+    """Determine whether a set of ASP rules is stratified and compute stratification depth.
+
+    A program is stratified if predicates can be assigned integer strata such that:
+    - For every positive body literal: head stratum >= literal stratum
+    - For every negative body literal: head stratum >  literal stratum
+    (i.e. no cycles through negation).
+
+    Returns a dict with:
+      is_stratified      - bool
+      stratification_depth - number of distinct strata (0 if non-stratified)
+      num_negative_cycles  - number of SCCs that contain a negative edge
+    """
+    # Build predicate dependency graph.
+    # pos_edges[p] = set of predicates q where p has a positive dep on q
+    # neg_edges[p] = set of predicates q where p has a negative dep on q
+    pos_edges: dict[str, set] = {}
+    neg_edges: dict[str, set] = {}
+    all_preds: set = set()
+
+    for rule in rules:
+        h = rule.head.pred
+        all_preds.add(h)
+        if h not in pos_edges:
+            pos_edges[h] = set()
+        if h not in neg_edges:
+            neg_edges[h] = set()
+        for lit in rule.body:
+            q = lit.atom.pred
+            all_preds.add(q)
+            if q not in pos_edges:
+                pos_edges[q] = set()
+            if q not in neg_edges:
+                neg_edges[q] = set()
+            if lit.pos:
+                pos_edges[h].add(q)
+            else:
+                neg_edges[h].add(q)
+
+    if not all_preds:
+        return {"is_stratified": True, "stratification_depth": 0, "num_negative_cycles": 0}
+
+    # Kosaraju's SCC on the full dependency graph (positive + negative edges combined).
+    all_preds_list = list(all_preds)
+    combined: dict[str, set] = {p: pos_edges[p] | neg_edges[p] for p in all_preds}
+    rev: dict[str, set] = {p: set() for p in all_preds}
+    for p, qs in combined.items():
+        for q in qs:
+            rev[q].add(p)
+
+    # Pass 1: finish-time order
+    visited: set = set()
+    finish_order: list = []
+
+    def dfs1(node: str) -> None:
+        stack = [(node, False)]
+        while stack:
+            v, done = stack.pop()
+            if done:
+                finish_order.append(v)
+                continue
+            if v in visited:
+                continue
+            visited.add(v)
+            stack.append((v, True))
+            for w in combined.get(v, ()):
+                if w not in visited:
+                    stack.append((w, False))
+
+    for p in all_preds_list:
+        if p not in visited:
+            dfs1(p)
+
+    # Pass 2: assign SCC labels in reverse finish order
+    scc_id: dict[str, int] = {}
+    num_sccs = 0
+
+    def dfs2(node: str, label: int) -> None:
+        stack = [node]
+        while stack:
+            v = stack.pop()
+            if v in scc_id:
+                continue
+            scc_id[v] = label
+            for w in rev.get(v, ()):
+                if w not in scc_id:
+                    stack.append(w)
+
+    for p in reversed(finish_order):
+        if p not in scc_id:
+            dfs2(p, num_sccs)
+            num_sccs += 1
+
+    # Count SCCs that contain a negative edge (either self-loop or cross-SCC within same SCC).
+    num_negative_cycles = 0
+    sccs_with_neg_cycle: set = set()
+    for p, qs in neg_edges.items():
+        for q in qs:
+            if scc_id[p] == scc_id[q]:
+                sccs_with_neg_cycle.add(scc_id[p])
+    num_negative_cycles = len(sccs_with_neg_cycle)
+    is_stratified = num_negative_cycles == 0
+
+    if not is_stratified:
+        return {
+            "is_stratified": False,
+            "stratification_depth": 0,
+            "num_negative_cycles": num_negative_cycles,
+        }
+
+    # Compute strata via topological sort on SCC condensation DAG.
+    # scc_stratum[scc] = stratum level (0-indexed)
+    scc_stratum: dict[int, int] = {i: 0 for i in range(num_sccs)}
+
+    # Build condensation edges: (src_scc, dst_scc, is_negative)
+    cond_in_degree: dict[int, int] = {i: 0 for i in range(num_sccs)}
+    cond_pos: dict[int, set] = {i: set() for i in range(num_sccs)}
+    cond_neg: dict[int, set] = {i: set() for i in range(num_sccs)}
+    seen_cond_edges: set = set()
+    for p, qs in pos_edges.items():
+        for q in qs:
+            s, t = scc_id[p], scc_id[q]
+            if s != t and (s, t, False) not in seen_cond_edges:
+                seen_cond_edges.add((s, t, False))
+                cond_pos[t].add(s)
+                cond_in_degree[s] = cond_in_degree.get(s, 0)  # ensure exists
+    for p, qs in neg_edges.items():
+        for q in qs:
+            s, t = scc_id[p], scc_id[q]
+            if s != t and (s, t, True) not in seen_cond_edges:
+                seen_cond_edges.add((s, t, True))
+                cond_neg[t].add(s)
+
+    # BFS/topo over condensation to assign strata
+    # stratum of s = max over positive predecessors (same stratum) +
+    #                max over negative predecessors (stratum + 1)
+    from collections import deque
+    in_deg: dict[int, int] = {i: 0 for i in range(num_sccs)}
+    succ: dict[int, list] = {i: [] for i in range(num_sccs)}
+    for s, t, neg in seen_cond_edges:
+        in_deg[s] += 1
+        succ[t].append((s, neg))
+
+    queue = deque(i for i in range(num_sccs) if in_deg[i] == 0)
+    while queue:
+        node = queue.popleft()
+        for (child, is_neg) in succ[node]:
+            candidate = scc_stratum[node] + (1 if is_neg else 0)
+            if candidate > scc_stratum[child]:
+                scc_stratum[child] = candidate
+            in_deg[child] -= 1
+            if in_deg[child] == 0:
+                queue.append(child)
+
+    stratification_depth = max(scc_stratum.values()) + 1 if scc_stratum else 1
+
+    return {
+        "is_stratified": True,
+        "stratification_depth": stratification_depth,
+        "num_negative_cycles": 0,
+    }
+
+
 def aggregate_results():
 
     rows = []
@@ -993,6 +1156,7 @@ def aggregate_results():
             program = read_file(benchmarks_path)
             kb = parse_kb(program)
             metrics = read_json(solutions_path)
+            strat = compute_stratification(kb.rules)
 
             predicates = set()
             possible_terms = set()
@@ -1046,6 +1210,9 @@ def aggregate_results():
                 "num_rules": len(kb.rules),
                 "total_pos_literals": len(pos_literals),
                 "total_neg_literals": len(neg_literals),
+                "is_stratified": strat["is_stratified"],
+                "stratification_depth": strat["stratification_depth"],
+                "num_negative_cycles": strat["num_negative_cycles"],
                 "solution_atoms": solution_atoms,
                 "num_solution_atoms": len(solution_atoms),
                 "num_derived_atoms": len(solution_atoms) - len(kb.facts),
