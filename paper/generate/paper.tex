@@ -493,6 +493,51 @@ qwen3-coder:30b  & 37/120 (30.8\%) & 54/120 (45.0\%)  & 66 & --- \\
 \end{table}
 }
 
+\added{
+Table~\ref{tab:ilasp_timeout} details the three benchmarks on which ILASP timed out (benchmark indices 7, 27, and 67). All share the structural profile of maximum facts (9), elevated negative literal counts, and approximately three times the average number of derived atoms. \textit{gpt-5-mini} solved all three; \textit{gpt-oss:20b} solved benchmark 7 but failed on 27 and 67; \textit{qwen3-coder:30b} failed all three.
+
+\begin{table}[h]
+\centering
+\caption{Outcomes for the 3 benchmarks where ILASP timed out (420\,s limit). \checkmark = correct stable model produced; $\times$ = failed.}
+\label{tab:ilasp_timeout}
+\begin{tabular}{lcccc}
+\toprule
+Benchmark & gpt-5-mini & gpt-oss:20b & qwen3-coder:30b & ILASP \\
+\midrule
+7  & \checkmark & \checkmark & $\times$ & Timed out \\
+27 & \checkmark & $\times$   & $\times$ & Timed out \\
+67 & \checkmark & $\times$   & $\times$ & Timed out \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:outcome_stacked} shows the breakdown of benchmark outcomes per LLM across three categories: correct on the first attempt (green), correct only after Clingo-verified feedback (gold), and failed across all iterations (red). \textit{gpt-5-mini} has the fewest gold and no red bars; \textit{qwen3-coder:30b} is dominated by red, with a large gold segment indicating that feedback helps but is insufficient for most cases.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.72\textwidth]{diagrams/outcome_stacked.pdf}
+    \caption{Stacked bar chart of benchmark outcomes per model: first-attempt success (green), feedback success (gold), and failed (red). Produced from \texttt{stats.ipynb} cell~2.}
+    \label{fig:outcome_stacked}
+\end{figure}
+
+Table~\ref{tab:feedback_uplift} quantifies the value of the iterative feedback loop. For \textit{gpt-5-mini} and \textit{gpt-oss:20b} the uplift is modest (+5.8\,pp each) since most benchmarks are already solved on the first attempt. For \textit{qwen3-coder:30b} the uplift is larger (+14.2\,pp, 17 cases recovered) yet still leaves overall accuracy well below the other systems, indicating that feedback alone cannot compensate for the model's weaker first-attempt capability.
+
+\begin{table}[h]
+\centering
+\caption{First-attempt vs.\ final accuracy per LLM. Feedback recovered cases where the initial program failed Clingo verification. Uplift is in percentage points (pp). Produced from \texttt{stats.ipynb} cell~3.}
+\label{tab:feedback_uplift}
+\begin{tabular}{lrrrr}
+\toprule
+Model & First-attempt (\%) & Final (\%) & Uplift (pp) & Recovered by feedback \\
+\midrule
+gpt-5-mini       & 94.2 & 100.0 &  5.8 &  7 \\
+gpt-oss:20b      & 90.0 &  95.8 &  5.8 &  7 \\
+qwen3-coder:30b  & 30.8 &  45.0 & 14.2 & 17 \\
+\bottomrule
+\end{tabular}
+\end{table}
+}
+
 \begin{table}[h]
 \centering
 \setlength{\tabcolsep}{4pt}
