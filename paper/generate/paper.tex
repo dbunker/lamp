@@ -39,9 +39,6 @@
 \usepackage{hyperref}
 \usepackage[normalem]{ulem}
 
-% \newcommand{\added}[1]{#1}
-% \newcommand{\deleted}[1]{}
-
 \newcommand{\added}[1]{\textcolor{red}{#1}}
 \newcommand{\deleted}[1]{\textcolor{gray}{\sout{#1}}}
 
@@ -106,24 +103,49 @@ The relevant research questions of this work are:
 \noindent
 \textbf{RQ3.} Which ASP language features most strongly affect LAMP and ILASP performance?
 
-This proposal investigates the current capabilities of Large Language Models (LLMs) regarding Answer Set Programming (ASP) and offers directions for future research at the intersection of artificial intelligence and constraint solving. Such a system can then be contrasted against similar systems such as those based on LLMs fine-tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, iterative scheduling and plan generation with LLMs and ASP \cite{lin2024clmaspcouplinglargelanguage}, and LLM based systems that can learn directly from ASP answer sets \cite{borroto2025questionansweringllmslearning}.
+This proposal investigates the current capabilities of Large Language Models (LLMs) regarding Answer Set Programming (ASP) and offers directions for future research at the intersection of artificial intelligence and constraint solving. The LAMP system can be compared against similar systems such as those based on LLMs fine-tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, iterative scheduling and plan generation with LLMs and ASP \cite{lin2024clmaspcouplinglargelanguage}, and LLM based systems that can learn directly from ASP answer sets \cite{borroto2025questionansweringllmslearning}.
 
 \section{Background}
 
-This section presents the method chosen for applying ASP suited for use with LLMs. This is followed by several ways to systematically vary the complexity, enabling an analysis of the LAMP process and prompting quality, LLM performance, and the specific features that pose the greatest challenges for LLMs. Finally, the process used to generate datasets of ASP programs for these experiments is outlined.
+This section presents details of ASP and ILASP as well as the method chosen for applying ASP as suited for use with LLMs. This is followed by several ways to systematically vary the complexity, enabling an analysis of the LAMP process and prompting quality, LLM performance, and the specific features that pose the greatest challenges for LLMs. Finally, the process used to generate datasets of ASP programs for these experiments is outlined.
 
 \subsection{Answer Set Programming}
 
-ASP is a declarative programming language based on logic programming and non-monotonic reasoning where previous conclusions can be invalidated by new information. Instead of individual instructions, programs are described with logical rules and constraints and an ASP solver computes the solutions as stable models, referred to as answer sets, that satisfy them.
+ASP is a declarative programming paradigm based on stable model semantics \cite{gelfond1988stable}.
 
-\paragraph*{Syntax.}
-A \emph{normal rule} is of the form $h \mathbin{:\text{-}} b_1, \ldots, b_n,\, \texttt{not}\; c_1, \ldots, \texttt{not}\; c_m$, where $h$ is the \emph{head}, $b_1,\ldots,b_n$ are positive body literals, and $\texttt{not}\; c_1, \ldots, \texttt{not}\; c_m$ are \emph{negation-as-failure} literals (together forming the \emph{body}). A \emph{hard constraint} is a rule with an empty head: $\mathbin{:\text{-}} b_1, \ldots, b_n, \texttt{not}\; c_1, \ldots, \texttt{not}\; c_m$. Choice rules and disjunctive heads are supported by full ASP but lie outside the LAMP fragment.
+\paragraph{Syntactic Primitives.}
+A \textit{term} is either a constant (a lowercase symbol or integer such as\ $a$, $0$), a variable (an uppercase symbol, such as\ $X$), or a function symbol $f(t_1,\ldots,t_k)$ applied to terms. A \textit{predicate} $p/k$ is a symbol of arity $k \geq 0$. Applying it to $k$ terms yields an \textit{atom} $p(t_1,\ldots,t_k)$. A ground atom contains no variables. A \textit{literal} is either a positive literal $a$ (an atom) or a \textit{default-negated} literal $\mathit{not}\; a$, where $\mathit{not}$ denotes negation as failure and $\mathit{not}\; a$ holds whenever $a$ cannot be derived.
 
-\paragraph*{Semantics.}
-The \emph{Herbrand base} $HB_P$ of a program $P$ is the set of all ground atoms constructible from the predicates and constants of $P$. Given $P$ and a Herbrand interpretation $I \subseteq HB_P$, the \emph{GL reduct} $P^I$ is constructed by (i)~removing rules whose body contains $\texttt{not}\; a$ with $a \in I$, and (ii)~removing all remaining negation-as-failure literals. $I$ is an \emph{answer set} of $P$ iff $I$ is the minimal model of $P^I$. We write $AS(P)$ for the set of all answer sets of $P$; $P$ is \emph{satisfiable} iff $AS(P) \neq \emptyset$ \cite{brewka2011answer}.
+\paragraph{Rules and Programs.}
+An ASP program $\Pi$ is a finite set of \textit{rules} of the following form.
 
+\begin{equation}
+    h \leftarrow b_1, \ldots, b_m, \mathit{not}\; c_1, \ldots, \mathit{not}\; c_n
+\end{equation}
 
-There are many ways to represent product configuration using ASP, one such example being \textit{OOASP} \cite{falkner2015ooaspconnectingobjectorientedlogic}, offering an expressive object-oriented product configuration system. For use as a demonstration of LLM evaluation and ASP program generation and optimization a simpler approach is more suitable option. This simplification includes ASP \textit{facts} of form \texttt{descriptor(object)} with possible \textit{normal rules} \texttt{new\_descriptor(X) :- descriptor\_0(X), [not] descriptor\_1(X), ...} allowing new object descriptions to be resolved from initial instance object descriptions. These ASP program constraints offer flexibility without overwhelming the LLMs with semantic possibilities.
+\noindent Here $h$ is the \textit{head} (a classical atom or empty), each $b_i$ is a positive body literal, and $\mathit{not}\; c_j$ denotes default negation of atom $c_j$. When $m = n = 0$ the rule is a \textit{fact} and when $h$ is empty the rule is a \textit{constraint} (written $\leftarrow \text{body}$), eliminating any answer set in which the body is satisfied.
+
+\paragraph{Variables and Grounding.}
+Rules are written with first order variables, allowing compact expression over large domains. Prior to solving, a \textit{grounder}, such as \textsc{Gringo}, substitutes all domain consistent constants for each variable, producing an equivalent propositional ground program $\Pi_g$. A rule is \textit{safe} if every variable in the head or in a negative body literal also appears in a positive body literal, which guarantees that grounding is finite and well defined.
+
+\paragraph{Semantics.}
+Let $\mathcal{A}$ denote the Herbrand base set of all ground atoms. Given a ground program $\Pi$ and a set $S \subseteq \mathcal{A}$, the \textit{Gelfond--Lifschitz reduct} $\Pi^S$ is obtained by the steps.
+\begin{enumerate}
+    \item Remove every rule whose body contains $\mathit{not}\; c$ for some $c \in S$
+    \item Remove all negative literals from the bodies of remaining rules.
+\end{enumerate}
+$S$ is a \textit{stable model}, referred to in ASP as \textit{answer set}, of $\Pi$ if and only if $S$ is the minimal model of the reduct $\Pi^S$. A program may have zero, one, or multiple answer sets and solutions to the encoded problem correspond exactly to its answer sets.
+
+Modern ASP solvers, such as Clingo \cite{gebser2019multi}, extend the core language with aggregates ($\#\mathit{count}$, $\#\mathit{sum}$, $\#\mathit{min}$, $\#\mathit{max}$), cardinality constraints, conditional literals, optimization statements ($\#\mathit{minimize}$, $\#\mathit{maximize}$), disjunctive heads $h_1 \mid \cdots \mid h_k$, and choice rules $\{h\} \leftarrow \textit{body}$.
+
+\paragraph{Solving Complexity.}
+Deciding whether a ground ASP program has an answer set is $\Sigma_2^P$-complete \cite{eiter1995complexity}. This places ASP a degree above $\mathsf{NP}$ in the polynomial hierarchy, reflecting the two sources of computational hardness, the nondeterministic search over candidate sets $S \subseteq \mathcal{A}$, and the co-$\mathsf{NP}$ check that no proper subset of $S$ is also a stable model of $\Pi^S$.
+
+\subsection{ASP Complexity Categories}
+
+There are many ways to take advantage of and extend ASPs expressivity to solve complex problems. One such example is \textit{OOASP} \cite{falkner2015ooaspconnectingobjectorientedlogic}, offering an expressive object-oriented product configuration system. For use as a demonstration of LLM evaluation and ASP program generation and optimization via LAMP and ILASP product configuration is a good option, however a simpler approach is more suitable.
+
+The chosen simplification includes ASP \textit{facts} of form \texttt{descriptor(object)} with possible \textit{normal rules} \texttt{new\_descriptor(X) :- descriptor\_0(X), [not] descriptor\_1(X), ...} allowing new object descriptions to be resolved from initial instance object descriptions. These ASP program constraints offer flexibility without overwhelming LAMP or ILASP.
 
 Below is an example representing the model facts that objects \texttt{"car"} and \texttt{"scooter"} are both vehicles, represented with the predicate \texttt{vehicle}, and the scooter is slow moving, represented with the predicate \texttt{slow\_moving}. It also has the rule that if an object is a vehicle and not slow moving it is highway possible, represented with the predicate \texttt{highway\_possible}.
 
@@ -136,7 +158,13 @@ highway_possible(X) :- vehicle(X), not slow_moving(X).
 
 Running this results in the answer set \texttt{\{ vehicle("bike"), vehicle("car"), slow\_moving("scooter"), highway\_possible("car") \}}. Given these facts and rules, \texttt{highway\_possible(car)} can be deduced, indicating the car is highway possible and, due to default negation, the scooter is not highway possible.
 
-This restricted fragment of ASP that LAMP operates over is formalized as follows.
+The restricted ASP that LAMP and ILASP will generate is formalized first by defining \emph{Complexity Category} which will be used to define the input \emph{ASP facts}, desired output \emph{answer sets} of the generated ASP rules when run on the input facts and the expected \emph{schema} of generated ASP rules.
+
+There are many ways to evaluate complexity of an ASP program. In the paper \textit{Inductive Learning of Logical Theories with LLMs}, which investigates LLM based Prolog rule generation, this is approached as categories Chain, Rooted Directed Graph, Disjunctive Rooted Directed Graph, and Mixed \cite{gandarela2025inductivelearninglogicaltheories}.
+
+% The Chain category is simplest in that every rule, except the root, deduces facts based on only one other rule, Rooted Directed Graph extends this where every rule can be relevant for several others by its head appearing in their bodies. Disjunctive Rooted Directed Graph extends this further by predicates appearing as head of multiple rules, facilitating disjunction. Mixed is the most complicated as it is a combination of each in addition to recursion, where a rule's head predicate can also appear in its body.
+
+As this work focuses specifically on correct answer set deduction and rule optimization, fact and rule features are used to represent complexity. These features include, number of possible predicates, terms, facts, rules, positive literals within each rule, and negative literals within each rule. Note that number of answer sets in output program is expected to be exactly one.
 
 \begin{definition}[Complexity Category]
 A \emph{Complexity Category} is a tuple
@@ -155,47 +183,62 @@ where:
 \end{itemize}
 \end{definition}
 
-\added{
-\begin{remark}
-The output format schema $\Phi$ (Definition~2) plays the same structural role as the mode-bias-induced hypothesis space $S_M$ in the LAS framework (Section~\ref{sec:las}): both bound the set of candidate rules from which a solution is drawn. For a complexity category $\mathcal{C}$, the size of $\Phi$ can be computed as
+From these categories we can define an input to LAMP and ILASP.
+
+\begin{definition}[Input Instance]
+Given a Complexity Category $\mathcal{C} = \langle\, \mathcal{D},\; \mathcal{T},\; F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle$ (Definition~1), an \emph{instance} of $\mathcal{C}$ as input into LAMP is a tuple
+\[
+  \mathcal{M} \;=\; \langle\, F,\; A^{*},\; \Phi \,\rangle
+\]
+where:
+\begin{itemize}
+  \item $F$ is the \emph{instance facts}, a set of $|\mathcal{C}.F|$ ground atoms of the form $d(o)$ with descriptor $d \in \mathcal{D}$ and object $o \in \mathcal{T}$ (e.g.\ \texttt{d0(o0)});
+  \item $A^{*}$ is the \emph{output stable model}, a set of ground atoms derived by the ASP output program, which must include all instance facts and at least $A_{\min}$ additional derived atoms; and
+  \item $\Phi$ is the \emph{output format schema}, a set of $|\Phi| \leq R$ fully-specified ASP rules defining the candidate pool from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
+    \[
+      d_h(X) \;:\text{-}\; p_1(X),\; \ldots,\; p_{k}(X),\; \texttt{not}\; n_1(X),\; \ldots,\; \texttt{not}\; n_{m}(X).
+    \]
+    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, $X$ is a single universally-quantified variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals (bounds from $\mathcal{C}$, Definition~1).
+\end{itemize}
+A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$; its rules thus inherit the structural constraints of $\mathcal{C}$ via $\Phi$.
+$\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
+\[
+  AS\!\left(F \cup \Pi\right) \;=\; \bigl\{\, A^{*} \,\bigr\},
+\]
+i.e., the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
+\end{definition}
+
+\subsection{Learning from Answer Sets}
+
+Inductive Learning of Answer Set Programs (ILASP) \cite{law2014inductive} is a framework for Inductive Logic Programming (ILP) that learns ASP programs from examples. ILASP operates over three inputs. These are a \textit{hypothesis space} $\mathcal{H}$, a \textit{background knowledge} program $B$, and a set of \textit{learning examples} $E$.
+
+\paragraph{Hypothesis Space.}
+The hypothesis space $\mathcal{H}$ is defined by a \textit{mode bias}, which constrains the structure of rules that may appear in a learned hypothesis. A \textit{mode declaration} is either a \textit{head declaration} $\mathit{modeh}(a)$ or a \textit{body declaration} $\mathit{modeb}(a)$, specifying which atoms may appear in rule heads and bodies respectively. Each atom in a mode declaration may contain \textit{placeholder terms} of the form $\mathit{\#var}(t)$ (a variable of type $t$) or $\mathit{\#con}(t)$ (a constant of type $t$), which are instantiated during the search. A \textit{hypothesis} $H \in \mathcal{H}$ is a set of ASP rules consistent with the mode bias.
+
+\paragraph{Learning Examples.}
+ILASP supports three types of example, each placing a different constraint on the answer sets of $B \cup H$:
+\begin{itemize}
+    \item \textbf{Positive examples} $e^+ \in E^+$: at least one answer set of $B \cup H$ must satisfy $e^+$.
+    \item \textbf{Negative examples} $e^- \in E^-$: no answer set of $B \cup H$ may satisfy $e^-$.
+    \item \textbf{Context-dependent examples} $e^{cd} \in E^{cd}$: a pair $\langle e_c, e_p \rangle$ where $e_c$ is a \textit{context} (an additional ASP program) and $e_p$ is a \textit{partial interpretation}. At least one answer set of $B \cup H \cup e_c$ must extend $e_p$, meaning it must include all atoms in $e_p^+$ and exclude all atoms in $e_p^-$.
+\end{itemize}
+
+\noindent Context-dependent examples subsume positive and negative examples and are the primary example type in modern ILASP, enabling the expression of partial observations under specific conditions.
+
+\paragraph{Learning Task.}
+A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^-, E^{cd} \rangle$. A hypothesis $H \in \mathcal{H}$ is an \textit{inductive solution} of $T$ if it covers all examples: every positive and context-dependent example is satisfied by some answer set of $B \cup H \cup e_c$, and no answer set of $B \cup H$ satisfies any negative example. When hypotheses are assigned a \textit{cost} (typically the sum of rule lengths), the learning task seeks an \textit{optimal} solution — the inductive solution of minimum cost.
+
+\paragraph{Search Procedure.}
+ILASP reduces the learning task to a sequence of ASP solving problems. The hypothesis space is encoded as an ASP metaprogram, and the search for a covering hypothesis is directed by a \textit{conflict-driven} procedure \cite{law2020fastlas}: candidate hypotheses are proposed, checked against all examples, and conflicts — examples not yet covered — are used to prune the space and guide subsequent iterations. This conflict-driven approach, implemented in the \textsc{FastLAS} system, scales substantially better than exhaustive enumeration of $\mathcal{H}$.
+
+\paragraph{Solving Complexity.}
+Learning an optimal inductive solution under the full ILASP framework is $\Sigma_3^P$-complete \cite{law2019complexity}, one level above the $\Sigma_2^P$-hardness of ASP itself. The additional level reflects the existential search over hypotheses $H \in \mathcal{H}$ layered on top of the $\Sigma_2^P$ check that $H$ is a valid inductive solution.
+
+\paragraph{Format Schema Representation.} The output format schema $\Phi$ (Definition~2) plays the same structural role as the mode-bias-induced hypothesis space $S_M$ in the LAS framework (Section~\ref{sec:las}): both bound the set of candidate rules from which a solution is drawn. For a complexity category $\mathcal{C}$, the size of $\Phi$ can be computed as
 \[
   |\Phi| \;=\; R \;\times\; \binom{|\mathcal{D}|}{1} \;\times\; \binom{|\mathcal{D}|}{L^+} \;\times\; \binom{|\mathcal{D}|}{L^-},
 \]
 where the binomial terms count possible head, positive-body, and negative-body predicate selections respectively. This quantity is tracked for each benchmark and used in the feature importance analysis.
-\end{remark}
-
-\begin{remark}
-The expressivity categories of \citet{gandarela2025inductivelearninglogicaltheories}---Chain, Rooted Directed Graph (RDG), Disjunctive RDG (DRDG), Mixed---classify rule structures by the number of parent predicates per head, presence of recursion, and alternative derivation paths. The current LAMP benchmarks correspond to a restricted Chain/RDG fragment: arity-1 predicates, a single universally-quantified variable, at most $L^+$ positive body literals and $L^-$ negative body literals, with no recursion or disjunctive heads. Extension to DRDG and Mixed categories is left as future work.
-\end{remark}
-}
-
-\added{
-\subsection{Learning from Answer Sets}\label{sec:las}
-
-Inductive Logic Programming (ILP) \cite{muggleton1991ilp} aims at finding a hypothesis $H$ (a set of logical clauses) such that $H$ together with background knowledge $B$ entails all positive examples $E^+$ and is consistent with negative examples $E^-$:
-\begin{itemize}
-  \item \textbf{Completeness:} $\forall e \in E^+$,\quad $B \cup H \models e$
-  \item \textbf{Consistency:} $\forall e \in E^-$,\quad $B \cup H \not\models e$
-\end{itemize}
-The \emph{Learning from Answer Sets} (LAS) framework \cite{law2020ilasp} extends ILP to ASP programs. The set of learnable rules is specified by a \emph{mode bias} $M = \langle M_h, M_b \rangle$ of head and body mode declarations, inducing a \emph{hypothesis space} $S_M$: the set of all normal rules whose head literal is compatible with a declaration in $M_h$ and whose body literals are compatible with declarations in $M_b$~\cite{borroto2025questionansweringllmslearning}. Each training example is a \emph{context-dependent partial interpretation} (CDPI) $ex = \langle ex_{id}, ex_{pi}, ex_{ctx} \rangle$, where $ex_{pi}$ specifies required (inclusion) and forbidden (exclusion) ground atoms, and $ex_{ctx}$ is a context ASP program. A hypothesis $H \subseteq S_M$ is an \emph{inductive solution} to learning task $T = \langle B, S_M, E \rangle$ iff for every $\langle ex_{id}, ex_{pi}, ex_{ctx} \rangle \in E$ there exists $A \in AS(B \cup ex_{ctx} \cup H)$ that extends $ex_{pi}$~\cite{borroto2025questionansweringllmslearning}. Solutions are scored by $\mathit{score}(H) = |H|$; a solution is \emph{optimal} if no other inductive solution has a strictly lower score. ILASP~\cite{law2020ilasp} is the state-of-the-art system for solving LAS tasks and is used as the classical ILP baseline throughout this work.
-}
-
-% \vspace{-1.5em}
-\subsection{Complexity}
-
-% - A. Graded Expressivity Levels
-%     - Inductive Learning of Logical Theories with LLMs: An Expressivity-Graded Analysis (2025)
-%           - \cite{gandarela2025inductivelearninglogicaltheories}
-%           - 2408.16779
-%     - Extended Version of: On the Structural Hardness of Answer Set Programming: Can Structure Efficiently Confine the Power of Disjunctions?
-%           - \cite{hecher2024extendedversionofstructural}
-%           - 2402.03539v1
-
-There are many ways to evaluate complexity of an ASP program. In the paper \textit{Inductive Learning of Logical Theories with LLMs}, which investigates LLM based Prolog rule generation, this is approached as categories Chain, Rooted Directed Graph, Disjunctive Rooted Directed Graph, and Mixed \cite{gandarela2025inductivelearninglogicaltheories}. The Chain category is simplest in that every rule, except the root, deduces facts based on only one other rule, Rooted Directed Graph extends this where every rule can be relevant for several others by its head appearing in their bodies. Disjunctive Rooted Directed Graph extends this further by predicates appearing as head of multiple rules, facilitating disjunction. Mixed is the most complicated as it is a combination of each in addition to recursion, where a rule's head predicate can also appear in its body.
-
-As this work focuses specifically on correct answer set deduction and rule optimization, fact and rule features are used to represent complexity. These features include, number of possible predicates, terms, facts, rules, positive literals within each rule, and negative literals within each rule. These could be extended to include greater arity, or additional language features, such as choice rules and head disjunction for future work.
-
-Another approach for future work would be from the specific perspective of solving complexity, focussing on solution space features such as, vector cover size, tree depth, feedback vertex set, clique width, tree width, among others \cite{hecher2024extendedversionofstructural}.
 
 \subsection{Dataset Generation}
 
@@ -325,29 +368,6 @@ This results in the answer set \texttt{\{\ d0(o0), d0(o1), d1(o1), d2(o0) \}}, c
 % Overview of the LAMP pipeline. Instance facts, the expected stable model, and the output format constraint $\Phi$ are used to construct a prompt for the LLM. The generated candidate program $\Pi_i$ is parsed and run through the Clingo solver. If the resulting answer set matches $A^*$ the program proceeds to evaluation; otherwise, feedback $\delta_i$ is returned and the loop repeats. Once a correct program is found, rule and literal counts are assessed and feature importance is computed to identify which ASP features most affect LLM performance.
 
 The ASP rule generation procedure functions by iteratively prompting the LLM, providing the facts and expected answer set. The following is the formalization of the task that LAMP is designed to solve.
-
-\begin{definition}[LAMP Instance]
-Given a Complexity Category $\mathcal{C} = \langle\, \mathcal{D},\; \mathcal{T},\; F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle$ (Definition~1), an \emph{instance} of $\mathcal{C}$ as input into LAMP is a tuple
-\[
-  \mathcal{M} \;=\; \langle\, F,\; A^{*},\; \Phi \,\rangle
-\]
-where:
-\begin{itemize}
-  \item $F$ is the \emph{instance facts}, a set of $|\mathcal{C}.F|$ ground atoms of the form $d(o)$ with descriptor $d \in \mathcal{D}$ and object $o \in \mathcal{T}$ (e.g.\ \texttt{d0(o0)});
-  \item $A^{*}$ is the \emph{output stable model}, a set of ground atoms derived by the ASP output program, which must include all instance facts and at least $A_{\min}$ additional derived atoms; and
-  \item $\Phi$ is the \emph{output format schema}, a set of $|\Phi| \leq R$ fully-specified ASP rules defining the candidate pool from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
-    \[
-      d_h(X) \;:\text{-}\; p_1(X),\; \ldots,\; p_{k}(X),\; \texttt{not}\; n_1(X),\; \ldots,\; \texttt{not}\; n_{m}(X).
-    \]
-    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, $X$ is a single universally-quantified variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals (bounds from $\mathcal{C}$, Definition~1).
-\end{itemize}
-A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$; its rules thus inherit the structural constraints of $\mathcal{C}$ via $\Phi$.
-$\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
-\[
-  AS\!\left(F \cup \Pi\right) \;=\; \bigl\{\, A^{*} \,\bigr\},
-\]
-i.e., the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
-\end{definition}
 
 \subsection{LLM Prompting}
 
@@ -766,6 +786,8 @@ Beyond ASP specific research, logic programming has been used as a tool to evalu
 Planning provides another closely related line of research. Logical chain of thought tuning for symbolic planning by Verma et al. (2025) \cite{verma2025teachingllmsplanlogical} and LLM symbolic planning pipelines without expert input  by Huang et al. (2024) \cite{huang2024planningdarkllmsymbolicplanning} highlight the benefits of keeping solvers such as ASP planners in the loop. Established ASP planning benchmarks, including Plasp developed by Dimopoulos et al. \cite{dimopoulos2018plasp3effectiveasp}, offer realistic domains that could extend LAMP beyond product configuration. Neuro symbolic refinement frameworks such as PEIRCE further demonstrate how LLMs and formal reasoning systems can iteratively improve each other \cite{quan2025peirceunifyingmaterialformal} by Quan et al. (2025).
 
 \section{Future Work}
+
+% The feature sets could later be extended to include greater arity, or additional language features, such as choice rules and head disjunction for future work. Another approach would be from the specific perspective of solving complexity, focussing on solution space features such as, vector cover size, tree depth, feedback vertex set, clique width, tree width, among others \cite{hecher2024extendedversionofstructural}.% The feature sets could later be extended to include greater arity, or additional language features, such as choice rules and head disjunction for future work. Another approach would be from the specific perspective of solving complexity, focussing on solution space features such as, vector cover size, tree depth, feedback vertex set, clique width, tree width, among others \cite{hecher2024extendedversionofstructural}.
 
 Several directions for future work follow naturally. First, iterative prompting could be improved by more explicit chain of thought reasoning, potentially evaluating candidate rules across multiple instance fact sets per iteration, with Clingo acting as a tool within an LLM based agent loop. Prompt optimization frameworks such as DSPy could be used to automatically refine prompts and feedback strategies. Second, the synthetic datasets could be extended to richer ASP constructs, including higher arity predicates, choice rules, disjunction, and head disjunction, as well as more complex dependency structures such as those proposed by Gandarela et al. (2025) regarding logic program expressivity \cite{gandarela2025inductivelearninglogicaltheories}.
 
