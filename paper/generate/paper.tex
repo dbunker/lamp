@@ -38,6 +38,10 @@
 
 \usepackage{hyperref}
 \usepackage[normalem]{ulem}
+
+% \newcommand{\added}[1]{#1}
+% \newcommand{\deleted}[1]{}
+
 \newcommand{\added}[1]{\textcolor{red}{#1}}
 \newcommand{\deleted}[1]{\textcolor{gray}{\sout{#1}}}
 
@@ -60,7 +64,7 @@
 
 \begin{document}
 
-\title{LAMP: ASP Configuration Model Rules Deduction and Optimization with LLMs}
+\title{LAMP: ASP Model Rules Deduction and Optimization with LLMs}
 
 \author{David Bunker \\ University of Potsdam}
 
@@ -71,8 +75,7 @@
 \pagestyle{plain}
 
 \begin{abstract}
-\deleted{Answer Set Programming (ASP) offers a compelling mechanism to represent product configuration. However, being able to deduce such programs that are sufficiently performant remains challenging for many users. In this area Large Language Models (LLMs) have the potential to bridge this gap. This work proposes a LLM to ASP Modeling Protocol (LAMP) system to deduce and optimize ASP rules based on provided instance facts and the expected stable models. This system also facilitates the evaluation of LLM capabilities in this regard of which gpt-oss, gpt-5-mini and qwen3-coder where selected for testing. To properly perform the evaluation a variety of ASP program complexities and potential optimizations were assessed including: varying the number of rules, number of positive and negative body literals, and number of predicates and terms. The evaluation of varying complexities also demonstrates which program features are most challenging for LLMs in ASP program generation.}
-\added{Inductive rule generation for Answer Set Programs (ASP)---deriving a correct rule set from instance facts and an expected stable model---can be approached either by classical Inductive Logic Programming (ILP) systems or by Large Language Models (LLMs). This work introduces the LLM to ASP Modeling Protocol (LAMP), a structured system in which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the Clingo solver. LAMP is evaluated against ILASP, the state-of-the-art Learning from Answer Sets (LAS) system, across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy (117/120), with all three failures due to search-space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 100\% final accuracy (94.2\% on first attempt), \textit{gpt-oss:20b} reaches 95.8\% (90\%), and \textit{qwen3-coder:30b} reaches 45\% (30.8\%). Notably, both leading LLMs solved all three benchmarks on which ILASP timed out, demonstrating that LLM-guided search can succeed where exhaustive ILP search cannot. LLMs also tend to generate more concise programs than the original, reducing rule and literal counts. Feature analysis confirms that negative literals and the number of newly inferred atoms are the strongest predictors of LLM success or failure.}
+Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning, however developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the Clingo solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with all failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 100\% final accuracy with 94.2\% on first attempt, \textit{gpt-oss:20b} reaches 95.8\% with 90.0\% on first attempt, and \textit{qwen3-coder:30b} reaches 45.0\% with 30.8\% on first attempt. The leading LLM solved all benchmarks on which ILASP timed out, demonstrating that LLM guided search can succeed where exhaustive ILP search cannot. LLMs also generate more concise programs than the original synthetic ASP programs similar to ILASP, reducing rule and literal counts and increasing stratification. Feature analysis also confirms that the number of negative literals and number of newly inferred atoms are the strongest predictors of LLM and ILASP success or failure, time to derive and optimization potential.
 \end{abstract}
 
 \section{Introduction}
@@ -82,47 +85,43 @@
 %           - \cite{ishay2023leveraginglargelanguagemodels}
 %           - 2307.07699
 
-Product configuration problems arise across many domains, including software and hardware customization, industrial manufacturing, service composition among others. These problems are characterized by combinatorial constraints that determine which combinations of components are valid. Answer Set Programming (ASP) models such problems, offering clear semantics based on stable models with expressive capabilities for constraints, defaults, and combinatorial reasoning.
+Knowledge representation and reasoning problems arise across many domains, including software and hardware customization, industrial manufacturing, service composition among others. These problems are characterized by combinatorial constraints that determine which combinations of components are valid. Answer Set Programming (ASP) models such problems, offering clear semantics based on stable models with expressive capabilities for constraints, defaults, and combinatorial reasoning.
 
-However, writing ASP programs that are both correct and performant remains challenging, particularly for new users, as modeling choices can significantly affect solver behavior. Recent progress in Large Language Models (LLMs) offers new opportunities to reduce this modeling burden. LLMs have shown strong capabilities in code generation and program synthesis, suggesting they may assist in deriving ASP encodings from high level specifications \cite{ishay2023leveraginglargelanguagemodels}.
+However, writing ASP programs that are both correct and performant remains challenging, particularly for new users, as modeling choices can significantly affect solver behavior. Recent progress in Large Language Models (LLMs) offers new opportunities to reduce this modeling burden. LLMs have shown strong capabilities in code generation and program synthesis, suggesting they may assist in deriving ASP encodings from high level natural language specifications \cite{ishay2023leveraginglargelanguagemodels}.
 
-LLMs can also be evaluated for logic programming abilities using such systems. It has been shown LLMs can perform inductive logic programming, such as learning logic rules from background knowledge and positive and negative examples when combined with feedback from a formal inference engine, such as Prolog \cite{gandarela2025inductivelearninglogicaltheories}. Here the authors proposed a systematic evaluation framework graded by expressivity to quantify LLM strengths and limitations in logic theory induction.
+LLMs can also be evaluated for logic programming abilities. It has been shown LLMs can perform inductive logic programming, such as learning logic rules from background knowledge and positive and negative examples when combined with feedback from a formal inference engine, such as Prolog \cite{gandarela2025inductivelearninglogicaltheories}. Here the authors proposed a systematic evaluation framework graded by expressivity to quantify LLM strengths and limitations in logic theory induction.
 
-Similarly, the proposed LLM to ASP Modeling Protocol (LAMP) is designed to guide LLMs in deducing and optimizing ASP rules from given instance facts and expected stable models. LAMP provides a structured interaction protocol that enables refinement of ASP encodings, with the goal of improving both correctness and performance. Beyond proposing the system itself, LAMP is used as a framework for evaluating the capabilities of different LLMs in ASP program generation.
+The proposed LLM to ASP Modeling Protocol (LAMP) is designed to guide LLMs in deducing and optimizing ASP rules from given instance facts and expected answer sets. LAMP provides a structured interaction protocol that enables refinement of ASP encodings, with the goal of improving both correctness and performance. Beyond proposing the system itself, LAMP can be used as a framework for evaluating the capabilities of different LLMs in ASP program generation.
 
-\added{Both LAMP and the classical ILP system ILASP~\cite{law2020ilasp} address the same underlying problem class: given a set of instance facts and an expected answer set, find a program within a bounded hypothesis space that produces exactly that answer set. ILASP solves this via exhaustive search under the Learning from Answer Sets (LAS) framework; LAMP replaces exhaustive search with LLM-guided generation and Clingo-based iterative verification. This parallel structure enables a direct, controlled comparison between symbolic ILP search and LLM-based generation on the same class of tasks.}
+Both LAMP and the classical Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilasp} address the same underlying problem class. Given a set of instance facts and an expected answer set, find a program within a bounded hypothesis space that produces the correct answer sets. ILASP solves this via exhaustive search under the Learning from Answer Sets (LAS) framework while LAMP replaces exhaustive search with LLM guided generation and Clingo based iterative verification. As the expected input and output are the same a controlled comparison can be made between symbolic ILP search and LLM based generation on the same class of tasks.
 
 The relevant research questions of this work are:
 
 \noindent
-\textbf{RQ1.} Is a structured approach for LLM assisted ASP modeling possible using LAMP system?
+\textbf{RQ1.} Is a structured approach for LLM assisted ASP modeling possible using LAMP system and if so under what conditions do LLMs outperform, match, or fall short of classical ILP ILASP on ASP rule induction?
 
 \noindent
-\textbf{RQ2.} Does this system allow for comparative evaluation of LLMs on ASP generation and optimization tasks?
+\textbf{RQ2.} Does this system allow for comparative evaluation of LLMs and ILASP on ASP generation and optimization tasks?
 
 \noindent
-\textbf{RQ3.} Which ASP language features most strongly affect LLM performance?
-
-\added{\noindent
-\textbf{RQ4.} Under what conditions do LLMs outperform, match, or fall short of classical ILP (ILASP) on ASP rule induction?}
+\textbf{RQ3.} Which ASP language features most strongly affect LAMP and ILASP performance?
 
 This proposal investigates the current capabilities of Large Language Models (LLMs) regarding Answer Set Programming (ASP) and offers directions for future research at the intersection of artificial intelligence and constraint solving. Such a system can then be contrasted against similar systems such as those based on LLMs fine-tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, iterative scheduling and plan generation with LLMs and ASP \cite{lin2024clmaspcouplinglargelanguage}, and LLM based systems that can learn directly from ASP answer sets \cite{borroto2025questionansweringllmslearning}.
 
 \section{Background}
 
-This section presents a method for applying ASP to product configuration that is suited for use with LLMs. This is followed by several ways to systematically vary the complexity, enabling an analysis of the LAMP process and prompting quality, LLM performance, and the specific features that pose the greatest challenges for LLMs. Finally, the process used to generate datasets of ASP programs for these experiments is outlined.
+This section presents the method chosen for applying ASP suited for use with LLMs. This is followed by several ways to systematically vary the complexity, enabling an analysis of the LAMP process and prompting quality, LLM performance, and the specific features that pose the greatest challenges for LLMs. Finally, the process used to generate datasets of ASP programs for these experiments is outlined.
 
 \subsection{Answer Set Programming}
 
 ASP is a declarative programming language based on logic programming and non-monotonic reasoning where previous conclusions can be invalidated by new information. Instead of individual instructions, programs are described with logical rules and constraints and an ASP solver computes the solutions as stable models, referred to as answer sets, that satisfy them.
 
-\added{
 \paragraph*{Syntax.}
 A \emph{normal rule} is of the form $h \mathbin{:\text{-}} b_1, \ldots, b_n,\, \texttt{not}\; c_1, \ldots, \texttt{not}\; c_m$, where $h$ is the \emph{head}, $b_1,\ldots,b_n$ are positive body literals, and $\texttt{not}\; c_1, \ldots, \texttt{not}\; c_m$ are \emph{negation-as-failure} literals (together forming the \emph{body}). A \emph{hard constraint} is a rule with an empty head: $\mathbin{:\text{-}} b_1, \ldots, b_n, \texttt{not}\; c_1, \ldots, \texttt{not}\; c_m$. Choice rules and disjunctive heads are supported by full ASP but lie outside the LAMP fragment.
 
 \paragraph*{Semantics.}
 The \emph{Herbrand base} $HB_P$ of a program $P$ is the set of all ground atoms constructible from the predicates and constants of $P$. Given $P$ and a Herbrand interpretation $I \subseteq HB_P$, the \emph{GL reduct} $P^I$ is constructed by (i)~removing rules whose body contains $\texttt{not}\; a$ with $a \in I$, and (ii)~removing all remaining negation-as-failure literals. $I$ is an \emph{answer set} of $P$ iff $I$ is the minimal model of $P^I$. We write $AS(P)$ for the set of all answer sets of $P$; $P$ is \emph{satisfiable} iff $AS(P) \neq \emptyset$ \cite{brewka2011answer}.
-}
+
 
 There are many ways to represent product configuration using ASP, one such example being \textit{OOASP} \cite{falkner2015ooaspconnectingobjectorientedlogic}, offering an expressive object-oriented product configuration system. For use as a demonstration of LLM evaluation and ASP program generation and optimization a simpler approach is more suitable option. This simplification includes ASP \textit{facts} of form \texttt{descriptor(object)} with possible \textit{normal rules} \texttt{new\_descriptor(X) :- descriptor\_0(X), [not] descriptor\_1(X), ...} allowing new object descriptions to be resolved from initial instance object descriptions. These ASP program constraints offer flexibility without overwhelming the LLMs with semantic possibilities.
 
