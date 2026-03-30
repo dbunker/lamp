@@ -156,7 +156,7 @@ slow_moving("scooter").
 highway_possible(X) :- vehicle(X), not slow_moving(X).
 \end{lstlisting}
 
-Running this results in the answer set \texttt{\{ vehicle("bike"), vehicle("car"), slow\_moving("scooter"), highway\_possible("car") \}}. Given these facts and rules, \texttt{highway\_possible(car)} can be deduced, indicating the car is highway possible and, due to default negation, the scooter is not highway possible.
+Running this results in the answer set \texttt{\{ vehicle("scooter"), vehicle("car"), slow\_moving("scooter"), highway\_possible("car") \}}. Given these facts and rules, \texttt{highway\_possible(car)} can be deduced, indicating the car is highway possible and, due to default negation, the scooter is not highway possible.
 
 The restricted ASP that LAMP and ILASP will generate is formalized first by defining \emph{Complexity Category} which will be used to define the input \emph{ASP facts}, desired output \emph{answer sets} of the generated ASP rules when run on the input facts and the expected \emph{schema} of generated ASP rules.
 
@@ -252,6 +252,41 @@ d2(X) :- d0(X), not d1(X).
 \end{lstlisting}
 
 This results in the answer set \texttt{\{\ d0(o0), d0(o1), d1(o1), d2(o0) \}}, corresponding to the vehicle example answer set.
+
+\subsection{ASP Program Optimization Metrics}
+
+Let $\Pi$ be an ASP program, $\Pi_g$ its ground instantiation, and $\mathcal{G} = (\mathcal{A}, \mathcal{E})$ the positive dependency graph of $\Pi$, where $\mathcal{A}$ is the set of ground atoms and $(a, b) \in \mathcal{E}$ if $a$ appears positively in the body of a rule with $b$ in the head.
+
+\paragraph{Grounding Size.}
+The grounding size of $\Pi$ is measured by the number of ground rules $|\Pi_g|$ and the size of the Herbrand base $|\mathcal{A}|$. A program is considered well-grounded if $|\Pi_g|$ grows polynomially with respect to the size of the input domain $\mathcal{D}$:
+\begin{equation}
+    |\Pi_g| = \mathcal{O}(|\mathcal{D}|^k)
+\end{equation}
+where $k$ is the maximum arity of any predicate in $\Pi$. Superpolynomial grounding growth is indicative of a poorly structured program.
+
+\paragraph{Tightness.}
+A program $\Pi$ is \textit{tight} \cite{fages1994consistency} if its positive dependency graph $\mathcal{G}$ is acyclic, i.e.\ contains no directed cycle. Tightness is a binary metric:
+\begin{equation}
+    \mathit{tight}(\Pi) = \begin{cases} 1 & \text{if } \mathcal{G} \text{ is acyclic} \\ 0 & \text{otherwise} \end{cases}
+\end{equation}
+Tight programs admit answer set computation without the reduct construction, as their answer sets coincide with supported models, yielding strictly lower solving complexity.
+
+\paragraph{Stratification.}
+A program $\Pi$ is \textit{stratified} \cite{apt1988towards} if no cycle in the dependency graph $\mathcal{G}$ contains a negative edge, i.e.\ an edge $(a, b)$ arising from $\mathit{not}\; a$ in the body of a rule with $b$ in the head. Stratification is also a binary metric:
+\begin{equation}
+    \mathit{stratified}(\Pi) = \begin{cases} 1 & \text{if no cycle in } \mathcal{G} \text{ contains a negative edge} \\ 0 & \text{otherwise} \end{cases}
+\end{equation}
+Stratified programs have a unique answer set computable in polynomial time, making stratification a strong indicator of tractability.
+
+\paragraph{Rule Complexity.}
+The structural complexity of $\Pi$ is characterised by the mean and maximum rule body length and predicate arity. Let $r_i \in \Pi$ denote the $i$-th rule, $|r_i|$ its body length, and $\alpha(p)$ the arity of predicate $p$. The mean body length and maximum predicate arity are:
+\begin{equation}
+    \bar{\ell} = \frac{1}{|\Pi|} \sum_{r_i \in \Pi} |r_i|, \qquad \alpha_{\max} = \max_{p \in \Pi} \alpha(p)
+\end{equation}
+Lower values of $\bar{\ell}$ and $\alpha_{\max}$ are associated with smaller grounding size and faster solving.
+
+\paragraph{Solving Performance.}
+Let $\tau_s$ denote solver wall-clock time, $\chi$ the number of choices, $\phi$ the number of conflicts, and $\eta$ the number of nogoods learned during CDCL search. These are reported directly by \textsc{Clingo}'s statistics output and characterise solver effort. A well-optimized program minimizes $\tau_s$ and $\phi$; a high ratio $\phi / \chi$ indicates that the program's structure is forcing extensive backtracking.
 
 \section{Methodology}
 
