@@ -398,7 +398,7 @@ LLM prompting has been shown to be effective in writing ASP programs in such are
 The prompt provided to the LLMs provides the instance facts (ground atoms), such as \texttt{descriptor\_0(object\_0)}, expected ASP output format \texttt{predicate\_0(X) :- predicate\_1(X), [not] predicate\_2(X)...}, and the expected stable model, such as \texttt{d0(o0), d0(o1), ...}. The output is then parsed into ASP and run with the ASP solver Clingo. This can then be passed back if incorrect.
 
 \begin{definition}[LAMP Interaction Protocol]
-A \emph{LAMP Interaction Sequence} for task \deleted{$\mathcal{M} = \langle F, A^{*}, \mathcal{S}, \Phi \rangle$}\added{$\mathcal{M} = \langle F, A^{*}, \Phi \rangle$}
+A \emph{LAMP Interaction Sequence} for task $\mathcal{M} = \langle F, A^{*}, \Phi \rangle$
 is a finite sequence of pairs
 \[
   \bigl\langle\,
@@ -408,19 +408,21 @@ is a finite sequence of pairs
     (\Pi_n,\delta_n)
   \,\bigr\rangle
 \]
-where each $\Pi_i$ is an LLM-generated candidate program derived from prompt $p_i$,
-and $\delta_i$ is the \emph{feedback signal} produced by running $F \cup \Pi_i$ through Clingo:
+where each $\Pi_i$ is an LLM-generated candidate program and $\delta_i$ is the \emph{feedback signal} produced by running $F \cup \Pi_i$ through Clingo:
 \[
   \delta_i \;=\;
   \begin{cases}
     \texttt{correct}
       & \text{if } AS(F \cup \Pi_i) = \{A^{*}\}, \\[4pt]
+    \texttt{unsatisfiable}
+      & \text{if } AS(F \cup \Pi_i) = \emptyset, \\[4pt]
     \bigl\langle\, AS(F \cup \Pi_i),\; A^{*} \,\bigr\rangle
       & \text{otherwise.}
   \end{cases}
 \]
+The initial prompt $p_0$ is constructed from $F$ and $A^{*}$, with the rule schema described inline.
+Each subsequent interaction appends $\delta_i$ as a new message to the full conversation history, which is passed in its entirety to the LLM at each step, enabling iterative refinement with retained context.
 The sequence terminates at step $n$ when $\delta_n = \texttt{correct}$ or a maximum iteration count is reached.
-Each subsequent prompt $p_{i+1}$ is constructed from $F$, $A^{*}$, $\Phi$, and $\delta_i$, enabling iterative refinement.
 The final output $\Pi_n$ is accepted as the deduced program if it is a solution to $\mathcal{M}$ (Definition~2).
 \end{definition}
 
