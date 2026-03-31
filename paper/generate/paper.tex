@@ -136,7 +136,7 @@ Let $\mathcal{A}$ denote the Herbrand base set of all ground atoms. Given a grou
 \end{enumerate}
 $S$ is a \textit{stable model}, referred to in ASP as \textit{answer set}, of $\Pi$ if and only if $S$ is the minimal model of the reduct $\Pi^S$. A program may have zero, one, or multiple answer sets and solutions to the encoded problem correspond exactly to its answer sets.
 
-Modern ASP solvers, such as Clingo \cite{gebser2019multi}, extend the core language with aggregates ($\#\mathit{count}$, $\#\mathit{sum}$, $\#\mathit{min}$, $\#\mathit{max}$), cardinality constraints, conditional literals, optimization statements ($\#\mathit{minimize}$, $\#\mathit{maximize}$), disjunctive heads $h_1 \mid \cdots \mid h_k$, and choice rules $\{h\} \leftarrow \textit{body}$.
+Modern ASP solvers, such as Clingo \cite{gebser2019multi}, extend the core language with aggregates, choice rules, disjunctive heads, and optimization statements. LAMP uses Clingo as its verification oracle but operates over a restricted subset of normal rules only, as defined in Section~\ref{sec:benchmark}.
 
 \paragraph{Solving Complexity.}
 Deciding whether a ground ASP program has an answer set is $\Sigma_2^P$-complete \cite{eiter1995complexity}. This places ASP one level above $\mathsf{NP}$ in the polynomial hierarchy, reflecting the two sources of computational hardness, the nondeterministic search over candidate sets $S \subseteq \mathcal{A}$, and the co-$\mathsf{NP}$ check that no proper subset of $S$ is also a stable model of $\Pi^S$.
@@ -165,7 +165,13 @@ A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^-, E^{cd
 ILASP reduces the learning task to a sequence of ASP solving problems. The hypothesis space is encoded as an ASP metaprogram, and the search for a covering hypothesis is directed by a \textit{conflict-driven} procedure \cite{law2020fastlas}: candidate hypotheses are proposed, checked against all examples, and conflicts — examples not yet covered — are used to prune the space and guide subsequent iterations. This conflict-driven approach, implemented in the \textsc{FastLAS} system, scales substantially better than exhaustive enumeration of $\mathcal{H}$.
 
 \paragraph{Solving Complexity.}
-Learning an optimal inductive solution under the full ILASP framework is $\Sigma_3^P$-complete \cite{law2019complexity}, one level above the $\Sigma_2^P$-hardness of ASP itself. The additional level reflects the existential search over hypotheses $H \in \mathcal{H}$ layered on top of the $\Sigma_2^P$ check that $H$ is a valid inductive solution.
+Learning an optimal inductive solution under the full ILASP framework is $\Sigma_3^P$-complete \cite{law2019complexity}, one level above the $\Sigma_2^P$-hardness of ASP itself. The additional level reflects the existential search over hypotheses $H \in \mathcal{H}$ layered on top of the $\Sigma_2^P$ check that $H$ is a valid inductive solution. This theoretical hardness motivates an alternative approach: rather than exhaustive symbolic search, LAMP replaces the hypothesis search with LLM-guided generation, bypassing the $\Sigma_3^P$ search entirely.
+
+\subsection{Large Language Models for Code Generation}
+
+Large Language Models (LLMs) are neural language models trained on large corpora of text and source code, enabling strong performance on code generation tasks. Given a structured prompt, an LLM generates a candidate program token by token; its output is non-deterministic and may require post-processing or validation against a formal oracle.
+
+LLMs have been shown to generate logic programs from natural language specifications \cite{ishay2023leveraginglargelanguagemodels} and to perform inductive logic programming when paired with a formal inference engine \cite{gandarela2025inductivelearninglogicaltheories}. A key pattern across these systems is \emph{iterative refinement}: the LLM generates a candidate, the candidate is verified symbolically, and any mismatch is encoded as feedback for the next prompt. LAMP instantiates this pattern for ASP, using Clingo as the verification oracle and Clingo-derived feedback to guide successive generation attempts.
 
 \section{Methodology}
 
@@ -283,7 +289,7 @@ Learning an optimal inductive solution under the full ILASP framework is $\Sigma
 
 The LAMP framework operates on a formally defined benchmark structure that constrains the hypothesis space and the target answer set, as illustrated in Figure~\ref{fig:lamp_process}. This section defines that benchmark framework, describes how benchmark instances are generated, and then details the LAMP interaction protocol and evaluation criteria.
 
-\subsection{Benchmark Framework}
+\subsection{Benchmark Framework}\label{sec:benchmark}
 
 To keep the benchmarks tractable for both LLM generation and exhaustive ILP search, the ASP used here is deliberately restricted. Rather than a full configuration system such as Object-Oriented ASP (OOASP) \cite{falkner2015ooaspconnectingobjectorientedlogic}, programs consist only of unary \textit{facts} of the form \texttt{descriptor(object)} and \textit{normal rules} of the form \texttt{new\_descriptor(X) :- descriptor\_0(X), [not] descriptor\_1(X), \ldots} which derive new object descriptions from initial instance facts. This subset is expressive enough to require fairly complex rule induction while remaining within a reasonable hypothesis space.
 
