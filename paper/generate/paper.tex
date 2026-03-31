@@ -90,7 +90,7 @@ LLMs can also be evaluated for logic programming abilities. It has been shown LL
 
 The proposed LLM to ASP Modeling Protocol (LAMP) is designed to guide LLMs in deducing and optimizing ASP rules from given instance facts and expected answer sets. LAMP provides a structured interaction protocol that enables refinement of ASP encodings, with the goal of improving both correctness and performance. Beyond proposing the system itself, LAMP can be used as a framework for evaluating the capabilities of different LLMs in ASP program generation.
 
-Both LAMP and the classical Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilasp} address the same underlying problem class. Given a set of instance facts and an expected answer set, find a program within a bounded hypothesis space that produces the correct answer sets. ILASP solves this via exhaustive search under the Learning from Answer Sets (LAS) framework while LAMP replaces exhaustive search with LLM guided generation and Clingo based iterative verification. As the expected input and output are the same a controlled comparison can be made between symbolic ILP search and LLM based generation on the same class of tasks.
+Both LAMP and the classical Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilasp} address the same underlying problem class. Given a set of instance facts and an expected answer set, find a program within a bounded hypothesis space that produces the correct answer sets. ILASP solves this via exhaustive search under the Learning from Answer Sets (LAS) framework (Section~\ref{sec:ilasp}) while LAMP replaces exhaustive search with LLM guided generation and Clingo based iterative verification. As the expected input and output are the same a controlled comparison can be made between symbolic ILP search and LLM based generation on the same class of tasks.
 
 The relevant research questions of this work are:
 
@@ -103,7 +103,7 @@ The relevant research questions of this work are:
 \noindent
 \textbf{RQ3.} Which ASP language features most strongly affect LAMP and ILASP performance?
 
-This proposal investigates the current capabilities of Large Language Models (LLMs) regarding Answer Set Programming (ASP) and offers directions for future research at the intersection of artificial intelligence and constraint solving. The LAMP system can be compared against similar systems such as those based on LLMs fine-tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, iterative scheduling and plan generation with LLMs and ASP \cite{lin2024clmaspcouplinglargelanguage}, and LLM based systems that can learn directly from ASP answer sets \cite{borroto2025questionansweringllmslearning}.
+This paper investigates the current capabilities of Large Language Models (LLMs) regarding Answer Set Programming (ASP) and offers directions for future research at the intersection of artificial intelligence and constraint solving. The LAMP system can be compared against similar systems such as those based on LLMs fine-tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, iterative scheduling and plan generation with LLMs and ASP \cite{lin2024clmaspcouplinglargelanguage}, and LLM based systems that can learn directly from ASP answer sets \cite{borroto2025questionansweringllmslearning}.
 
 \section{Background}
 
@@ -169,7 +169,7 @@ Learning an optimal inductive solution under the full ILASP framework is $\Sigma
 
 \section{Methodology}
 
-\begin{figure}[h!]
+\begin{figure}[t]
   \centering
 
   % ── Colour palette ──────────────────────────────────────────────────────
@@ -281,7 +281,7 @@ Learning an optimal inductive solution under the full ILASP framework is $\Sigma
 
 % Overview of the LAMP pipeline. Instance facts, the expected stable model, and the output format constraint $\Phi$ are used to construct a prompt for the LLM. The generated candidate program $\Pi_i$ is parsed and run through the Clingo solver. If the resulting answer set matches $A^*$ the program proceeds to evaluation; otherwise, feedback $\delta_i$ is returned and the loop repeats. Once a correct program is found, rule and literal counts are assessed and feature importance is computed to identify which ASP features most affect LLM performance.
 
-The LAMP framework operates on a formally defined benchmark structure that constrains the hypothesis space and the target answer set. This section defines that benchmark framework, describes how benchmark instances are generated, and then details the LAMP interaction protocol and evaluation criteria.
+The LAMP framework operates on a formally defined benchmark structure that constrains the hypothesis space and the target answer set, as illustrated in Figure~\ref{fig:lamp_process}. This section defines that benchmark framework, describes how benchmark instances are generated, and then details the LAMP interaction protocol and evaluation criteria.
 
 \subsection{Benchmark Framework}
 
@@ -352,7 +352,7 @@ where the binomial terms count possible head, positive-body, and negative-body p
 
 \subsection{Dataset Generation}
 
-To test against the complexity principles proposed, synthetic data is generated by introducing new possible predicates and terms as needed. To keep the programs sufficiently complex, but manageable by the LLMs, only one stable model is expected and at least one atom must be deduced. The vehicle example above would be represented as shown below.
+To instantiate benchmarks across the complexity categories defined above, synthetic data is generated by introducing new possible predicates and terms as needed. To keep the programs sufficiently complex, but manageable by the LLMs, only one stable model is expected and at least one atom must be deduced. The vehicle example above would be represented as shown below.
 
 \begin{lstlisting}[language=ASP]
 d0(o0).
