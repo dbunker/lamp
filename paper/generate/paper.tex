@@ -581,29 +581,6 @@ Figure~\ref{fig:timing_boxplot} shows the per-benchmark wall-clock time distribu
     \end{tabular}
 \end{table}
 
-\begin{table}[h]
-    \centering
-    \setlength{\tabcolsep}{4pt}
-    \centering
-    \begin{tabular}{lrr}
-    \toprule
-    LLM & Correct & Number Correct Stratified \\
-    \midrule
-    Original        & ---     & 49 \\
-    ILASP           & 117/120 & 117 \\
-    gpt-5-mini      & 120/120 & 119 \\
-    gpt-oss:20b     & 115/120 & 114 \\
-    qwen3-coder:30b & 54/120  & 54 \\
-    \bottomrule
-    \end{tabular}
-    \centering
-    \hfill
-    \caption{LLM with Answer Set Correct and Incorrect Results, Rules Matching Indicates number of LLM Generated Programs that Match the Original.}
-    \label{tab:llm_stratification}
-\end{table}
-
-Table \ref{tab:llm_stratification}. 
-
 Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals} and \ref{fig:qwen3_literals} compare the total literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) of the original ASP programs against that of the LLM generated rules for each LLM tested. The dot size indicates the number of examples with left for when the LLM got the correct stable model and right for incorrect. Figure \ref{fig:gpt_oss_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{qwen3-gpt\_oss\_literals:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3\_literals} shown in figure \ref{fig:qwen3_literals} had mixed results. Overall, the results corroborate with other benchmarking studies on the abilities of LLMs to generate ASP \cite{ren2025llmssolveaspproblems}.
 
 \begin{figure}[h!]
@@ -630,6 +607,33 @@ Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals} and \ref{fig:qwen3_
     \label{fig:qwen3_literals}
 \end{figure}
 
+\subsection{Stratification Analysis}
+
+An ASP program is \emph{stratified} if no predicate depends negatively on itself (directly or transitively). Stratification is a structural property that simplifies semantics and is often correlated with lower solver complexity. Since the LAMP benchmarks include programs with varying negation depths, it is informative to assess whether LLM-generated programs preserve this property.
+
+\begin{table}[h]
+    \centering
+    \setlength{\tabcolsep}{4pt}
+    \centering
+    \begin{tabular}{lrr}
+    \toprule
+    LLM & Correct & Number Correct Stratified \\
+    \midrule
+    Original        & ---     & 49 \\
+    ILASP           & 117/120 & 117 \\
+    gpt-5-mini      & 120/120 & 119 \\
+    gpt-oss:20b     & 115/120 & 114 \\
+    qwen3-coder:30b & 54/120  & 54 \\
+    \bottomrule
+    \end{tabular}
+    \centering
+    \hfill
+    \caption{LLM with Answer Set Correct and Incorrect Results, Rules Matching Indicates number of LLM Generated Programs that Match the Original.}
+    \label{tab:llm_stratification}
+\end{table}
+
+Table~\ref{tab:llm_stratification} shows that both ILASP and the LLM-based systems produce programs that are substantially more stratified than the original benchmark programs, of which only 49 of 120 were stratified. ILASP, being a formal inductive learner, produces stratified programs in 117 of its 117 correct solutions. Among the LLMs, \textit{gpt-5-mini} achieves the highest degree of stratification: 119 of its 120 correct programs are stratified, closely followed by \textit{gpt-oss:20b} at 114 of 115. Even \textit{qwen3-coder:30b}, which solved far fewer benchmarks, produced stratified programs in all 54 of its correct solutions. The degree of stratification indicates both learned and generated programs tend toward syntactic simplicity that avoid the cyclic negation present in the synthetic benchmarks.
+
 \subsection{Feature Importance}
 
 % - A. SHAP Values
@@ -637,7 +641,7 @@ Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals} and \ref{fig:qwen3_
 %           - \cite{lundberg2019consistentindividualizedfeatureattribution}
 %           - 1802.03888
 
-Based on whether the LLM is able to get the correct stable model or not it is possible to deduced which ASP rule features are most difficult for LLMs to deduce thereby indicating higher complexity. To do this, the features of the original ASP program and the LLM deduced ASP program such as number of rules, number of new atoms inferred etc. are used to predict the likelihood of getting the correct stable model using the tree based machine learning algorithm XGBoost.
+Based on whether the LLM is able to get the correct stable model or not it is possible to deduce which ASP rule features are most difficult for LLMs to deduce thereby indicating higher complexity. To do this, the features of the original ASP program and the LLM deduced ASP program such as number of rules, number of new atoms inferred etc. are used to predict the likelihood of getting the correct stable model using the tree based machine learning algorithm XGBoost.
 
 From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, or average improvement in the loss function from splits using that feature or cover, the average number of samples affected by splits using that feature. For this analysis weight is used, the number of times a feature is used to split across all trees \cite{lundberg2019consistentindividualizedfeatureattribution}.
 
@@ -658,14 +662,6 @@ A similar method that is somewhat more robust involves deriving the features SHA
     \caption{SHAP Feature Importance}
     \label{fig:shap}
 \end{figure}
-
-\added{
-\subsection{Stratification Analysis}
-
-An ASP program is \emph{stratified} if no predicate depends negatively on itself (directly or transitively). Stratification is a structural property that simplifies semantics and is often correlated with lower solver complexity. Since the LAMP benchmarks include programs with varying negation depths, it is informative to assess whether LLM-generated programs preserve this property.
-
-Analysis of the output programs (computed via the stratification routine in the LAMP implementation, which uses Kosaraju's algorithm to detect strongly connected components in the predicate dependency graph) shows that \textit{gpt-5-mini} and \textit{gpt-oss:20b} preserve stratification in virtually all correct outputs. \textit{qwen3-coder:30b} shows more frequent violations, often introducing unnecessary cyclic negative dependencies. Stratification depth is positively correlated with solver time on correct benchmarks, confirming it as a proxy for structural complexity. Preservation of stratification thus provides an additional structural correctness metric beyond answer-set equality.
-}
 
 \section{Related Work}
 
