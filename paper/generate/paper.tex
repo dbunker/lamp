@@ -297,18 +297,19 @@ This restricted ASP subset can now be formalized. A \emph{Complexity Category} s
 Previous work on LLM based logic rule induction has characterized complexity by structural rule graph topology such as Chain, Rooted Directed Graph, Disjunctive, and Mixed categories \cite{gandarela2025inductivelearninglogicaltheories}. Since this work is concerned with correct answer set deduction and rule optimization rather than rule graph structure, complexity is instead quantified by six numerical features. These include number of possible predicates, terms, facts, rules, positive body literals per rule, and negative body literals per rule. All generated programs are also limited to having exactly one answer set.
 
 \begin{definition}[Complexity Category]
+\label{def:complexity}
 A \emph{Complexity Category} is a tuple
 \[
   \mathcal{C} \;=\; \langle\, \mathcal{D},\; \mathcal{T},\; N_F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle
 \]
 where:
 \begin{itemize}
-  \item $\mathcal{D}$ is a finite set of \emph{descriptors} (predicate symbols).
-  \item $\mathcal{T}$ is a finite set of \emph{objects} (constant symbols).
-  \item $N_F \in \mathbb{N}$ is the number of \emph{instance facts}.
-  \item $R \in \mathbb{N}$ is the maximum number of \emph{rules}.
-  \item $L^+ \in \mathbb{N}$ is the maximum number of \emph{positive literals} in each rule body.
-  \item $L^- \in \mathbb{N}$ is the maximum number of \emph{negative literals} in each rule body.
+  \item $\mathcal{D}$ is a finite set of \emph{descriptors} (predicate symbols);
+  \item $\mathcal{T}$ is a finite set of \emph{objects} (constant symbols);
+  \item $N_F \in \mathbb{N}$ is the number of \emph{instance facts};
+  \item $R \in \mathbb{N}$ is the maximum number of \emph{rules};
+  \item $L^+ \in \mathbb{N}$ is the maximum number of \emph{positive literals} in each rule body;
+  \item $L^- \in \mathbb{N}$ is the maximum number of \emph{negative literals} in each rule body; and
   \item $A_{\min} \in \mathbb{N}$ is the \emph{minimum derived atoms}, the minimum number of atoms that must appear in the answer set beyond the given input facts.
 \end{itemize}
 \end{definition}
@@ -316,6 +317,7 @@ where:
 From a Complexity Category we can define a concrete input instance. Each instance pairs a set of ground facts and a target answer set with a bounded schema that defines the hypothesis space both LAMP and ILASP search over.
 
 \begin{definition}[Input Instance]
+\label{def:input}
 Given a Complexity Category stated as $\mathcal{C} = \langle\, \mathcal{D},\; \mathcal{T},\; N_F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle$ (Definition~1), an \emph{instance} of $\mathcal{C}$ is a tuple
 \[
   \mathcal{M} \;=\; \langle\, F,\; A^{*},\; \Phi \,\rangle
@@ -420,6 +422,7 @@ LLM prompting has been shown to be effective in writing ASP programs in such are
 The prompt provided to the LLMs provides the instance facts (ground atoms), such as \texttt{descriptor\_0(object\_0)}, expected ASP output format \texttt{predicate\_0(X) :- predicate\_1(X), [not] predicate\_2(X)...}, and the expected stable model, such as \texttt{d0(o0), d0(o1), ...}. The output is then parsed into ASP and run with the ASP solver Clingo. This can then be passed back if incorrect. This interaction can be represented as shown below.
 
 \begin{definition}[LAMP Interaction Protocol]
+\label{def:protocol}
 A \emph{LAMP Interaction Sequence} for instance $\mathcal{M} = \langle F, A^{*}, \Phi \rangle$
 is a sequence of pairs
 \[
@@ -466,10 +469,10 @@ Given a solution $\Pi$ to instance $\mathcal{M}$, its \emph{literal count} is
 \[
   L(\Pi) \;=\; \sum_{r\,\in\,\Pi} \bigl(\mathit{pos}(r) + \mathit{neg}(r)\bigr),
 \]
-where $\mathit{pos}(r)$ and $\mathit{neg}(r)$ are the positive and negative body literal counts of rule $r$. A solution $\Pi$ is \emph{more concise} than $\Pi'$ if $L(\Pi) < L(\Pi')$.
+where $\mathit{pos}(r)$ and $\mathit{neg}(r)$ are the sets of distinct positive and negative body literals of rule $r$. A solution $\Pi$ is \emph{more concise} than $\Pi'$ if $L(\Pi) < L(\Pi')$.
 \end{definition}
 
-Many other notions of optimality are applicable to ASP programs, including overall body literal and rule count, stratification, tightness, total grounded rules, and ASP solving time. This work focuses on unique literal count as a direct measure of complexity, with rule count and stratification reported separately.
+Many other notions of optimality are applicable to ASP programs, including body literal and rule count, stratification, tightness, total grounded rules, and ASP solving time. This work focuses on literal count as a direct measure of complexity with stratification reported separately.
 
 \section{Experiments}
 
@@ -477,7 +480,26 @@ Experiments where conducted on the synthetic data with varying complexities as s
 
 \subsection{Experimental Setup}
 
-A total of 120 synthetic ASP programs were created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. All ASP solving and analysis was done using Clingo. ILASP was run on each benchmark with a timeout of 420\,s; benchmarks not solved within this limit were recorded as failures.
+A total of 120 synthetic ASP programs were created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. All ASP solving and analysis was done using Clingo. ILASP was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. The selected parameters used for complexity classes are listed in table \ref{tab:ilasp_results}. All combinations were used except limited where positive and negative literals must sum to less than overall literals.
+
+\begin{table}[h]
+    \centering
+    \caption{Parameters associated with Definition~\ref{def:complexity}}
+    \label{tab:parameters}
+    \begin{tabular}{ll}
+    \toprule
+    \textbf{Parameter} & \textbf{Variations} \\
+    \midrule
+    Descriptors & [10, 6] \\
+    Objects & [10, 6] \\
+    Facts & [9, 6] \\
+    Rules & [11] \\
+    Overall Literals & [3, 2] \\
+    Positive Literals & [2, 1, 0] \\
+    Negative Literals & [1] \\
+    \bottomrule
+    \end{tabular}
+\end{table}
 
 \subsection{Results and Discussion}
 
@@ -486,32 +508,29 @@ A total of 120 synthetic ASP programs were created with varying features for tes
 %           - \cite{ren2025llmssolveaspproblems}
 %           - 2507.19749
 
-Overall results are shown in table \ref{tab:ilasp_results}. Both \textit{gpt-5-mini} and \textit{gpt-oss:20b} perform very well, deducing the correct ASP rules to get the expected stable model in almost all cases. LAMP using \textit{qwen3-coder:30b} performed significantly worse, reaching only 45\% final accuracy (54/120), with 30.8\% correct on the first attempt. Although \textit{qwen3-coder:30b} is tuned for programming, it may not have been tuned for ASP, resulting in poorer performance. Of the cases the correct stable model was produced the rules never exactly matched the ones from the synthetic data.
+Overall results are shown in table \ref{tab:ilasp_results}. Both \textit{gpt-5-mini} and \textit{gpt-oss:20b} perform very well, deducing the correct ASP rules to get the expected stable model in almost all cases. LAMP using \textit{qwen3-coder:30b} performed significantly worse, reaching only 45.0\% final accuracy (54/120), with 30.8\% correct on the first attempt. Although \textit{qwen3-coder:30b} is tuned for programming, it may not have been tuned for ASP, resulting in poorer performance. Of the cases the correct stable model was produced the rules never exactly matched the ones from the synthetic data.
 
-\added{Table~\ref{tab:ilasp_results} compares all systems including the ILASP baseline. ILASP achieved 97.5\% accuracy (117/120); all three failures were timeouts---not reasoning errors---occurring on benchmarks with high negation counts and large numbers of derived atoms. Critically, \textit{gpt-5-mini} and \textit{gpt-oss:20b} both solved all three benchmarks on which ILASP timed out, demonstrating that LLM-guided search can succeed precisely where exhaustive ILP search cannot.
+ILASP achieved 97.5\% accuracy (117/120) of which all three failures were timeouts, not reasoning errors, occurring on benchmarks with high negation counts and large numbers of derived atoms. LLMs in LAMP \textit{gpt-5-mini} and \textit{gpt-oss:20b} solved 3 and 1 benchmarks respectively of which ILASP timed out demonstrating that LLM-guided search can succeed in some instances where ILP search cannot.
 
-The iterative feedback loop contributes meaningfully for all models. First-attempt accuracy was 94.2\% for \textit{gpt-5-mini} (113/120), 90.0\% for \textit{gpt-oss:20b} (108/120), and 30.8\% for \textit{qwen3-coder:30b} (37/120). Subsequent Clingo-verified feedback iterations recovered 7 additional cases for \textit{gpt-5-mini}, 7 for \textit{gpt-oss:20b}, and 17 for \textit{qwen3-coder:30b}.}
+The iterative feedback loop contributes meaningfully for all models. First attempt accuracy was 94.2\% for \textit{gpt-5-mini} (113/120), 90.0\% for \textit{gpt-oss:20b} (108/120), and 30.8\% for \textit{qwen3-coder:30b} (37/120). Subsequent Clingo verified feedback iterations recovered 7 additional cases for \textit{gpt-5-mini}, 7 for \textit{gpt-oss:20b}, and 17 for \textit{qwen3-coder:30b}.
 
-\added{
 \begin{table}[h]
-\centering
-\caption{Comparison of all systems including ILASP baseline. First attempt is the accuracy on the initial generation; final accuracy is after up to 3 feedback iterations. ILASP failures are all timeouts (420\,s limit); LLM failures are unresolved after all iterations.}
-\label{tab:ilasp_results}
-\begin{tabular}{lrrrl}
-\toprule
-System & First attempt & Final & Failures & Failure type \\
-\midrule
-ILASP            & ---           & 117/120 (97.5\%) & 3  & Timeout only \\
-gpt-5-mini       & 113/120 (94.2\%) & 120/120 (100\%) & 0  & --- \\
-gpt-oss:20b      & 108/120 (90.0\%) & 115/120 (95.8\%) & 5  & --- \\
-qwen3-coder:30b  & 37/120 (30.8\%) & 54/120 (45.0\%)  & 66 & --- \\
-\bottomrule
-\end{tabular}
+    \centering
+    \caption{Comparison of all systems including ILASP baseline. First attempt is the accuracy on the initial generation; final accuracy is after up to 3 feedback iterations. ILASP failures are all timeouts (420\,s limit); LLM failures are unresolved after all iterations.}
+    \label{tab:ilasp_results}
+    \begin{tabular}{lrrrl}
+    \toprule
+    System & First attempt & Final & Failures & Failure type \\
+    \midrule
+    ILASP            & ---              & 117/120 (97.5\%) & 3  & Timeout only \\
+    gpt-5-mini       & 113/120 (94.2\%) & 120/120 (100\%)  & 0  & --- \\
+    gpt-oss:20b      & 108/120 (90.0\%) & 115/120 (95.8\%) & 5  & --- \\
+    qwen3-coder:30b  & 37/120 (30.8\%)  & 54/120 (45.0\%)  & 66 & --- \\
+    \bottomrule
+    \end{tabular}
 \end{table}
-}
 
-\added{
-Table~\ref{tab:ilasp_timeout} details the three benchmarks on which ILASP timed out (benchmark indices 7, 27, and 67). All share the structural profile of maximum facts (9), elevated negative literal counts, and approximately three times the average number of derived atoms. \textit{gpt-5-mini} solved all three; \textit{gpt-oss:20b} solved benchmark 7 but failed on 27 and 67; \textit{qwen3-coder:30b} failed all three.
+Table~\ref{tab:ilasp_timeout} details the three benchmarks on which ILASP timed out (benchmark indices 7, 27, and 67). All share the structural profile of maximum facts (9), elevated negative literal counts, and approximately three times the average number of derived atoms. \textit{gpt-5-mini} solved all three, \textit{gpt-oss:20b} solved benchmark 7 but failed on 27 and 67 while \textit{qwen3-coder:30b} failed all three.
 
 \begin{table}[h]
 \centering
@@ -528,7 +547,7 @@ Benchmark & gpt-5-mini & gpt-oss:20b & qwen3-coder:30b & ILASP \\
 \end{tabular}
 \end{table}
 
-Figure~\ref{fig:outcome_stacked} shows the breakdown of benchmark outcomes per LLM across three categories: correct on the first attempt (green), correct only after Clingo-verified feedback (gold), and failed across all iterations (red). \textit{gpt-5-mini} has the fewest gold and no red bars; \textit{qwen3-coder:30b} is dominated by red, with a large gold segment indicating that feedback helps but is insufficient for most cases.
+Figure~\ref{fig:outcome_stacked} shows the breakdown of benchmark outcomes per LLM across the three categories of correct on the first attempt (green), correct only after Clingo verified feedback (gold), and failed across all iterations (red).
 
 \begin{figure}[h!]
     \centering
@@ -537,26 +556,7 @@ Figure~\ref{fig:outcome_stacked} shows the breakdown of benchmark outcomes per L
     \label{fig:outcome_stacked}
 \end{figure}
 
-Table~\ref{tab:feedback_uplift} quantifies the value of the iterative feedback loop. For \textit{gpt-5-mini} and \textit{gpt-oss:20b} the uplift is modest (+5.8\,pp each) since most benchmarks are already solved on the first attempt. For \textit{qwen3-coder:30b} the uplift is larger (+14.2\,pp, 17 cases recovered) yet still leaves overall accuracy well below the other systems, indicating that feedback alone cannot compensate for the model's weaker first-attempt capability.
-
-\begin{table}[h]
-\centering
-\caption{First-attempt vs.\ final accuracy per LLM. Feedback recovered cases where the initial program failed Clingo verification. Uplift is in percentage points (pp). Produced from \texttt{stats.ipynb} cell~3.}
-\label{tab:feedback_uplift}
-\begin{tabular}{lrrrr}
-\toprule
-Model & First-attempt (\%) & Final (\%) & Uplift (pp) & Recovered by feedback \\
-\midrule
-gpt-5-mini       & 94.2 & 100.0 &  5.8 &  7 \\
-gpt-oss:20b      & 90.0 &  95.8 &  5.8 &  7 \\
-qwen3-coder:30b  & 30.8 &  45.0 & 14.2 & 17 \\
-\bottomrule
-\end{tabular}
-\end{table}
-}
-
-\added{
-Figure~\ref{fig:timing_boxplot} shows the per-benchmark wall-clock time distribution for each system as a box plot. \textit{gpt-5-mini} is the fastest LLM with a median of 18\,s and a maximum of 137\,s, reflecting the low latency of the API-hosted model. \textit{gpt-oss:20b} is slowest (median 50.8\,s, max 369.6\,s) due to the larger locally-run model size. ILASP has a highly bimodal distribution: the median is just 0.66\,s (most benchmarks are trivially solved by exhaustive search) but three benchmarks hit the 420\,s ceiling, pulling the maximum to that value. \textit{qwen3-coder:30b} shows a near-uniform distribution with a median of 40.3\,s and a maximum near the 420\,s timeout (417.8\,s), consistent with the model spending maximum iteration budget on hard cases it ultimately fails to solve. Table~\ref{tab:timing} gives the aggregate statistics.
+Figure~\ref{fig:timing_boxplot} shows the per-benchmark wall-clock time distribution for each system as a box plot. \textit{gpt-5-mini} is the fastest LLM with a median of 18.0 and a maximum of 137.0, reflecting the low latency of the API-hosted model. \textit{gpt-oss:20b} is slowest with median 50.8 and max 369.6 seconds due to the larger locally-run model size. ILASP has a highly bimodal distribution. The median is only 0.66 seconds as most benchmarks are trivially solved by exhaustive search, but three benchmarks hit the 420.0 second ceiling, pulling the maximum to that value. \textit{qwen3-coder:30b} shows a near uniform distribution with a median of 40.3 and a maximum near the 420.0 timeout at 417.8 seconds, consistent with the model spending maximum iteration budget on hard cases it ultimately fails to solve. Table~\ref{tab:timing} gives the aggregate statistics.
 
 \begin{figure}[h!]
     \centering
@@ -566,108 +566,43 @@ Figure~\ref{fig:timing_boxplot} shows the per-benchmark wall-clock time distribu
 \end{figure}
 
 \begin{table}[h]
-\centering
-\caption{Wall-clock time per system (seconds). LLM times accumulate all feedback iterations; ILASP timeouts are recorded as 420\,s. Produced from \texttt{stats.ipynb} cell~5.}
-\label{tab:timing}
-\begin{tabular}{lrrrr}
-\toprule
-Model & Total (s) & Mean (s) & Median (s) & Max (s) \\
-\midrule
-gpt-5-mini       & 2837.00 & 23.64 & 18.00 & 137.00 \\
-gpt-oss:20b      & 8579.97 & 71.50 & 50.78 & 369.64 \\
-qwen3-coder:30b  & 5319.65 & 44.33 & 40.32 & 417.77 \\
-ILASP            & 1917.36 & 15.98 &  0.66 & 420.00 \\
-\bottomrule
-\end{tabular}
+    \centering
+    \caption{Wall-clock time per system (seconds). LLM times accumulate all feedback iterations; ILASP timeouts are recorded as 420\,s. Produced from \texttt{stats.ipynb} cell~5.}
+    \label{tab:timing}
+    \begin{tabular}{lrrrr}
+    \toprule
+    Model & Total (s) & Mean (s) & Median (s) & Max (s) \\
+    \midrule
+    gpt-5-mini       & 2837.00 & 23.64 & 18.00 & 137.00 \\
+    gpt-oss:20b      & 8579.97 & 71.50 & 50.78 & 369.64 \\
+    qwen3-coder:30b  & 5319.65 & 44.33 & 40.32 & 417.77 \\
+    ILASP            & 1917.36 & 15.98 &  0.66 & 420.00 \\
+    \bottomrule
+    \end{tabular}
 \end{table}
-}
 
 \begin{table}[h]
-\centering
-\setlength{\tabcolsep}{4pt}
-
-\begin{minipage}{0.3\textwidth}
+    \centering
+    \setlength{\tabcolsep}{4pt}
     \centering
     \begin{tabular}{lrr}
     \toprule
-    LLM & Correct & Rules Matching \\
+    LLM & Correct & Number Correct Stratified \\
     \midrule
-    gpt-5-mini & \deleted{119}\added{120} & 11 \\
-    gpt-oss:20b & \deleted{116}\added{115} & 11 \\
-    qwen3-coder:30b & \deleted{53}\added{54} & 1 \\
+    Original        & ---     & 49 \\
+    ILASP           & 117/120 & 117 \\
+    gpt-5-mini      & 120/120 & 119 \\
+    gpt-oss:20b     & 115/120 & 114 \\
+    qwen3-coder:30b & 54/120  & 54 \\
     \bottomrule
     \end{tabular}
     \centering
-\end{minipage}
-\hfill
-\begin{minipage}{0.3\textwidth}
-    \centering
-    \begin{tabular}{lr}
-    \toprule
-    LLM & Incorrect \\
-    \midrule
-    gpt-5-mini & \deleted{1}\added{0} \\
-    gpt-oss:20b & \deleted{4}\added{5} \\
-    qwen3-coder:30b & \deleted{67}\added{66} \\
-    \bottomrule
-    \end{tabular}
-    \centering
-\end{minipage}
-
-\caption{LLM with Answer Set Correct and Incorrect Results, Rules Matching Indicates number of LLM Generated Programs that Match the Original.}
-\label{tab:llm_results}
+    \hfill
+    \caption{LLM with Answer Set Correct and Incorrect Results, Rules Matching Indicates number of LLM Generated Programs that Match the Original.}
+    \label{tab:llm_stratification}
 \end{table}
 
-Table \ref{tab:llm_rules} shows the number of rules deduced by the LLM subtracted from the number of rules of the original synthetically generated data. The left table shows when the stable model is correct and the left is for incorrect. The rule count matches much of the time for both \texttt{gpt-5-mini} and \texttt{gpt-oss:20b}, but often optimizes to fewer rules reducing by as many as 2 rules 24 times for both. The LLM \texttt{qwen3-coder:30b} performs worse, creating more rules than the original in 10 cases.
-
-\begin{table}[h]
-\centering
-\setlength{\tabcolsep}{4pt}
-
-\begin{minipage}{0.3\textwidth}
-    \centering
-    \begin{tabular}{lrr}
-    \toprule
-    LLM & Rules Diff & Correct \\
-    \midrule
-    gpt-5-mini & 0 & 59 \\
-    gpt-5-mini & 1 & 36 \\
-    gpt-5-mini & 2 & 24 \\
-    gpt-oss:20b & 0 & 58 \\
-    gpt-oss:20b & 1 & 34 \\
-    gpt-oss:20b & 2 & 24 \\
-    qwen3-coder:30b & -2 & 3 \\
-    qwen3-coder:30b & -1 & 7 \\
-    qwen3-coder:30b & 0 & 17 \\
-    qwen3-coder:30b & 1 & 15 \\
-    qwen3-coder:30b & 2 & 10 \\
-    \bottomrule
-    \end{tabular}
-    \centering
-\end{minipage}
-\hspace{0.3\textwidth}
-\begin{minipage}{0.3\textwidth}
-    \centering
-    \begin{tabular}{lrr}
-    \toprule
-    LLM & Rules Diff & Incorrect \\
-    \midrule
-    gpt-5-mini & 0 & 1 \\
-    gpt-oss:20b & 0 & 2 \\
-    gpt-oss:20b & 1 & 2 \\
-    qwen3-coder:30b & -2 & 9 \\
-    qwen3-coder:30b & -1 & 11 \\
-    qwen3-coder:30b & 0 & 13 \\
-    qwen3-coder:30b & 1 & 13 \\
-    qwen3-coder:30b & 2 & 10 \\
-    \bottomrule
-    \end{tabular}
-    \centering
-\end{minipage}
-
-\caption{Number of Correct and Incorrect Answer Set Results by LLM and Number of Rules Fewer than Original (Larger is Better).}
-\label{tab:llm_rules}
-\end{table}
+Table \ref{tab:llm_stratification}. 
 
 Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals} and \ref{fig:qwen3_literals} compare the total literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) of the original ASP programs against that of the LLM generated rules for each LLM tested. The dot size indicates the number of examples with left for when the LLM got the correct stable model and right for incorrect. Figure \ref{fig:gpt_oss_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{qwen3-gpt\_oss\_literals:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3\_literals} shown in figure \ref{fig:qwen3_literals} had mixed results. Overall, the results corroborate with other benchmarking studies on the abilities of LLMs to generate ASP \cite{ren2025llmssolveaspproblems}.
 
@@ -702,7 +637,7 @@ Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals} and \ref{fig:qwen3_
 %           - \cite{lundberg2019consistentindividualizedfeatureattribution}
 %           - 1802.03888
 
-Based on whether the LLM is able to get the correct stable model or not it is possible to deduced which ASP rule features are most difficult for LLMs to deduce thereby indicating higher complexity. To do this, the features of the original ASP program and the LLM deduced ASP program such as number of rules, number of new atoms inferred etc. are used to predict the likelihood of a getting the correct stable model using the tree based machine learning algorithm XGBoost.
+Based on whether the LLM is able to get the correct stable model or not it is possible to deduced which ASP rule features are most difficult for LLMs to deduce thereby indicating higher complexity. To do this, the features of the original ASP program and the LLM deduced ASP program such as number of rules, number of new atoms inferred etc. are used to predict the likelihood of getting the correct stable model using the tree based machine learning algorithm XGBoost.
 
 From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, or average improvement in the loss function from splits using that feature or cover, the average number of samples affected by splits using that feature. For this analysis weight is used, the number of times a feature is used to split across all trees \cite{lundberg2019consistentindividualizedfeatureattribution}.
 
