@@ -188,13 +188,13 @@ where:
 \begin{itemize}
   \item $F$ is the \emph{instance facts}, a set of $N_F$ ground atoms of the form $d(o)$ with descriptor $d \in \mathcal{D}$ and object $o \in \mathcal{T}$ (e.g.\ \texttt{d0(o0)});
   \item $A^{*}$ is the \emph{target answer set}, the desired unique stable model that any correct solution $\Pi$ must produce; it must satisfy $F \subseteq A^{*}$ and $|A^{*} \setminus F| \geq A_{\min}$; and
-  \item $\Phi$ is the \emph{candidate rule schema}, a set of $|\Phi| \leq R$ concrete ASP rules defining the hypothesis space from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
+  \item $\Phi$ is the \emph{candidate rule schema}, the full set of concrete ASP rules defining the hypothesis space from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
     \[
       d_h(X) \;:\text{-}\; p_1(X),\; \ldots,\; p_{k}(X),\; \texttt{not}\; n_1(X),\; \ldots,\; \texttt{not}\; n_{m}(X).
     \]
     where $d_h,\, p_i,\, n_j \in \mathcal{D}$, $X$ is a single universally-quantified variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals (bounds from $\mathcal{C}$, Definition~1).
 \end{itemize}
-A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$; every rule in $\Pi$ is therefore unary, uses only predicates from $\mathcal{D}$, and respects the bounds $L^+$ and $L^-$.
+A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$ with $|\Pi| \leq R$; every rule in $\Pi$ is therefore unary, uses only predicates from $\mathcal{D}$, and respects the bounds $L^+$ and $L^-$.
 $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
 \[
   AS\!\left(F \cup \Pi\right) \;=\; \bigl\{\, A^{*} \,\bigr\},
@@ -246,41 +246,6 @@ d2(X) :- d0(X), not d1(X).
 \end{lstlisting}
 
 This results in the answer set \texttt{\{\ d0(o0), d0(o1), d1(o1), d2(o0) \}}, corresponding to the vehicle example answer set.
-
-\subsection{ASP Program Optimization Metrics}
-
-Let $\Pi$ be an ASP program, $\Pi_g$ its ground instantiation, and $\mathcal{G} = (\mathcal{A}, \mathcal{E})$ the positive dependency graph of $\Pi$, where $\mathcal{A}$ is the set of ground atoms and $(a, b) \in \mathcal{E}$ if $a$ appears positively in the body of a rule with $b$ in the head.
-
-\paragraph{Grounding Size.}
-The grounding size of $\Pi$ is measured by the number of ground rules $|\Pi_g|$ and the size of the Herbrand base $|\mathcal{A}|$. A program is considered well-grounded if $|\Pi_g|$ grows polynomially with respect to the size of the input domain $\mathcal{D}$:
-\begin{equation}
-    |\Pi_g| = \mathcal{O}(|\mathcal{D}|^k)
-\end{equation}
-where $k$ is the maximum arity of any predicate in $\Pi$. Superpolynomial grounding growth is indicative of a poorly structured program.
-
-\paragraph{Tightness.}
-A program $\Pi$ is \textit{tight} \cite{fages1994consistency} if its positive dependency graph $\mathcal{G}$ is acyclic, i.e.\ contains no directed cycle. Tightness is a binary metric:
-\begin{equation}
-    \mathit{tight}(\Pi) = \begin{cases} 1 & \text{if } \mathcal{G} \text{ is acyclic} \\ 0 & \text{otherwise} \end{cases}
-\end{equation}
-Tight programs admit answer set computation without the reduct construction, as their answer sets coincide with supported models, yielding strictly lower solving complexity.
-
-\paragraph{Stratification.}
-A program $\Pi$ is \textit{stratified} \cite{apt1988towards} if no cycle in the dependency graph $\mathcal{G}$ contains a negative edge, i.e.\ an edge $(a, b)$ arising from $\mathit{not}\; a$ in the body of a rule with $b$ in the head. Stratification is also a binary metric:
-\begin{equation}
-    \mathit{stratified}(\Pi) = \begin{cases} 1 & \text{if no cycle in } \mathcal{G} \text{ contains a negative edge} \\ 0 & \text{otherwise} \end{cases}
-\end{equation}
-Stratified programs have a unique answer set computable in polynomial time, making stratification a strong indicator of tractability.
-
-\paragraph{Rule Complexity.}
-The structural complexity of $\Pi$ is characterised by the mean and maximum rule body length and predicate arity. Let $r_i \in \Pi$ denote the $i$-th rule, $|r_i|$ its body length, and $\alpha(p)$ the arity of predicate $p$. The mean body length and maximum predicate arity are:
-\begin{equation}
-    \bar{\ell} = \frac{1}{|\Pi|} \sum_{r_i \in \Pi} |r_i|, \qquad \alpha_{\max} = \max_{p \in \Pi} \alpha(p)
-\end{equation}
-Lower values of $\bar{\ell}$ and $\alpha_{\max}$ are associated with smaller grounding size and faster solving.
-
-\paragraph{Solving Performance.}
-Let $\tau_s$ denote solver wall-clock time, $\chi$ the number of choices, $\phi$ the number of conflicts, and $\eta$ the number of nogoods learned during CDCL search. These are reported directly by \textsc{Clingo}'s statistics output and characterise solver effort. A well-optimized program minimizes $\tau_s$ and $\phi$; a high ratio $\phi / \chi$ indicates that the program's structure is forcing extensive backtracking.
 
 \section{Methodology}
 
