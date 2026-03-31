@@ -139,15 +139,13 @@ $S$ is a \textit{stable model}, referred to in ASP as \textit{answer set}, of $\
 Modern ASP solvers, such as Clingo \cite{gebser2019multi}, extend the core language with aggregates ($\#\mathit{count}$, $\#\mathit{sum}$, $\#\mathit{min}$, $\#\mathit{max}$), cardinality constraints, conditional literals, optimization statements ($\#\mathit{minimize}$, $\#\mathit{maximize}$), disjunctive heads $h_1 \mid \cdots \mid h_k$, and choice rules $\{h\} \leftarrow \textit{body}$.
 
 \paragraph{Solving Complexity.}
-Deciding whether a ground ASP program has an answer set is $\Sigma_2^P$-complete \cite{eiter1995complexity}. This places ASP a degree above $\mathsf{NP}$ in the polynomial hierarchy, reflecting the two sources of computational hardness, the nondeterministic search over candidate sets $S \subseteq \mathcal{A}$, and the co-$\mathsf{NP}$ check that no proper subset of $S$ is also a stable model of $\Pi^S$.
+Deciding whether a ground ASP program has an answer set is $\Sigma_2^P$-complete \cite{eiter1995complexity}. This places ASP one level above $\mathsf{NP}$ in the polynomial hierarchy, reflecting the two sources of computational hardness, the nondeterministic search over candidate sets $S \subseteq \mathcal{A}$, and the co-$\mathsf{NP}$ check that no proper subset of $S$ is also a stable model of $\Pi^S$.
 
 \subsection{ASP Complexity Categories}
 
-There are many ways to take advantage of and extend ASPs expressivity to solve complex problems. One such example is \textit{OOASP} \cite{falkner2015ooaspconnectingobjectorientedlogic}, offering an expressive object-oriented product configuration system. For use as a demonstration of LLM evaluation and ASP program generation and optimization via LAMP and ILASP product configuration is a good option, however a simpler approach is more suitable.
+To keep the benchmarks tractable for both LLM generation and exhaustive ILP search, the ASP used here is deliberately restricted. Rather than a full configuration system such as Object-Oriented ASP (OOASP) \cite{falkner2015ooaspconnectingobjectorientedlogic}, programs consist only of unary \textit{facts} of the form \texttt{descriptor(object)} and \textit{normal rules} of the form \texttt{new\_descriptor(X) :- descriptor\_0(X), [not] descriptor\_1(X), \ldots} which derive new object descriptions from initial instance facts. This subset is expressive enough to require fairly complex rule induction while remaining within a reasonable hypothesis space.
 
-The chosen simplification includes ASP \textit{facts} of form \texttt{descriptor(object)} with possible \textit{normal rules} \texttt{new\_descriptor(X) :- descriptor\_0(X), [not] descriptor\_1(X), ...} allowing new object descriptions to be resolved from initial instance object descriptions. These ASP program constraints offer flexibility without overwhelming LAMP or ILASP.
-
-Below is an example representing the model facts that objects \texttt{"car"} and \texttt{"scooter"} are both vehicles, represented with the predicate \texttt{vehicle}, and the scooter is slow moving, represented with the predicate \texttt{slow\_moving}. It also has the rule that if an object is a vehicle and not slow moving it is highway possible, represented with the predicate \texttt{highway\_possible}.
+The following is an example representing the model facts that objects \texttt{"car"} and \texttt{"scooter"} are both vehicles, represented with the predicate \texttt{vehicle}, and the scooter is slow moving, represented with the predicate \texttt{slow\_moving}. It also has the rule that if an object is a vehicle and not slow moving it is highway possible, represented with the predicate \texttt{highway\_possible}.
 
 \begin{lstlisting}[language=ASP]
 vehicle("scooter").
@@ -158,49 +156,45 @@ highway_possible(X) :- vehicle(X), not slow_moving(X).
 
 Running this results in the answer set \texttt{\{ vehicle("scooter"), vehicle("car"), slow\_moving("scooter"), highway\_possible("car") \}}. Given these facts and rules, \texttt{highway\_possible(car)} can be deduced, indicating the car is highway possible and, due to default negation, the scooter is not highway possible.
 
-The restricted ASP that LAMP and ILASP will generate is formalized first by defining \emph{Complexity Category} which will be used to define the input \emph{ASP facts}, desired output \emph{answer sets} of the generated ASP rules when run on the input facts and the expected \emph{schema} of generated ASP rules.
+This restricted ASP subset can now be formalized. A \emph{Complexity Category} specifies the size and shape of the problem of how many predicates and terms exist, how many facts are given, and how large the rules may be. Together with the input facts and a target answer set, it defines a concrete benchmark that both LAMP and ILASP can solve.
 
-There are many ways to evaluate complexity of an ASP program. In the paper \textit{Inductive Learning of Logical Theories with LLMs}, which investigates LLM based Prolog rule generation, this is approached as categories Chain, Rooted Directed Graph, Disjunctive Rooted Directed Graph, and Mixed \cite{gandarela2025inductivelearninglogicaltheories}.
-
-% The Chain category is simplest in that every rule, except the root, deduces facts based on only one other rule, Rooted Directed Graph extends this where every rule can be relevant for several others by its head appearing in their bodies. Disjunctive Rooted Directed Graph extends this further by predicates appearing as head of multiple rules, facilitating disjunction. Mixed is the most complicated as it is a combination of each in addition to recursion, where a rule's head predicate can also appear in its body.
-
-As this work focuses specifically on correct answer set deduction and rule optimization, fact and rule features are used to represent complexity. These features include, number of possible predicates, terms, facts, rules, positive literals within each rule, and negative literals within each rule. Note that number of answer sets in output program is expected to be exactly one.
+Previous work on LLM based logic rule induction has characterized complexity by structural rule graph topology such as Chain, Rooted Directed Graph, Disjunctive, and Mixed categories \cite{gandarela2025inductivelearninglogicaltheories}. Since this work is concerned with correct answer set deduction and rule optimization rather than rule graph structure, complexity is instead quantified by six numerical features. These include number of possible predicates, terms, facts, rules, positive body literals per rule, and negative body literals per rule. All generated programs are also limited to having exactly one answer set.
 
 \begin{definition}[Complexity Category]
 A \emph{Complexity Category} is a tuple
 \[
-  \mathcal{C} \;=\; \langle\, \mathcal{D},\; \mathcal{T},\; F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle
+  \mathcal{C} \;=\; \langle\, \mathcal{D},\; \mathcal{T},\; N_F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle
 \]
 where:
 \begin{itemize}
-  \item $\mathcal{D}$ is the set of \emph{descriptors} (possible predicates);
-  \item $\mathcal{T}$ is the set of \emph{objects} (possible terms);
-  \item $F \in \mathbb{N}$ is the number of \emph{instance facts};
+  \item $\mathcal{D}$ is a finite set of \emph{descriptors} (predicate symbols);
+  \item $\mathcal{T}$ is a finite set of \emph{objects} (constant symbols);
+  \item $N_F \in \mathbb{N}$ is the number of \emph{instance facts};
   \item $R \in \mathbb{N}$ is the maximum number of \emph{rules};
   \item $L^+ \in \mathbb{N}$ is the maximum number of \emph{positive literals} in each rule body;
   \item $L^- \in \mathbb{N}$ is the maximum number of \emph{negative literals} in each rule body; and
-  \item $A_{\min} \in \mathbb{N}$ is the \emph{minimum derived atoms}, the minimum number of atoms that must be derived from running ASP beyond the instance facts.
+  \item $A_{\min} \in \mathbb{N}$ is the \emph{minimum derived atoms}, the minimum number of atoms that must appear in the answer set beyond the given input facts.
 \end{itemize}
 \end{definition}
 
-From these categories we can define an input to LAMP and ILASP.
+From a Complexity Category we can define a concrete input instance. Each instance pairs a set of ground facts and a target answer set with a bounded schema that defines the hypothesis space both LAMP and ILASP search over.
 
 \begin{definition}[Input Instance]
-Given a Complexity Category $\mathcal{C} = \langle\, \mathcal{D},\; \mathcal{T},\; F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle$ (Definition~1), an \emph{instance} of $\mathcal{C}$ as input into LAMP is a tuple
+Given a Complexity Category $\mathcal{C} = \langle\, \mathcal{D},\; \mathcal{T},\; N_F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle$ (Definition~1), an \emph{instance} of $\mathcal{C}$ is a tuple
 \[
   \mathcal{M} \;=\; \langle\, F,\; A^{*},\; \Phi \,\rangle
 \]
 where:
 \begin{itemize}
-  \item $F$ is the \emph{instance facts}, a set of $|\mathcal{C}.F|$ ground atoms of the form $d(o)$ with descriptor $d \in \mathcal{D}$ and object $o \in \mathcal{T}$ (e.g.\ \texttt{d0(o0)});
-  \item $A^{*}$ is the \emph{output stable model}, a set of ground atoms derived by the ASP output program, which must include all instance facts and at least $A_{\min}$ additional derived atoms; and
-  \item $\Phi$ is the \emph{output format schema}, a set of $|\Phi| \leq R$ fully-specified ASP rules defining the candidate pool from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
+  \item $F$ is the \emph{instance facts}, a set of $N_F$ ground atoms of the form $d(o)$ with descriptor $d \in \mathcal{D}$ and object $o \in \mathcal{T}$ (e.g.\ \texttt{d0(o0)});
+  \item $A^{*}$ is the \emph{target answer set}, the desired unique stable model that any correct solution $\Pi$ must produce; it must satisfy $F \subseteq A^{*}$ and $|A^{*} \setminus F| \geq A_{\min}$; and
+  \item $\Phi$ is the \emph{candidate rule schema}, a set of $|\Phi| \leq R$ concrete ASP rules defining the hypothesis space from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
     \[
       d_h(X) \;:\text{-}\; p_1(X),\; \ldots,\; p_{k}(X),\; \texttt{not}\; n_1(X),\; \ldots,\; \texttt{not}\; n_{m}(X).
     \]
     where $d_h,\, p_i,\, n_j \in \mathcal{D}$, $X$ is a single universally-quantified variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals (bounds from $\mathcal{C}$, Definition~1).
 \end{itemize}
-A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$; its rules thus inherit the structural constraints of $\mathcal{C}$ via $\Phi$.
+A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$; every rule in $\Pi$ is therefore unary, uses only predicates from $\mathcal{D}$, and respects the bounds $L^+$ and $L^-$.
 $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
 \[
   AS\!\left(F \cup \Pi\right) \;=\; \bigl\{\, A^{*} \,\bigr\},
@@ -234,7 +228,7 @@ ILASP reduces the learning task to a sequence of ASP solving problems. The hypot
 \paragraph{Solving Complexity.}
 Learning an optimal inductive solution under the full ILASP framework is $\Sigma_3^P$-complete \cite{law2019complexity}, one level above the $\Sigma_2^P$-hardness of ASP itself. The additional level reflects the existential search over hypotheses $H \in \mathcal{H}$ layered on top of the $\Sigma_2^P$ check that $H$ is a valid inductive solution.
 
-\paragraph{Format Schema Representation.} The output format schema $\Phi$ (Definition~2) plays the same structural role as the mode-bias-induced hypothesis space $S_M$ in the LAS framework (Section~\ref{sec:las}): both bound the set of candidate rules from which a solution is drawn. For a complexity category $\mathcal{C}$, the size of $\Phi$ can be computed as
+\paragraph{Candidate Rule Schema.} The candidate rule schema $\Phi$ (Definition~2) plays the same structural role as the mode-bias-induced hypothesis space $S_M$ in the LAS framework (Section~\ref{sec:las}): both bound the set of candidate rules from which a solution is drawn. For a complexity category $\mathcal{C}$, the size of $\Phi$ can be computed as
 \[
   |\Phi| \;=\; R \;\times\; \binom{|\mathcal{D}|}{1} \;\times\; \binom{|\mathcal{D}|}{L^+} \;\times\; \binom{|\mathcal{D}|}{L^-},
 \]
