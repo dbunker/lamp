@@ -804,7 +804,15 @@ def run_llms(max_iter: int = 3, rerun=True):
                 if run_index == 0:
                     user_content = explicit_prompt(facts_str, stable_model_str)
                 else:
-                    actual_model_str = " ".join(str(a) for a in llm_values)
+                    if not llm_stats.get("satisfiable"):
+                        actual_model_str = "UNSATISFIABLE (no stable model)"
+                    elif len(llm_stats["witnesses"]) > 1:
+                        actual_model_str = "; ".join(
+                            f"Model {w['index']}: " + " ".join(w["atoms"])
+                            for w in llm_stats["witnesses"]
+                        )
+                    else:
+                        actual_model_str = " ".join(str(a) for a in llm_values)
                     user_content = feedback_prompt(facts_str, stable_model_str, actual_model_str)
 
                 messages.append({"role": "user", "content": user_content})
