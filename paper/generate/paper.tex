@@ -456,9 +456,9 @@ As future work the prompt may be able to be optimized by adding examples or usin
 %           - \cite{kaur2025empiricalstudyconformalprediction}
 %           - 2503.05439
 
-LAMP and ILASP systems are evaluated by correctness of answer set, time to solve and optimality of ASP programs. The ASP programs generated are evaluated after being run via Clingo. The number of rules, complexity and how close it is to the expected stable model can then be assessed. This is similar to the process LLM-ARC employs as an actor-critic method, where the LLM Actor generates ASP, while the automated reasoning critic evaluates the code \cite{kalyanpur2024llmarcenhancingllmsautomated}. Other systems use ASP as a scaffolding for robust reasoning \cite{kaur2025empiricalstudyconformalprediction}.
+LAMP and ILASP systems are evaluated by correctness of answer set, time to solve and optimality of ASP programs. The ASP programs generated are evaluated after being run via Clingo. The correctness, number of rules, complexity and how close it is to the expected stable model can then be assessed. This is similar to the process LLM-ARC employs as an actor-critic method, where the LLM Actor generates ASP, while the automated reasoning critic evaluates the code \cite{kalyanpur2024llmarcenhancingllmsautomated}. Other systems use ASP as a scaffolding for robust reasoning \cite{kaur2025empiricalstudyconformalprediction}.
 
-Beyond correctness, LAMP also assesses whether the LLM has produced a more concise encoding than the original synthetic program, formalised as follows.
+Beyond correctness, the systems are evaluated on whether the LLM has produced a more concise encoding than the original synthetic program, formalized as follows.
 
 \begin{definition}[Program Conciseness]
 \label{def:conciseness}
@@ -469,7 +469,7 @@ Given a solution $\Pi$ to instance $\mathcal{M}$, its \emph{literal count} is
 where $\mathit{pos}(r)$ and $\mathit{neg}(r)$ are the positive and negative body literal counts of rule $r$. A solution $\Pi$ is \emph{more concise} than $\Pi'$ if $L(\Pi) < L(\Pi')$.
 \end{definition}
 
-Many other notions of optimality are applicable to ASP programs, including rule count, stratification, tightness, total grounded rules, and solving time. This work focuses on literal count as a direct measure of rule body complexity, with stratification reported separately.
+Many other notions of optimality are applicable to ASP programs, including overall body literal and rule count, stratification, tightness, total grounded rules, and ASP solving time. This work focuses on unique literal count as a direct measure of complexity, with rule count and stratification reported separately.
 
 \section{Experiments}
 
