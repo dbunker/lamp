@@ -66,7 +66,7 @@
 \pagestyle{plain}
 
 \begin{abstract}
-Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning, however developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the Clingo solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with all failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 100\% final accuracy with 94.2\% on first attempt, \textit{gpt-oss:20b} reaches 95.8\% with 90.0\% on first attempt, and \textit{qwen3-coder:30b} reaches 45.0\% with 30.8\% on first attempt. The leading LLM solved all benchmarks on which ILASP timed out, demonstrating that LLM guided search can succeed where exhaustive ILP search cannot. LAMP also generates more concise programs than the original synthetic ASP programs, similarly to ILASP, reducing rule and literal counts and increasing stratification. Feature analysis also confirms that the number of negative literals and number of newly inferred atoms are the strongest predictors of LLM and ILASP success or failure, time to derive and optimization potential.
+Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning, however developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the Clingo solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 100\% accuracy \textit{gpt-oss:20b} 95.8\%, and \textit{qwen3-coder:30b} 45.0\%. Although ILASP was on average faster, the leading LLM solved all benchmarks on which ILASP timed out. Both LAMP and ILASP are also able to reduce literal counts and increase stratification at a similar level. Finally, feature analysis is used to determine predictors of LLM and ILASP success or failure.
 \end{abstract}
 
 \section{Introduction}
@@ -533,7 +533,7 @@ Figure~\ref{fig:outcome_stacked} shows the breakdown of benchmark outcomes per L
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.72\textwidth]{diagrams/outcome_stacked.pdf}
+    \includegraphics[width=0.95\textwidth]{diagrams/outcome_stacked.pdf}
     \caption{Stacked bar chart of benchmark outcomes per model: first-attempt success (green), feedback success (gold), and failed (red). Produced from \texttt{stats.ipynb} cell~2.}
     \label{fig:outcome_stacked}
 \end{figure}
@@ -561,7 +561,7 @@ Figure~\ref{fig:timing_boxplot} shows the per-benchmark wall-clock time distribu
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.72\textwidth]{diagrams/timing_boxplot.pdf}
+    \includegraphics[width=0.95\textwidth]{diagrams/timing_boxplot.pdf}
     \caption{Per-benchmark wall-clock time distribution per system (seconds). Boxes show the interquartile range; whiskers extend to the full range. ILASP failures are capped at the 420\,s timeout. Produced from \texttt{stats.ipynb} cell~5.}
     \label{fig:timing_boxplot}
 \end{figure}
@@ -720,7 +720,7 @@ A similar method that is somewhat more robust involves deriving the features SHA
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.8\textwidth]{diagrams/shap.pdf}
+    \includegraphics[width=1.0\textwidth]{diagrams/shap.pdf}
     \caption{SHAP Feature Importance}
     \label{fig:shap}
 \end{figure}
