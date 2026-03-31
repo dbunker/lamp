@@ -24,7 +24,6 @@
 \usepackage{amsthm}
 
 \newtheorem{definition}{Definition}
-\newtheorem{remark}{Remark}
 
 \usepackage{xcolor}
 
@@ -177,7 +176,8 @@ LLMs have been shown to generate logic programs from natural language specificat
   \colorlet{inputcol}{blue!12}
   \colorlet{llmcol}{green!15}
   \colorlet{clingo}{orange!18}
-\colorlet{outcol}{red!12}
+  \colorlet{evalcol}{violet!12}
+  \colorlet{outcol}{red!12}
   \colorlet{loopbg}{black!3}
 
   \tikzset{
@@ -460,28 +460,17 @@ The ASP programs generated are evaluated after being run via Clingo. The number 
 
 Beyond correctness, LAMP also assesses whether the LLM has produced a more concise encoding than the original synthetic program, formalised as follows.
 
-\begin{definition}[LAMP Optimization Task]
-Given a LAMP Modeling Task \deleted{$\mathcal{M} = \langle F, A^{*}, \mathcal{S}, \Phi \rangle$}\added{$\mathcal{M} = \langle F, A^{*}, \Phi \rangle$}
-and a solution $\Pi$, define the \emph{complexity measure}
+\begin{definition}[Program Conciseness]
+\label{def:conciseness}
+Given a solution $\Pi$ to instance $\mathcal{M}$, its \emph{literal count} is
 \[
-  \mathit{cost}(\Pi)
-    \;=\;
-  |\Pi|
-    \;+\;
-  \sum_{r\,\in\,\Pi}
-    \bigl(\,\mathit{pos}(r) + \mathit{neg}(r)\,\bigr),
+  L(\Pi) \;=\; \sum_{r\,\in\,\Pi} \bigl(\mathit{pos}(r) + \mathit{neg}(r)\bigr),
 \]
-where $|\Pi|$ is the number of rules in $\Pi$, and $\mathit{pos}(r)$, $\mathit{neg}(r)$ denote the counts of positive and negative body literals in rule $r$ respectively.
-A solution $\Pi^{*}$ is \emph{optimal} for $\mathcal{M}$ if there is no other solution $\Pi'$ to $\mathcal{M}$ such that $\mathit{cost}(\Pi') < \mathit{cost}(\Pi^{*})$.
+where $\mathit{pos}(r)$ and $\mathit{neg}(r)$ are the positive and negative body literal counts of rule $r$. A solution $\Pi$ is \emph{more concise} than $\Pi'$ if $L(\Pi) < L(\Pi')$.
 \end{definition}
 
-\added{
-\subsection{ILASP Baseline}
+Many other notions of optimality are applicable to ASP programs, including rule count, stratification, tightness, total grounded rules, and solving time. This work focuses on literal count as a direct measure of rule body complexity, with rule count reported separately.
 
-To provide a direct comparison with classical ILP, each benchmark is also presented to ILASP~\cite{law2020ilasp} as a context-dependent LAS task (Section~\ref{sec:ilasp}). The task is constructed from the complexity category $\mathcal{C}$ as follows: the background knowledge $B$ is the empty program (all instance facts are embedded in the single CDPI context); the hypothesis space $S_M$ is induced by a mode bias with one \texttt{\#modeh} declaration per descriptor in $\mathcal{D}$ and \texttt{\#modeb} declarations for each descriptor, with positive and negative literal counts bounded by $L^+$ and $L^-$ respectively; and the single CDPI requires the derived atoms $A^* \setminus F$ to appear in the inclusion set. The hypothesis space size $|\Phi|$ (see Remark~1) is logged for each benchmark and used in the feature importance analysis.
-
-ILASP is run with a timeout of 420\,s, matching the LLM timeout for a fair wall-clock comparison. The \texttt{ILASPClient} and \texttt{format\_ilasp\_task()} functions in the LAMP implementation handle LAS task construction and output parsing. ILASP searches $S_M$ exhaustively for an optimal inductive solution; if no solution is found within the timeout, the benchmark is recorded as a failure.
-}
 
 \section{Experiments}
 
@@ -489,7 +478,7 @@ Experiments where conducted on the synthetic data with varying complexities as s
 
 \subsection{Experimental Setup}
 
-A total of 120 synthetic ASP programs where created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAIs API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which where run locally using Ollama. All ASP solving and analysis was done using Clingo.
+A total of 120 synthetic ASP programs were created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. All ASP solving and analysis was done using Clingo. ILASP was run on each benchmark with a timeout of 420\,s; benchmarks not solved within this limit were recorded as failures.
 
 \subsection{Results and Discussion}
 
@@ -681,7 +670,7 @@ Table \ref{tab:llm_rules} shows the number of rules deduced by the LLM subtracte
 \label{tab:llm_rules}
 \end{table}
 
-Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals} and \ref{fig:qwen3_literals} compare the total number of literals in the original ASP against the total number of literals of the LLM generated rules for each LLM tested. The dot size indicates the number of examples with left for when the LLM got the correct stable model and right for incorrect. Figure \ref{fig:gpt_oss_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{qwen3-gpt\_oss\_literals:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3\_literals} shown in figure \ref{fig:qwen3_literals} had mixed results. Overall, the results corroborate with other benchmarking studies on the abilities of LLMs to generate ASP \cite{ren2025llmssolveaspproblems}.
+Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals} and \ref{fig:qwen3_literals} compare the total literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) of the original ASP programs against that of the LLM generated rules for each LLM tested. The dot size indicates the number of examples with left for when the LLM got the correct stable model and right for incorrect. Figure \ref{fig:gpt_oss_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{qwen3-gpt\_oss\_literals:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3\_literals} shown in figure \ref{fig:qwen3_literals} had mixed results. Overall, the results corroborate with other benchmarking studies on the abilities of LLMs to generate ASP \cite{ren2025llmssolveaspproblems}.
 
 \begin{figure}[h!]
     \centering
@@ -718,7 +707,7 @@ Based on whether the LLM is able to get the correct stable model or not it is po
 
 From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, or average improvement in the loss function from splits using that feature or cover, the average number of samples affected by splits using that feature. For this analysis weight is used, the number of times a feature is used to split across all trees \cite{lundberg2019consistentindividualizedfeatureattribution}.
 
-The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{atom\_diff\_llm}, the difference in the number of atoms inferred by the LLM-generated program compared to the original. This makes sense as a program that infers too few or too many atoms is a strong indicator it will not arrive at the expected stable model. The next most important feature is \textit{total\_neg\_literals\_llm}, the total count of negative body literals in the LLM-generated program, indicating that programs with more negative literals are harder to generate correctly.
+The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{atom\_diff\_llm}, or the number of new atoms infered by the LLMs program. This makes sense as the LLMs ASP not inferring atoms is a good indicator it won't arrive at the expected stable model. The next most important feature is \textit{total\_neg\_literals\_llm}, indicating that having a lot of negative literals adds complexity.
 
 A similar method that is somewhat more robust involves deriving the features SHAP values. Each feature's SHAP value is the average change in prediction caused by that feature taken over all possible ways that feature could have appeared in the model \cite{lundberg2019consistentindividualizedfeatureattribution}. SHAP values shown in figure \ref{fig:shap} show similar results to figure \ref{fig:importance}.
 
@@ -778,6 +767,7 @@ Analysis of the output programs (computed via the stratification routine in the 
 %     - Planning in the Dark: LLM-Symbolic Planning Pipeline without Experts (2025)
 %           - \cite{huang2024planningdarkllmsymbolicplanning}
 %           - 2409.15915
+
 
 \added{\subsection{Inductive ASP Learning and LAS}}
 
