@@ -177,8 +177,7 @@ LLMs have been shown to generate logic programs from natural language specificat
   \colorlet{inputcol}{blue!12}
   \colorlet{llmcol}{green!15}
   \colorlet{clingo}{orange!18}
-  \colorlet{evalcol}{violet!12}
-  \colorlet{outcol}{red!12}
+\colorlet{outcol}{red!12}
   \colorlet{loopbg}{black!3}
 
   \tikzset{
@@ -719,7 +718,7 @@ Based on whether the LLM is able to get the correct stable model or not it is po
 
 From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, or average improvement in the loss function from splits using that feature or cover, the average number of samples affected by splits using that feature. For this analysis weight is used, the number of times a feature is used to split across all trees \cite{lundberg2019consistentindividualizedfeatureattribution}.
 
-The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{atom\_diff\_llm}, or the number of new atoms infered by the LLMs program. This makes sense as the LLMs ASP not inferring atoms is a good indicator it won't arrive at the expected stable model. The next most important feature is \textit{total\_neg\_literals\_llm}, indicating that having a lot of negative literals adds complexity.
+The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{atom\_diff\_llm}, the difference in the number of atoms inferred by the LLM-generated program compared to the original. This makes sense as a program that infers too few or too many atoms is a strong indicator it will not arrive at the expected stable model. The next most important feature is \textit{total\_neg\_literals\_llm}, the total count of negative body literals in the LLM-generated program, indicating that programs with more negative literals are harder to generate correctly.
 
 A similar method that is somewhat more robust involves deriving the features SHAP values. Each feature's SHAP value is the average change in prediction caused by that feature taken over all possible ways that feature could have appeared in the model \cite{lundberg2019consistentindividualizedfeatureattribution}. SHAP values shown in figure \ref{fig:shap} show similar results to figure \ref{fig:importance}.
 
@@ -780,15 +779,13 @@ Analysis of the output programs (computed via the stratification routine in the 
 %           - \cite{huang2024planningdarkllmsymbolicplanning}
 %           - 2409.15915
 
-% NOTE: This section is recommended to be moved to immediately after the Introduction (before Background) in the final version.
-
 \added{\subsection{Inductive ASP Learning and LAS}}
 
 Recent work has explored the integration of LLMs and ASP with several approaches studying how LLMs can learn from or reason over ASP directly. \added{Law et al.~\cite{law2020ilasp} introduced ILASP, the state-of-the-art system for Learning from Answer Sets, which exhaustively searches a mode-bias-defined hypothesis space for optimal inductive solutions and is used as the classical ILP baseline in this work.} Borroto et al. (2025) \cite{borroto2025questionansweringllmslearning} investigates question answering and inductive learning from answer sets\added{, introducing the LLM2LAS system, which uses LLMs to construct ILASP learning tasks from natural language stories and then runs ILASP to induce the required commonsense rules. A key distinction from LAMP is that LLM2LAS uses LLMs to \emph{build the ILP task} and then defers to ILASP for search, whereas LAMP uses LLMs to \emph{directly generate} the hypothesis, bypassing exhaustive search entirely}. Declarative knowledge distillation techniques have also been proposed to transfer structured reasoning from LLMs into symbolic representations by Either et al. (2024) \cite{eiter2024declarativeknowledgedistillationlarge}. Similarly, Borroto et al. (2024) \cite{borroto2024automaticcompositionaspprograms} demonstrates automatic composition of ASP programs from natural language specifications, focusing on translating high level descriptions into executable ASP encodings.
 
 \added{\subsection{Expressivity-Graded Evaluation}}
 
-\added{Gandarela et al.~\cite{gandarela2025inductivelearninglogicaltheories} introduced the RuDaS benchmark framework and a systematic methodology for evaluating LLM-based theory induction graded by rule expressivity---Chain, RDG, DRDG, and Mixed categories (see also Section~\ref{sec:ilasp} and Remark~2). A key finding from that work is that LLMs are more limited by their capacity to track long predicate-dependency chains (Chain category) than by disjunctive complexity (DRDG); this is directly relevant to future LAMP extensions beyond the current Chain/RDG fragment.}
+\added{Gandarela et al.~\cite{gandarela2025inductivelearninglogicaltheories} introduced the RuDaS benchmark framework and a systematic methodology for evaluating LLM-based theory induction graded by rule expressivity---Chain, RDG, DRDG, and Mixed categories (see also Section~\ref{sec:ilasp}). A key finding from that work is that LLMs are more limited by their capacity to track long predicate-dependency chains (Chain category) than by disjunctive complexity (DRDG); this is directly relevant to future LAMP extensions beyond the current Chain/RDG fragment.}
 
 Beyond ASP specific research, logic programming has been used as a tool to evaluate and scaffold LLM reasoning. Hybrid GOFAI LLM systems show how expert systems can be rebuilt using LLM generated logic rules by Garrido et al. (2025) \cite{garridomerchán2026gofaimeetsgenerativeai}, while Xu et al. (2025) \cite{xu2025socratessmartypantstestinglogic} shows programming based test evaluators systematically assess LLM reasoning reliability . These works support the use of formal solvers, as in LAMP, to ground and validate LLM outputs.
 
