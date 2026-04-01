@@ -479,7 +479,7 @@ Experiments were conducted on the synthetic data with varying complexities as sp
 
 \subsection{Experimental Setup}
 
-A total of 120 synthetic ASP programs were created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. All ASP solving and analysis was done using Clingo. ILASP was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. The selected parameters used for complexity classes are listed in table \ref{tab:parameters}. All combinations were used except limited where positive and negative literals must sum to less than overall literals.
+A total of 120 synthetic ASP programs were created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. All ASP solving and analysis was done using Clingo. ILASP was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. The selected parameters used for complexity classes are listed in table \ref{tab:parameters}. All combinations were used except where positive and negative literals are constrained to sum to no more than the overall literal count.
 
 \begin{table}[h]
     \centering
@@ -580,7 +580,7 @@ Figure~\ref{fig:timing_boxplot} shows the per-benchmark wall-clock time distribu
     \end{tabular}
 \end{table}
 
-Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals}, \ref{fig:qwen3_literals}, and \ref{fig:ilasp_literals} compare the total literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) of the original ASP programs against that of ILASP and the LLM generated rules for each LLM tested using LAMP. The dot size indicates the number of examples with the left graph indicating when the LLM got the correct answer set and right for indicating when it failed on initial attempts, but recovered in yellow and overall incorrect in red. 
+Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals}, \ref{fig:qwen3_literals}, and \ref{fig:ilasp_literals} compare the total literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) of the original ASP programs against that of ILASP and the LLM generated rules for each LLM tested using LAMP. Dot size indicates the number of examples. The left plot shows correct answer sets and the right shows first-attempt failures with recovered cases in gold and failed cases in red. 
 
 Figure \ref{fig:gpt_5_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{gpt-oss:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3-coder:30b} shown in figure \ref{fig:qwen3_literals} had mixed results. Figure \ref{fig:ilasp_literals} shows ILASP is similarly able to reduce literal counts, though it fails to improve conciseness on the 3 benchmarks where it timed out.
 
@@ -588,7 +588,7 @@ Figure \ref{fig:gpt_5_literals} shows \texttt{gpt-5-mini} is generally able to g
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_gpt-5-mini.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_gpt-5-mini.pdf}
-    \caption{Gpt-5-mini input literals to output literals for correct answer set response.}
+    \caption{Gpt-5-mini literal counts (left: correct, right: recovered (gold) / failed (red)).}
     \label{fig:gpt_5_literals}
 \end{figure}
 
@@ -596,7 +596,7 @@ Figure \ref{fig:gpt_5_literals} shows \texttt{gpt-5-mini} is generally able to g
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_gpt-oss:20b.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_gpt-oss:20b.pdf}
-    \caption{Gpt-oss:20b input literals to output literals for correct answer set response.}
+    \caption{Gpt-oss:20b literal counts (left: correct, right: recovered (gold) / failed (red)).}
     \label{fig:gpt_oss_literals}
 \end{figure}
 
@@ -604,7 +604,7 @@ Figure \ref{fig:gpt_5_literals} shows \texttt{gpt-5-mini} is generally able to g
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_qwen3-coder:30b.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_qwen3-coder:30b.pdf}
-    \caption{Qwen3-coder input literals to output literals for correct answer set response.}
+    \caption{Qwen3-coder:30b literal counts (left: correct, right: recovered (gold) / failed (red)).}
     \label{fig:qwen3_literals}
 \end{figure}
 
@@ -612,7 +612,7 @@ Figure \ref{fig:gpt_5_literals} shows \texttt{gpt-5-mini} is generally able to g
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_ilasp.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_ilasp.pdf}
-    \caption{ILASP input literals to output literals for correct answer set response.}
+    \caption{ILASP literal counts (left: correct, right: recovered (gold) / failed (red)).}
     \label{fig:ilasp_literals}
 \end{figure}
 
@@ -623,21 +623,18 @@ An ASP program is \emph{stratified} if no predicate depends negatively on itself
 \begin{table}[h]
     \centering
     \setlength{\tabcolsep}{4pt}
-    \centering
-    \begin{tabular}{lrr}
+    \begin{tabular}{lr}
     \toprule
-    System & Correct & Number Correct Stratified \\
+    System & Stratified / Solved \\
     \midrule
-    Original        & ---     & 49 \\
-    gpt-5-mini      & 120/120 & 119 \\
-    gpt-oss:20b     & 115/120 & 114 \\
-    qwen3-coder:30b & 54/120  & 54 \\
-    ILASP           & 117/120 & 117 \\
+    Original        & 49 / 120 \\
+    gpt-5-mini      & 119 / 120 \\
+    gpt-oss:20b     & 114 / 115 \\
+    qwen3-coder:30b & 54 / 54 \\
+    ILASP           & 117 / 117 \\
     \bottomrule
     \end{tabular}
-    \centering
-    \hfill
-    \caption{Stratification of ASP.}
+    \caption{Stratification of solved programs per system. Original is the 120 benchmark programs.}
     \label{tab:llm_stratification}
 \end{table}
 
@@ -654,12 +651,12 @@ Based on whether the LLM is able to get the correct stable model or not it is po
 
 From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, or average improvement in the loss function from splits using that feature or cover, the average number of samples affected by splits using that feature. For this analysis weight is used, the number of times a feature is used to split across all trees \cite{chen2016xgboostscalabletreeboosting}.
 
-The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{num\_solution\_atoms\_original}, or the number of total atoms in the answer set, which makes sense as a proxy for overall complexity. The next most important feature is \textit{atom\_diff\_llm}, or the number of new atoms inferred by the LAMP. This makes sense as the LLMs ASP not inferring atoms is a good indicator it won't arrive at the expected stable model.
+The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{num\_solution\_atoms\_original}, or the number of total atoms in the answer set, which makes sense as a proxy for overall complexity. The next most important feature is \textit{atom\_diff\_llm}, or the number of new atoms inferred by the LAMP. This makes sense as the LLMs ASP not inferring atoms is a good indicator it won't arrive at the expected stable model. As the XGBoost model is trained on a small pooled sample, these importances should be treated as indicative rather than definitive.
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=1.0\textwidth]{diagrams/xgb_importance.pdf}
-    \caption{XGBoost Feature Importance}
+    \caption{XGBoost feature importance of ASP features predicting LLM success.}
     \label{fig:importance}
 \end{figure}
 
