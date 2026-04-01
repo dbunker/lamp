@@ -549,7 +549,7 @@ Figure~\ref{fig:outcome_stacked} shows the breakdown of benchmark outcomes per L
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.95\textwidth]{diagrams/outcome_stacked.pdf}
-    \caption{Stacked bar chart of benchmark outcomes per model: first-attempt success (green), feedback success (gold), and failed (red). Produced from \texttt{stats.ipynb} cell~2.}
+    \caption{Stacked bar chart of benchmark outcomes per model: first-attempt success (green), feedback success (gold), and failed (red).}
     \label{fig:outcome_stacked}
 \end{figure}
 
@@ -558,13 +558,13 @@ Figure~\ref{fig:timing_boxplot} shows the per-benchmark wall-clock time distribu
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.95\textwidth]{diagrams/timing_boxplot.pdf}
-    \caption{Per-benchmark wall-clock time distribution per system (seconds). Boxes show the interquartile range; whiskers extend to the full range. ILASP failures are capped at the 420\,s timeout. Produced from \texttt{stats.ipynb} cell~5.}
+    \caption{Per-benchmark wall-clock time distribution per system (seconds). Boxes show the interquartile range; whiskers extend to the full range. ILASP failures are capped at the 420\,s timeout.}
     \label{fig:timing_boxplot}
 \end{figure}
 
 \begin{table}[h]
     \centering
-    \caption{Wall-clock time per system (seconds). LLM times accumulate all feedback iterations; ILASP timeouts are recorded as 420\,s. Produced from \texttt{stats.ipynb} cell~5.}
+    \caption{Wall-clock time per system (seconds). LLM times accumulate all feedback iterations; ILASP timeouts are recorded as 420\,s.}
     \label{tab:timing}
     \begin{tabular}{lrrrr}
     \toprule
@@ -580,7 +580,7 @@ Figure~\ref{fig:timing_boxplot} shows the per-benchmark wall-clock time distribu
 
 Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals}, \ref{fig:qwen3_literals}, and \ref{fig:ilasp_literals} compare the total literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) of the original ASP programs against that of ILASP and the LLM generated rules for each LLM tested using LAMP. The dot size indicates the number of examples with the left graph indicating when the LLM got the correct answer set and right for indicating when it failed on initial attempts, but recovered in yellow and overall incorrect in red. 
 
-Figure \ref{fig:gpt_5_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{gpt-oss:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3-coder:30b} shown in figure \ref{fig:qwen3_literals} had mixed results. Figure \ref{fig:ilasp_literals} shows ILASP most able to increase conciseness, but similar to LLMs and not on 3 examples.
+Figure \ref{fig:gpt_5_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{gpt-oss:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3-coder:30b} shown in figure \ref{fig:qwen3_literals} had mixed results. Figure \ref{fig:ilasp_literals} shows ILASP is similarly able to reduce literal counts, though it fails to improve conciseness on the 3 benchmarks where it timed out.
 
 \begin{figure}[h!]
     \centering
