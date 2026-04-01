@@ -63,7 +63,7 @@
 \pagestyle{plain}
 
 \begin{abstract}
-Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning, however developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the Clingo solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 100\% accuracy \textit{gpt-oss:20b} 95.8\%, and \textit{qwen3-coder:30b} 45.0\%. Although ILASP was on average faster, the leading LLM solved all benchmarks on which ILASP timed out. Both LAMP and ILASP are also able to reduce literal counts and increase stratification at a similar level. Finally, feature analysis is used to determine predictors of LLM and ILASP success or failure.
+Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning, however developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the Clingo solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 100\% accuracy, \textit{gpt-oss:20b} 95.8\%, and \textit{qwen3-coder:30b} 45.0\%. Although ILASP was on average faster, the leading LLM solved all benchmarks on which ILASP timed out. Both LAMP and ILASP are also able to reduce literal counts and increase stratification at a similar level. Finally, feature analysis is used to determine predictors of LLM success or failure.
 \end{abstract}
 
 \section{Introduction}
@@ -473,7 +473,7 @@ Many other notions of optimality are applicable to ASP programs, including body 
 
 \section{Experiments}
 
-Experiments were conducted on the synthetic data with varying complexities as specified in the section \textit{ASP, Complexity and Datasets}. A variety of online and local open weight LLMs were selected for testing to get a broad view of capabilities.
+Experiments were conducted on the synthetic data with varying complexities as specified in the \textit{Dataset Generation} section. A variety of online and local open weight LLMs were selected for testing to get a broad view of capabilities.
 
 \subsection{Experimental Setup}
 
@@ -505,11 +505,11 @@ A total of 120 synthetic ASP programs were created with varying features for tes
 %           - \cite{ren2025llmssolveaspproblems}
 %           - 2507.19749
 
-Overall results are shown in table \ref{tab:ilasp_results}. Both \textit{gpt-5-mini} and \textit{gpt-oss:20b} perform very well, deducing the correct ASP rules to get the expected stable model in almost all cases. LAMP using \textit{qwen3-coder:30b} performed significantly worse, reaching only 45.0\% final accuracy (54/120), with 30.8\% correct on the first attempt. Although \textit{qwen3-coder:30b} is tuned for programming, it may not have been tuned for ASP, resulting in poorer performance. Of the cases the correct stable model was produced the rules never exactly matched the ones from the synthetic data.
+Overall results are shown in table \ref{tab:ilasp_results}. Both \textit{gpt-5-mini} and \textit{gpt-oss:20b} perform very well, deducing the correct ASP rules to get the expected stable model in almost all cases. LAMP using \textit{qwen3-coder:30b} performed significantly worse, reaching only 45.0\% final accuracy (54/120), with 30.8\% correct on the first attempt. Although \textit{qwen3-coder:30b} is tuned for programming, it may not have been tuned for ASP, resulting in poorer performance.
 
-ILASP achieved 97.5\% accuracy (117/120) of which all three failures were timeouts, not reasoning errors, occurring on benchmarks with high negation counts and large numbers of derived atoms. LLMs in LAMP \textit{gpt-5-mini} and \textit{gpt-oss:20b} solved 3 and 1 benchmarks respectively of which ILASP timed out demonstrating that LLM-guided search can succeed in some instances where ILP search cannot.
+ILASP achieved 97.5\% accuracy (117/120) of which all three failures were timeouts, not reasoning errors, occurring on benchmarks with high negation counts and large numbers of derived atoms. LLMs in LAMP, \textit{gpt-5-mini} and \textit{gpt-oss:20b}, solved 3 and 1 of the benchmarks, respectively, on which ILASP timed out, demonstrating that LLM-guided search can succeed in some instances where ILP search cannot.
 
-The iterative feedback loop contributes meaningfully for all models. First attempt accuracy was 94.2\% for \textit{gpt-5-mini} (113/120), 90.0\% for \textit{gpt-oss:20b} (108/120), and 30.8\% for \textit{qwen3-coder:30b} (37/120). Subsequent Clingo verified feedback iterations recovered 7 additional cases for \textit{gpt-5-mini}, 7 for \textit{gpt-oss:20b}, and 17 for \textit{qwen3-coder:30b}.
+The iterative feedback loop contributes meaningfully for all models. First attempt accuracy was 94.2\% for \textit{gpt-5-mini} (113/120), 90.0\% for \textit{gpt-oss:20b} (108/120), and 30.8\% for \textit{qwen3-coder:30b} (37/120). Subsequent Clingo verified feedback iterations recovered 7 additional cases for \textit{gpt-5-mini}, 7 for \textit{gpt-oss:20b}, and 17 for \textit{qwen3-coder:30b}. In all cases where the correct stable model was produced, the generated rules never exactly matched those of the original synthetic program, as multiple rule sets can produce the same answer set.
 
 \begin{table}[h]
     \centering
@@ -520,8 +520,8 @@ The iterative feedback loop contributes meaningfully for all models. First attem
     System & First attempt & Final & Failures & Failure type \\
     \midrule
     gpt-5-mini       & 113/120 (94.2\%) & 120/120 (100\%)  & 0  & --- \\
-    gpt-oss:20b      & 108/120 (90.0\%) & 115/120 (95.8\%) & 5  & --- \\
-    qwen3-coder:30b  & 37/120 (30.8\%)  & 54/120 (45.0\%)  & 66 & --- \\
+    gpt-oss:20b      & 108/120 (90.0\%) & 115/120 (95.8\%) & 5  & Max iterations \\
+    qwen3-coder:30b  & 37/120 (30.8\%)  & 54/120 (45.0\%)  & 66 & Max iterations \\
     ILASP            & ---              & 117/120 (97.5\%) & 3  & Timeout only \\
     \bottomrule
     \end{tabular}
@@ -624,7 +624,7 @@ An ASP program is \emph{stratified} if no predicate depends negatively on itself
     \centering
     \begin{tabular}{lrr}
     \toprule
-    LLM & Correct & Number Correct Stratified \\
+    System & Correct & Number Correct Stratified \\
     \midrule
     Original        & ---     & 49 \\
     gpt-5-mini      & 120/120 & 119 \\
@@ -648,9 +648,9 @@ Table~\ref{tab:llm_stratification} shows that both ILASP and the LLM-based syste
 %           - \cite{lundberg2019consistentindividualizedfeatureattribution}
 %           - 1802.03888
 
-Based on whether the LLM is able to get the correct stable model or not it is possible to deduce which ASP rule features are most difficult for LLMs to deduce thereby indicating higher complexity. To do this, the features of the original ASP program and the LLM deduced ASP program such as number of rules, number of new atoms inferred etc. are used to predict the likelihood of getting the correct stable model using the tree based machine learning algorithm XGBoost.
+Based on whether the LLM is able to get the correct stable model or not it is possible to deduce which ASP rule features are most difficult for LLMs to deduce thereby indicating higher complexity. To do this, the features of the original ASP program and the LLM deduced ASP program such as number of rules, number of new atoms inferred etc. are used to predict the likelihood of getting the correct stable model using the tree based machine learning algorithm XGBoost, trained on the pooled results across all three LLMs.
 
-From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, or average improvement in the loss function from splits using that feature or cover, the average number of samples affected by splits using that feature. For this analysis weight is used, the number of times a feature is used to split across all trees \cite{lundberg2019consistentindividualizedfeatureattribution}.
+From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, or average improvement in the loss function from splits using that feature or cover, the average number of samples affected by splits using that feature. For this analysis weight is used, the number of times a feature is used to split across all trees \cite{chen2016xgboostscalabletreeboosting}.
 
 The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{num\_solution\_atoms\_original}, or the number of total atoms in the answer set, which makes sense as a proxy for overall complexity. The next most important feature is \textit{atom\_diff\_llm}, or the number of new atoms inferred by the LAMP. This makes sense as the LLMs ASP not inferring atoms is a good indicator it won't arrive at the expected stable model.
 
