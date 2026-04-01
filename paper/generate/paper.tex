@@ -30,9 +30,6 @@
 \usepackage{hyperref}
 \usepackage[normalem]{ulem}
 
-\newcommand{\added}[1]{\textcolor{red}{#1}}
-\newcommand{\deleted}[1]{\textcolor{gray}{\sout{#1}}}
-
 \lstdefinelanguage{ASP}{
   sensitive=true,
   morestring=[b]",
@@ -522,10 +519,10 @@ The iterative feedback loop contributes meaningfully for all models. First attem
     \toprule
     System & First attempt & Final & Failures & Failure type \\
     \midrule
-    ILASP            & ---              & 117/120 (97.5\%) & 3  & Timeout only \\
     gpt-5-mini       & 113/120 (94.2\%) & 120/120 (100\%)  & 0  & --- \\
     gpt-oss:20b      & 108/120 (90.0\%) & 115/120 (95.8\%) & 5  & --- \\
     qwen3-coder:30b  & 37/120 (30.8\%)  & 54/120 (45.0\%)  & 66 & --- \\
+    ILASP            & ---              & 117/120 (97.5\%) & 3  & Timeout only \\
     \bottomrule
     \end{tabular}
 \end{table}
@@ -581,7 +578,9 @@ Figure~\ref{fig:timing_boxplot} shows the per-benchmark wall-clock time distribu
     \end{tabular}
 \end{table}
 
-Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals} and \ref{fig:qwen3_literals} compare the total literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) of the original ASP programs against that of the LLM generated rules for each LLM tested. The dot size indicates the number of examples with left for when the LLM got the correct stable model and right for incorrect. Figure \ref{fig:gpt_oss_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{qwen3-gpt\_oss\_literals:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3\_literals} shown in figure \ref{fig:qwen3_literals} had mixed results. Overall, the results corroborate with other benchmarking studies on the abilities of LLMs to generate ASP \cite{ren2025llmssolveaspproblems}.
+Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals}, \ref{fig:qwen3_literals}, and \ref{fig:ilasp_literals} compare the total literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) of the original ASP programs against that of ILASP and the LLM generated rules for each LLM tested using LAMP. The dot size indicates the number of examples with the left graph indicating when the LLM got the correct answer set and right for indicating when it failed on initial attempts, but recovered in yellow and overall incorrect in red. 
+
+Figure \ref{fig:gpt_oss_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{qwen3-gpt\_oss\_literals:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3\_literals} shown in figure \ref{fig:qwen3_literals} had mixed results. Figure \ref{fig:ilasp_literals} shows ILASP most able to increase conciseness, but similar to LLMs and not on 3 examples.
 
 \begin{figure}[h!]
     \centering
@@ -605,6 +604,14 @@ Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals} and \ref{fig:qwen3_
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_qwen3-coder:30b.pdf}
     \caption{Qwen3-coder input literals to output literals for correct answer set response.}
     \label{fig:qwen3_literals}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.495\textwidth]{diagrams/Correct_ilasp.pdf}
+    \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_ilasp.pdf}
+    \caption{Qwen3-coder input literals to output literals for correct answer set response.}
+    \label{fig:ilasp_literals}
 \end{figure}
 
 \subsection{Stratification Analysis}
@@ -645,22 +652,13 @@ Based on whether the LLM is able to get the correct stable model or not it is po
 
 From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, or average improvement in the loss function from splits using that feature or cover, the average number of samples affected by splits using that feature. For this analysis weight is used, the number of times a feature is used to split across all trees \cite{lundberg2019consistentindividualizedfeatureattribution}.
 
-The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{atom\_diff\_llm}, or the number of new atoms infered by the LLMs program. This makes sense as the LLMs ASP not inferring atoms is a good indicator it won't arrive at the expected stable model. The next most important feature is \textit{total\_neg\_literals\_llm}, indicating that having a lot of negative literals adds complexity.
-
-A similar method that is somewhat more robust involves deriving the features SHAP values. Each feature's SHAP value is the average change in prediction caused by that feature taken over all possible ways that feature could have appeared in the model \cite{lundberg2019consistentindividualizedfeatureattribution}. SHAP values shown in figure \ref{fig:shap} show similar results to figure \ref{fig:importance}.
+The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{num\_solution\_atoms\_original}, or the number of total atoms in the answer set, which makes sense as a proxy for overall complexity. The next most important feature is \textit{atom\_diff\_llm}, or the number of new atoms inferred by the LAMP. This makes sense as the LLMs ASP not inferring atoms is a good indicator it won't arrive at the expected stable model.
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=1.0\textwidth]{diagrams/xgb_importance.pdf}
     \caption{XGBoost Feature Importance}
     \label{fig:importance}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=1.0\textwidth]{diagrams/shap.pdf}
-    \caption{SHAP Feature Importance}
-    \label{fig:shap}
 \end{figure}
 
 \section{Related Work}
@@ -698,38 +696,41 @@ A similar method that is somewhat more robust involves deriving the features SHA
 %           - \cite{huang2024planningdarkllmsymbolicplanning}
 %           - 2409.15915
 
+\subsection{Inductive ASP Learning and LAS}
 
-\added{\subsection{Inductive ASP Learning and LAS}}
+Recent work has explored the integration of LLMs and ASP with several approaches studying how LLMs can learn from or reason over ASP directly. ILASP \cite{law2020ilaspinductivelearninganswer}, the leading IRL system for Learning from Answer Sets was combined with LLMs by Borroto et al. (2025) \cite{borroto2025questionansweringllmslearning} which investigated question answering and inductive learning from answer sets, introducing the LLM2LAS system, which uses LLMs to construct ILASP learning tasks from natural language stories and then runs ILASP to induce the required commonsense rules. 
 
-Recent work has explored the integration of LLMs and ASP with several approaches studying how LLMs can learn from or reason over ASP directly. \added{Law et al.~\cite{law2020ilasp} introduced ILASP, the state-of-the-art system for Learning from Answer Sets, which exhaustively searches a mode-bias-defined hypothesis space for optimal inductive solutions and is used as the classical ILP baseline in this work.} Borroto et al. (2025) \cite{borroto2025questionansweringllmslearning} investigates question answering and inductive learning from answer sets\added{, introducing the LLM2LAS system, which uses LLMs to construct ILASP learning tasks from natural language stories and then runs ILASP to induce the required commonsense rules. A key distinction from LAMP is that LLM2LAS uses LLMs to \emph{build the ILP task} and then defers to ILASP for search, whereas LAMP uses LLMs to \emph{directly generate} the hypothesis, bypassing exhaustive search entirely}. Declarative knowledge distillation techniques have also been proposed to transfer structured reasoning from LLMs into symbolic representations by Either et al. (2024) \cite{eiter2024declarativeknowledgedistillationlarge}. Similarly, Borroto et al. (2024) \cite{borroto2024automaticcompositionaspprograms} demonstrates automatic composition of ASP programs from natural language specifications, focusing on translating high level descriptions into executable ASP encodings.
+A key distinction from LAMP is that LLM2LAS uses LLMs to \emph{build the ILP task} and then defers to ILASP for search, whereas LAMP uses LLMs to \emph{directly generate} the hypothesis, bypassing exhaustive search. Declarative knowledge distillation techniques have been proposed to transfer structured reasoning from LLMs into symbolic representations by Either et al. (2024) \cite{eiter2024declarativeknowledgedistillationlarge}.
 
-\added{\subsection{Expressivity-Graded Evaluation}}
+\subsection{Expressivity Graded Evaluation}
 
-\added{Gandarela et al.~\cite{gandarela2025inductivelearninglogicaltheories} introduced the RuDaS benchmark framework and a systematic methodology for evaluating LLM-based theory induction graded by rule expressivity---Chain, RDG, DRDG, and Mixed categories (see also Section~\ref{sec:ilasp}). A key finding from that work is that LLMs are more limited by their capacity to track long predicate-dependency chains (Chain category) than by disjunctive complexity (DRDG); this is directly relevant to future LAMP extensions beyond the current Chain/RDG fragment.}
+Gandarela et al.~\cite{gandarela2025inductivelearninglogicaltheories} introduced the RuDaS benchmark framework and a systematic methodology for evaluating LLM based theory induction graded by rule expressivity as Chain, RDG, DRDG, and Mixed categories. A key finding from that work is that LLMs are limited by their capacity to track long predicate dependency chains, directly relevant to future LAMP experiments and improvements. Beyond this, ASPBench \cite{szeider2026aspbenchnaturallanguagelogic} provides new benchmarks specifically for grading LLM ASP induction.
 
-Beyond ASP specific research, logic programming has been used as a tool to evaluate and scaffold LLM reasoning. Hybrid GOFAI LLM systems show how expert systems can be rebuilt using LLM generated logic rules by Garrido et al. (2025) \cite{garridomerchán2026gofaimeetsgenerativeai}, while Xu et al. (2025) \cite{xu2025socratessmartypantstestinglogic} shows programming based test evaluators systematically assess LLM reasoning reliability . These works support the use of formal solvers, as in LAMP, to ground and validate LLM outputs.
+Beyond ASP specific research, logic programming has been used as a tool to evaluate and scaffold LLM reasoning. Hybrid GOFAI LLM systems show how expert systems can be rebuilt using LLM generated logic rules by Garrido et al. (2025) \cite{garridomerchán2026gofaimeetsgenerativeai}, while Xu et al. (2025) \cite{xu2025socratessmartypantstestinglogic} shows programming based test evaluators systematically assess LLM reasoning reliability. These works support the use of formal solvers, as in LAMP, to ground and validate LLM outputs.
 
-\added{\subsection{Planning and Neuro-Symbolic Pipelines}}
+\subsection{Planning and NeuroSymbolic Pipelines}
 
 Planning provides another closely related line of research. Logical chain of thought tuning for symbolic planning by Verma et al. (2025) \cite{verma2025teachingllmsplanlogical} and LLM symbolic planning pipelines without expert input  by Huang et al. (2024) \cite{huang2024planningdarkllmsymbolicplanning} highlight the benefits of keeping solvers such as ASP planners in the loop. Established ASP planning benchmarks, including Plasp developed by Dimopoulos et al. \cite{dimopoulos2018plasp3effectiveasp}, offer realistic domains that could extend LAMP beyond product configuration. Neuro symbolic refinement frameworks such as PEIRCE further demonstrate how LLMs and formal reasoning systems can iteratively improve each other \cite{quan2025peirceunifyingmaterialformal} by Quan et al. (2025).
 
 \section{Future Work}
 
-% The feature sets could later be extended to include greater arity, or additional language features, such as choice rules and head disjunction for future work. Another approach would be from the specific perspective of solving complexity, focussing on solution space features such as, vector cover size, tree depth, feedback vertex set, clique width, tree width, among others \cite{hecher2024extendedversionofstructural}.% The feature sets could later be extended to include greater arity, or additional language features, such as choice rules and head disjunction for future work. Another approach would be from the specific perspective of solving complexity, focussing on solution space features such as, vector cover size, tree depth, feedback vertex set, clique width, tree width, among others \cite{hecher2024extendedversionofstructural}.
+Several directions for future work follow naturally. First, iterative prompting could be improved by more explicit chain of thought reasoning, potentially evaluating candidate rules across multiple instance fact sets per iteration, with Clingo acting as a tool within an LLM based agent loop. The feature sets could also be extended to include greater arity, or additional language features, such as choice rules and head disjunction for future work. Another approach would be from the specific perspective of solving complexity, focussing on solution space features such as, vector cover size, tree depth, feedback vertex set, clique width, tree width, among others \cite{hecher2024extendedversionofstructural}.
 
-Several directions for future work follow naturally. First, iterative prompting could be improved by more explicit chain of thought reasoning, potentially evaluating candidate rules across multiple instance fact sets per iteration, with Clingo acting as a tool within an LLM based agent loop. Prompt optimization frameworks such as DSPy could be used to automatically refine prompts and feedback strategies. Second, the synthetic datasets could be extended to richer ASP constructs, including higher arity predicates, choice rules, disjunction, and head disjunction, as well as more complex dependency structures such as those proposed by Gandarela et al. (2025) regarding logic program expressivity \cite{gandarela2025inductivelearninglogicaltheories}.
+Prompt optimization frameworks such as DSPy could be used to automatically refine prompts and feedback strategies. Second, the synthetic datasets could be extended to richer ASP constructs, including higher arity predicates, choice rules, disjunction, and head disjunction, as well as more complex dependency structures such as those proposed by Gandarela et al. (2025) regarding logic program expressivity \cite{gandarela2025inductivelearninglogicaltheories}.
 
-Third, evaluation could move beyond synthetic configuration tasks to existing ASP datasets, including OOASP models, real world ASP encodings, planning benchmarks such as Plasp and PDDL to ASP translations, and domains like rail scheduling. Fourth, deeper natural language interfaces to ASP could be explored, covering bidirectional translation between text and ground facts, rules, stable models, and multiple natural languages. Finally, optimization remains a promising avenue, including other ways of transforming ASP into more efficient ASP, compiling ASP fragments to lower level code, such as C, and tighter integration with solver level optimizations such as those seen in the Non Ground Optimizer (NGO), enabling LLMs to reason not only about correctness but also about grounding and solving performance.
+Third, evaluation could move beyond synthetic configuration tasks to existing ASP datasets, including ASPBench \cite{szeider2026aspbenchnaturallanguagelogic}, OOASP models, real world ASP encodings, planning benchmarks such as Plasp and PDDL to ASP translations, and domains like rail scheduling. Fourth, deeper natural language interfaces to ASP could be explored, covering bidirectional translation between text and ground facts, rules, stable models, and multiple natural languages. 
+
+Finally, optimization remains a promising avenue, including other ways of transforming ASP into more efficient ASP, compiling ASP fragments to lower level code, such as C, and tighter integration with solver level optimizations, enabling LLMs to reason not only about correctness but also about grounding and solving performance.
 
 \section{Conclusion}
 
-This work proposed a structured LLM to ASP Modeling Protocol (LAMP) designed to support the deduction and optimization of ASP rules from instance facts and expected stable models. The results show this as effective for guiding LLMs toward correct and often optimized ASP encodings. By constraining the modeling task and providing iterative feedback via an ASP solver, this system reduces the modeling burden associated with ASP while preserving  correctness.
+This work proposed a structured LLM to ASP Modeling Protocol (LAMP) designed to support the deduction and optimization of ASP rules from instance facts and expected stable models. The results show this as effective for guiding LLMs toward correct and often optimized ASP encodings. By constraining the modeling task and providing iterative feedback via an ASP solver, this system reduces the modeling burden associated with ASP while preserving correctness.
 
-The tested models exhibited clear performance differences, with \deleted{\textit{gpt-5-mini} and \textit{gpt-oss:20b} achieving solid stable model reconstruction, however \textit{qwen3-coder:30b} struggled despite its programming focus.}\added{\textit{gpt-5-mini} achieving 100\% final accuracy (94.2\% on first attempt) and \textit{gpt-oss:20b} achieving 95.8\% (90\%), while \textit{qwen3-coder:30b} reached only 45\% (30.8\% first attempt) despite its programming focus.} These results highlight that strong general code generation ability does not necessarily translate to proficiency in logic programming, underscoring the value of ASP specific evaluation frameworks. Analysis of complexity features and feature importance, shows that the presence of negative literals and the ability to correctly infer new atoms are the strongest predictors of LLM success.
+The tested models exhibited clear performance differences, with \textit{gpt-5-mini} achieving 100\% final accuracy (94.2\% on first attempt) and \textit{gpt-oss:20b} achieving 95.8\% (90\%), while \textit{qwen3-coder:30b} reached only 45\% (30.8\% first attempt) despite its programming focus. These results highlight that strong general code generation ability does not necessarily translate to proficiency in logic programming, underscoring the value of ASP specific evaluation frameworks.
 
-\added{The ILASP baseline achieved 97.5\% (117/120), with all three failures being search-space timeouts rather than reasoning errors. Crucially, both \textit{gpt-5-mini} and \textit{gpt-oss:20b} solved all three benchmarks on which ILASP timed out. This demonstrates that LLMs do not merely replicate classical ILP search---they navigate the hypothesis space in a fundamentally different way and can succeed precisely where exhaustive search cannot. The iterative feedback loop further contributed recovery of 7, 7, and 17 cases for the three models respectively, confirming its value as a component of the LAMP pipeline.}
+The ILASP baseline achieved 97.5\%, with the three failures being search space timeouts rather than reasoning errors. This shows LLMs do not follow the same classical ILP search, they navigate the hypothesis space differently, searching using tokens instead of the hypothesis space, and can succeed where exhaustive search may not. The iterative feedback loop further contributed recovery of many cases for the three LLMs, confirming its value as a component of the LAMP pipeline.
 
-Beyond assisting users in ASP modeling, this protocol provides a system for probing LLM reasoning and logic programming capabilities. Future work includes extending to richer ASP constructs such as disjunction and choice rules, incorporating solver-level performance metrics, and exploring fine-tuned or neuro-symbolic hybrids to further improve robustness and scalability.
+Beyond assisting users in ASP modeling, this protocol provides a system for probing LLM reasoning and logic programming capabilities. Future work includes extending to richer ASP constructs such as disjunction and choice rules, incorporating solver-level performance metrics, and exploring fine-tuned or neuro symbolic hybrids to further improve robustness and scalability.
 
 \bibliography{custom}
 \bibliographystyle{splncs04}
