@@ -77,7 +77,7 @@ Knowledge representation and reasoning problems arise across many domains, inclu
 
 However, writing ASP programs that are both correct and performant remains challenging, as modeling choices can significantly affect solver behavior. Recent progress in Large Language Models (LLMs) offers new opportunities to reduce this modeling burden. LLMs have shown strong capabilities in code generation and program synthesis, suggesting they may assist in deriving ASP encodings from high level natural language specifications \cite{ishay2023leveraginglargelanguagemodels}.
 
-It has also been shown LLMs can perform inductive logic programming, such as learning logic rules from background knowledge and positive and negative examples when combined with feedback from a formal inference engine, such as Prolog \cite{gandarela2025inductivelearninglogicaltheories}. Here the authors proposed a systematic evaluation framework graded by expressivity to quantify LLM strengths and limitations in logic theory induction.
+It has also been shown that LLMs can perform inductive logic programming, such as learning logic rules from background knowledge and positive and negative examples when combined with feedback from a formal inference engine, such as Prolog \cite{gandarela2025inductivelearninglogicaltheories}. Here the authors proposed a systematic evaluation framework graded by expressivity to quantify LLM strengths and limitations in logic theory induction.
 
 The LLM to ASP Modeling Protocol (LAMP) is designed to guide LLMs in deducing and optimizing ASP rules from given instance facts and expected answer sets. LAMP provides a structured interaction protocol that enables refinement of ASP encodings, with the goal of improving both correctness and performance. Beyond proposing the system itself, LAMP can be used as a framework for evaluating the capabilities of different LLMs in ASP program generation.
 
@@ -92,7 +92,7 @@ The relevant research questions of this work are the following.
 \textbf{RQ2.} How do LLMs and ILASP compare in terms of accuracy, speed, and program conciseness on ASP rule induction tasks?
 
 \noindent
-\textbf{RQ3.} Which ASP language features most strongly predict LLM success or failure in LAMP?
+\textbf{RQ3.} Which features of the ASP benchmark most strongly predict LLM success or failure in LAMP?
 
 This paper investigates the current capabilities of Large Language Models (LLMs) regarding Answer Set Programming (ASP) and offers directions for future research at the intersection of artificial intelligence and constraint solving. The LAMP system can be compared against similar systems such as those based on LLMs fine-tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, iterative scheduling and plan generation with LLMs and ASP \cite{lin2024clmaspcouplinglargelanguage}, and LLM based systems that can learn directly from ASP answer sets \cite{borroto2025questionansweringllmslearning}, as well as solver-in-the-loop frameworks that use Clingo feedback to iteratively improve LLM generated ASP \cite{schrader2025solverintheloopframeworkimprovingllms}.
 
@@ -458,7 +458,7 @@ As future work the prompt may be able to be optimized by adding examples or usin
 
 LAMP and ILASP systems are evaluated by correctness of answer set, time to solve and optimality of ASP programs. The ASP programs generated are evaluated after being run via Clingo. The correctness, number of rules, complexity and how close it is to the expected stable model can then be assessed. This is similar to the process LLM-ARC employs as an actor-critic method, where the LLM Actor generates ASP, while the automated reasoning critic evaluates the code \cite{kalyanpur2024llmarcenhancingllmsautomated}. 
 
-Other systems use ASP as a scaffolding for robust reasoning \cite{kaur2025empiricalstudyconformalprediction}. Both systems receive equivalent information including the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The prompt also instructs the LLM to prefer the minimal rule set with fewest rules and literals, directly encouraging concise encodings.
+Other systems use ASP as a scaffolding for robust reasoning \cite{kaur2025empiricalstudyconformalprediction}. The prompt also instructs the LLM to prefer the minimal rule set with fewest rules and literals, directly encouraging concise encodings.
 
 Beyond correctness, the systems are evaluated on whether the LLM has produced a more concise encoding than the original synthetic program, formalized as follows.
 
@@ -466,9 +466,9 @@ Beyond correctness, the systems are evaluated on whether the LLM has produced a 
 \label{def:conciseness}
 Given a solution $\Pi$ to instance $\mathcal{M}$, its \emph{literal count} is
 \[
-  L(\Pi) \;=\; \sum_{r\,\in\,\Pi} \bigl(\mathit{pos}(r) + \mathit{neg}(r)\bigr),
+  L(\Pi) \;=\; \left|\bigcup_{r\,\in\,\Pi} \mathit{pos}(r)\right| + \left|\bigcup_{r\,\in\,\Pi} \mathit{neg}(r)\right|,
 \]
-where $\mathit{pos}(r)$ and $\mathit{neg}(r)$ are the sets of distinct positive and negative body literals of rule $r$. A solution $\Pi$ is \emph{more concise} than $\Pi'$ if $L(\Pi) < L(\Pi')$.
+where $\mathit{pos}(r)$ and $\mathit{neg}(r)$ are the sets of distinct positive and negative body literal atoms of rule $r$, and $L(\Pi)$ counts each distinct literal atom once across the entire program. A solution $\Pi$ is \emph{more concise} than $\Pi'$ if $L(\Pi) < L(\Pi')$.
 \end{definition}
 
 Many other notions of optimality are applicable to ASP programs, including body literal and rule count, stratification, tightness, total grounded rules, and ASP solving time. This work focuses on literal count as a direct measure of complexity with stratification reported separately.
@@ -479,7 +479,7 @@ Experiments were conducted on the synthetic data with varying complexities as sp
 
 \subsection{Experimental Setup}
 
-A total of 120 synthetic ASP programs were created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. All ASP solving and analysis was done using Clingo. ILASP was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. The selected parameters used for complexity classes are listed in table \ref{tab:parameters}. All combinations were used except where positive and negative literals are constrained to sum to no more than the overall literal count.
+A total of 120 synthetic ASP programs were created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. All ASP solving and analysis was done using Clingo. ILASP was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. Each LAMP run was allowed a maximum of 3 iterations: one initial generation followed by up to 2 rounds of feedback verified by Clingo. Both systems receive the same input instance $\mathcal{M}$ (Definition~\ref{def:input}): the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The selected parameters used for complexity classes are listed in table \ref{tab:parameters}. All combinations were used except where positive and negative literals are constrained to sum to no more than the overall literal count.
 
 \begin{table}[h]
     \centering
@@ -647,11 +647,11 @@ Table~\ref{tab:llm_stratification} shows that both ILASP and the LLM-based syste
 %           - \cite{lundberg2019consistentindividualizedfeatureattribution}
 %           - 1802.03888
 
-Based on whether the LLM is able to get the correct stable model or not it is possible to deduce which ASP rule features are most difficult for LLMs to deduce thereby indicating higher complexity. To do this, the features of the original ASP program and the LLM deduced ASP program such as number of rules, number of new atoms inferred etc. are used to predict the likelihood of getting the correct stable model using the tree based machine learning algorithm XGBoost, trained on the pooled results across all three LLMs.
+Based on whether the LLM is able to get the correct stable model or not it is possible to deduce which ASP benchmark features are most difficult for LLMs to deduce thereby indicating higher complexity. To do this, syntactic and structural features of the input ASP program, such as number of predicates, facts, rules, and literal counts, are used to predict the likelihood of getting the correct stable model using the tree based machine learning algorithm XGBoost \cite{chen2016xgboostscalabletreeboosting}, trained on the \textit{qwen3-coder:30b} results. The other two LLMs had too few failures for a meaningful classifier.
 
-From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, or average improvement in the loss function from splits using that feature or cover, the average number of samples affected by splits using that feature. For this analysis weight is used, the number of times a feature is used to split across all trees \cite{chen2016xgboostscalabletreeboosting}.
+From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, the average improvement in the loss function from splits using that feature, or cover, the average number of samples affected by splits using that feature. For this analysis gain is used.
 
-The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{num\_solution\_atoms\_original}, or the number of total atoms in the answer set, which makes sense as a proxy for overall complexity. The next most important feature is \textit{atom\_diff\_llm}, or the number of new atoms inferred by the LAMP. This makes sense as the LLMs ASP not inferring atoms is a good indicator it won't arrive at the expected stable model. As the XGBoost model is trained on a small pooled sample, these importances should be treated as indicative rather than definitive.
+The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{num\_solution\_atoms\_original}, the total number of atoms in the answer set, which serves as a proxy for overall problem complexity. The next most important feature is \textit{num\_derived\_atoms\_original}, the number of atoms that must be deduced beyond the input facts, directly reflecting the deductive burden placed on the LLM. \textit{total\_neg\_literals\_original} also ranks highly, consistent with default negation being a known challenge for LLMs. As the XGBoost model is trained on a small sample, these importances should be treated as indicative rather than definitive.
 
 \begin{figure}[h!]
     \centering
