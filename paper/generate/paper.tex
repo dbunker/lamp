@@ -102,7 +102,7 @@ This section presents the core background underpinning LAMP including Answer Set
 
 \subsection{Answer Set Programming}
 
-ASP is a declarative programming paradigm based on stable model semantics \cite{bogaerts2024stablemodelsemanticshigherorder}.
+Answer Set Programming (ASP) is a declarative programming paradigm based on stable model semantics \cite{bogaerts2024stablemodelsemanticshigherorder}.
 
 \paragraph{Syntactic Primitives.}
 A \textit{term} is either a constant (a lowercase symbol or integer such as\ $a$, $0$), a variable (an uppercase symbol, such as\ $X$), or a function symbol $f(t_1,\ldots,t_k)$ applied to terms. A \textit{predicate} $p/k$ is a symbol of arity $k \geq 0$. Applying it to $k$ terms yields an \textit{atom} $p(t_1,\ldots,t_k)$. A ground atom contains no variables. A \textit{literal} is either a positive literal $a$ (an atom) or a \textit{default-negated} literal $\mathit{not}\; a$, where $\mathit{not}$ denotes negation as failure and $\mathit{not}\; a$ holds whenever $a$ cannot be derived.
@@ -315,7 +315,7 @@ From a Complexity Category we can define a concrete input instance. Each instanc
 
 \begin{definition}[Input Instance]
 \label{def:input}
-Given a Complexity Category stated as $\mathcal{C} = \langle\, \mathcal{D},\; \mathcal{T},\; N_F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle$ (Definition~1), an \emph{instance} of $\mathcal{C}$ is a tuple
+Given a Complexity Category stated as $\mathcal{C} = \langle\, \mathcal{D},\; \mathcal{T},\; N_F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle$ (Definition~\ref{def:complexity}), an \emph{instance} of $\mathcal{C}$ is a tuple
 \[
   \mathcal{M} \;=\; \langle\, F,\; A^{*},\; \Phi \,\rangle
 \]
@@ -327,12 +327,12 @@ where:
     \[
       d_h(X) \;:\text{-}\; p_1(X),\; \ldots,\; p_{k}(X),\; \texttt{not}\; n_1(X),\; \ldots,\; \texttt{not}\; n_{m}(X).
     \]
-    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, $X$ is a single universally-quantified variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals (bounds from $\mathcal{C}$, Definition~1).
+    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, $X$ is a single universally-quantified variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals (bounds from $\mathcal{C}$, Definition~\ref{def:complexity}).
 \end{itemize}
 A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$ with $|\Pi| \leq R$; every rule in $\Pi$ is therefore unary, uses only predicates from $\mathcal{D}$, and respects the bounds $L^+$ and $L^-$.
 $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
 \[
-  AS\!\left(F \cup \Pi\right) \;=\; \bigl\{\, A^{*} \,\bigr\},
+  AS\!\left(F \cup \Pi\right) \;=\; \bigl\{\, A^{*} \,\bigr\}
 \]
 Meaning the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
 \end{definition}
@@ -441,7 +441,7 @@ and $\delta_i$ is the \emph{feedback signal} produced by running $F \cup \Pi_i$ 
   \end{cases}
 \]
 The sequence terminates when $\delta_n = \texttt{correct}$ or a maximum iteration count is reached.
-The final output $\Pi_n$ is accepted as the solution if it satisfies $\mathcal{M}$ (Definition~2).
+The final output $\Pi_n$ is accepted as the solution if it satisfies $\mathcal{M}$ (Definition~\ref{def:input}).
 \end{definition}
 
 As future work the prompt may be able to be optimized by adding examples or using DSPy \cite{khattab2023dspycompilingdeclarativelanguage} which tests many variations of the prompt with different examples to get the best result. This was demonstrated for spatial reasoning as a chain of thought reasoning system \cite{wang2024dspybasedneuralsymbolicpipelineenhance}. Another option would be to fine tune the LLM specifically for ASP code generation as was done with LLASP \cite{coppolillo2024llaspfinetuninglargelanguage}.
