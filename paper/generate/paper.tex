@@ -456,7 +456,9 @@ As future work the prompt may be able to be optimized by adding examples or usin
 %           - \cite{kaur2025empiricalstudyconformalprediction}
 %           - 2503.05439
 
-LAMP and ILASP systems are evaluated by correctness of answer set, time to solve and optimality of ASP programs. The ASP programs generated are evaluated after being run via Clingo. The correctness, number of rules, complexity and how close it is to the expected stable model can then be assessed. This is similar to the process LLM-ARC employs as an actor-critic method, where the LLM Actor generates ASP, while the automated reasoning critic evaluates the code \cite{kalyanpur2024llmarcenhancingllmsautomated}. Other systems use ASP as a scaffolding for robust reasoning \cite{kaur2025empiricalstudyconformalprediction}.
+LAMP and ILASP systems are evaluated by correctness of answer set, time to solve and optimality of ASP programs. The ASP programs generated are evaluated after being run via Clingo. The correctness, number of rules, complexity and how close it is to the expected stable model can then be assessed. This is similar to the process LLM-ARC employs as an actor-critic method, where the LLM Actor generates ASP, while the automated reasoning critic evaluates the code \cite{kalyanpur2024llmarcenhancingllmsautomated}. 
+
+Other systems use ASP as a scaffolding for robust reasoning \cite{kaur2025empiricalstudyconformalprediction}. Both systems receive equivalent information including the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The prompt also instructs the LLM to prefer the minimal rule set with fewest rules and literals, directly encouraging concise encodings.
 
 Beyond correctness, the systems are evaluated on whether the LLM has produced a more concise encoding than the original synthetic program, formalized as follows.
 
@@ -492,8 +494,8 @@ A total of 120 synthetic ASP programs were created with varying features for tes
     Facts & [9, 6] \\
     Rules & [11] \\
     Overall Literals & [3, 2] \\
-    Positive Literals & [2, 1, 0] \\
-    Negative Literals & [1] \\
+    Negative Literals & [2, 1, 0] \\
+    Min Derived Atoms & [3, 1] \\
     \bottomrule
     \end{tabular}
 \end{table}
@@ -513,7 +515,7 @@ The iterative feedback loop contributes meaningfully for all models. First attem
 
 \begin{table}[h]
     \centering
-    \caption{Comparison of all systems including ILASP baseline. First attempt is the accuracy on the initial generation; final accuracy is after up to 3 feedback iterations. ILASP failures are all timeouts (420\,s limit); LLM failures are unresolved after all iterations.}
+    \caption{Comparison of all systems including ILASP baseline. First attempt is the accuracy on the initial generation; final accuracy is after up to 2 feedback iterations. ILASP failures are all timeouts (420\,s limit); LLM failures are unresolved after all iterations.}
     \label{tab:ilasp_results}
     \begin{tabular}{lrrrl}
     \toprule
