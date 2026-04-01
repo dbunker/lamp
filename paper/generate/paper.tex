@@ -473,7 +473,7 @@ Many other notions of optimality are applicable to ASP programs, including body 
 
 \section{Experiments}
 
-Experiments were conducted on the synthetic data with varying complexities as specified in the section \textit{ASP, Complexity and Datasets}. A variety of online and local open weight LLMs where selected for testing to get a broad view of capabilities.
+Experiments were conducted on the synthetic data with varying complexities as specified in the section \textit{ASP, Complexity and Datasets}. A variety of online and local open weight LLMs were selected for testing to get a broad view of capabilities.
 
 \subsection{Experimental Setup}
 
@@ -610,7 +610,7 @@ Figure \ref{fig:gpt_5_literals} shows \texttt{gpt-5-mini} is generally able to g
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_ilasp.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_ilasp.pdf}
-    \caption{Qwen3-coder input literals to output literals for correct answer set response.}
+    \caption{ILASP input literals to output literals for correct answer set response.}
     \label{fig:ilasp_literals}
 \end{figure}
 
@@ -627,10 +627,10 @@ An ASP program is \emph{stratified} if no predicate depends negatively on itself
     LLM & Correct & Number Correct Stratified \\
     \midrule
     Original        & ---     & 49 \\
-    ILASP           & 117/120 & 117 \\
     gpt-5-mini      & 120/120 & 119 \\
     gpt-oss:20b     & 115/120 & 114 \\
     qwen3-coder:30b & 54/120  & 54 \\
+    ILASP           & 117/120 & 117 \\
     \bottomrule
     \end{tabular}
     \centering
