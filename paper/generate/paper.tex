@@ -473,11 +473,11 @@ Many other notions of optimality are applicable to ASP programs, including body 
 
 \section{Experiments}
 
-Experiments where conducted on the synthetic data with varying complexities as specified in the section \textit{ASP, Complexity and Datasets}. A variety of online and local open weight LLMs where selected for testing to get a broad view of capabilities.
+Experiments were conducted on the synthetic data with varying complexities as specified in the section \textit{ASP, Complexity and Datasets}. A variety of online and local open weight LLMs where selected for testing to get a broad view of capabilities.
 
 \subsection{Experimental Setup}
 
-A total of 120 synthetic ASP programs were created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. All ASP solving and analysis was done using Clingo. ILASP was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. The selected parameters used for complexity classes are listed in table \ref{tab:ilasp_results}. All combinations were used except limited where positive and negative literals must sum to less than overall literals.
+A total of 120 synthetic ASP programs were created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. All ASP solving and analysis was done using Clingo. ILASP was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. The selected parameters used for complexity classes are listed in table \ref{tab:parameters}. All combinations were used except limited where positive and negative literals must sum to less than overall literals.
 
 \begin{table}[h]
     \centering
@@ -580,7 +580,7 @@ Figure~\ref{fig:timing_boxplot} shows the per-benchmark wall-clock time distribu
 
 Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals}, \ref{fig:qwen3_literals}, and \ref{fig:ilasp_literals} compare the total literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) of the original ASP programs against that of ILASP and the LLM generated rules for each LLM tested using LAMP. The dot size indicates the number of examples with the left graph indicating when the LLM got the correct answer set and right for indicating when it failed on initial attempts, but recovered in yellow and overall incorrect in red. 
 
-Figure \ref{fig:gpt_oss_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{qwen3-gpt\_oss\_literals:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3\_literals} shown in figure \ref{fig:qwen3_literals} had mixed results. Figure \ref{fig:ilasp_literals} shows ILASP most able to increase conciseness, but similar to LLMs and not on 3 examples.
+Figure \ref{fig:gpt_5_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{gpt-oss:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3-coder:30b} shown in figure \ref{fig:qwen3_literals} had mixed results. Figure \ref{fig:ilasp_literals} shows ILASP most able to increase conciseness, but similar to LLMs and not on 3 examples.
 
 \begin{figure}[h!]
     \centering
@@ -635,7 +635,7 @@ An ASP program is \emph{stratified} if no predicate depends negatively on itself
     \end{tabular}
     \centering
     \hfill
-    \caption{LLM with Answer Set Correct and Incorrect Results, Rules Matching Indicates number of LLM Generated Programs that Match the Original.}
+    \caption{Stratification of ASP.}
     \label{tab:llm_stratification}
 \end{table}
 
@@ -698,9 +698,9 @@ The results can be seen in figure \ref{fig:importance}. The most important featu
 
 \subsection{Inductive ASP Learning and LAS}
 
-Recent work has explored the integration of LLMs and ASP with several approaches studying how LLMs can learn from or reason over ASP directly. ILASP \cite{law2020ilaspinductivelearninganswer}, the leading IRL system for Learning from Answer Sets was combined with LLMs by Borroto et al. (2025) \cite{borroto2025questionansweringllmslearning} which investigated question answering and inductive learning from answer sets, introducing the LLM2LAS system, which uses LLMs to construct ILASP learning tasks from natural language stories and then runs ILASP to induce the required commonsense rules. 
+Recent work has explored the integration of LLMs and ASP with several approaches studying how LLMs can learn from or reason over ASP directly. ILASP \cite{law2020ilaspinductivelearninganswer}, the leading ILP system for Learning from Answer Sets was combined with LLMs by Borroto et al. (2025) \cite{borroto2025questionansweringllmslearning} which investigated question answering and inductive learning from answer sets, introducing the LLM2LAS system, which uses LLMs to construct ILASP learning tasks from natural language stories and then runs ILASP to induce the required commonsense rules. 
 
-A key distinction from LAMP is that LLM2LAS uses LLMs to \emph{build the ILP task} and then defers to ILASP for search, whereas LAMP uses LLMs to \emph{directly generate} the hypothesis, bypassing exhaustive search. Declarative knowledge distillation techniques have been proposed to transfer structured reasoning from LLMs into symbolic representations by Either et al. (2024) \cite{eiter2024declarativeknowledgedistillationlarge}.
+A key distinction from LAMP is that LLM2LAS uses LLMs to \emph{build the ILP task} and then defers to ILASP for search, whereas LAMP uses LLMs to \emph{directly generate} the hypothesis, bypassing exhaustive search. Declarative knowledge distillation techniques have been proposed to transfer structured reasoning from LLMs into symbolic representations by Eiter et al. (2024) \cite{eiter2024declarativeknowledgedistillationlarge}.
 
 \subsection{Expressivity Graded Evaluation}
 
