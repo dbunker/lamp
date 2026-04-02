@@ -277,7 +277,7 @@ The LAMP framework operates on a formally defined benchmark structure that const
 
 \subsection{Benchmark Framework}\label{sec:benchmark}
 
-To keep the benchmarks tractable for both LLM generation and ILP search, the ASP used here is deliberately restricted. Rather than a full configuration system such as Object-Oriented ASP (OOASP) \cite{falkner2015ooaspconnectingobjectorientedlogic}, programs consist only of unary \textit{facts} of the form \texttt{descriptor(object)} and \textit{normal rules} of the form \texttt{new\_descriptor(X) :- descriptor\_0(X), [not] descriptor\_1(X), \ldots} which derive new object descriptions from initial instance facts. This subset is expressive enough to require fairly complex rule induction while remaining within a reasonable hypothesis space.
+To keep the benchmarks tractable for both LLM generation and ILP search, the ASP used here is deliberately restricted. Programs consist only of unary \textit{facts} of the form \texttt{descriptor(object)} and \textit{normal rules} of the form \texttt{new\_descriptor(X) :- descriptor\_0(X), [not] descriptor\_1(X), \ldots} which derive new object descriptions from initial instance facts. This subset is expressive enough to require fairly complex rule induction while remaining within a reasonable hypothesis space.
 
 The following is an example representing the model facts that objects \texttt{"car"} and \texttt{"scooter"} are both vehicles, represented with the predicate \texttt{vehicle}, and the scooter is slow moving, represented with the predicate \texttt{slow\_moving}. It also has the rule that if an object is a vehicle and not slow moving it is highway possible, represented with the predicate \texttt{highway\_possible}.
 
