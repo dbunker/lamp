@@ -1198,14 +1198,12 @@ def aggregate_results():
                 if fact.terms:
                     possible_terms.add(fact.terms[0])
 
-            pos_literals = set()
-            neg_literals = set()
-            for rule in kb.rules:
-                for literal in rule.body:
-                    if literal.pos:
-                        pos_literals.add(literal.atom)
-                    else:
-                        neg_literals.add(literal.atom)
+            total_pos_literals = sum(1 for rule in kb.rules for lit in rule.body if lit.pos)
+            total_neg_literals = sum(1 for rule in kb.rules for lit in rule.body if not lit.pos)
+
+            unique_pos_atoms = len({lit.atom.pred for rule in kb.rules for lit in rule.body if lit.pos})
+            unique_neg_atoms = len({lit.atom.pred for rule in kb.rules for lit in rule.body if not lit.pos})
+            unique_atoms = len({lit.atom.pred for rule in kb.rules for lit in rule.body})
 
             body_sizes = [len(r.body) for r in kb.rules]
             max_body_size = max(body_sizes) if body_sizes else 0
@@ -1273,8 +1271,11 @@ def aggregate_results():
                 "num_possible_terms": len(possible_terms),
                 "num_facts": len(kb.facts),
                 "num_rules": len(kb.rules),
-                "total_pos_literals": len(pos_literals),
-                "total_neg_literals": len(neg_literals),
+                "total_pos_literals": total_pos_literals,
+                "total_neg_literals": total_neg_literals,
+                "unique_pos_atoms": unique_pos_atoms,
+                "unique_neg_atoms": unique_neg_atoms,
+                "unique_atoms": unique_atoms,
                 "is_stratified": strat["is_stratified"],
                 "stratification_depth": strat["stratification_depth"],
                 "num_negative_cycles": strat["num_negative_cycles"],
@@ -1319,6 +1320,9 @@ def aggregate_results():
         "num_rules": "int64",
         "total_pos_literals": "int64",
         "total_neg_literals": "int64",
+        "unique_pos_atoms": "int64",
+        "unique_neg_atoms": "int64",
+        "unique_atoms": "int64",
         "solution_atoms": "object",
         "num_solution_atoms": "int64",
         "num_derived_atoms": "int64",
