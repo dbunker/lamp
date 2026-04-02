@@ -466,9 +466,9 @@ Beyond correctness, the systems are evaluated on whether the LLM has produced a 
 \label{def:conciseness}
 Given a solution $\Pi$ to instance $\mathcal{M}$, its \emph{literal count} is
 \[
-  L(\Pi) \;=\; \left|\bigcup_{r\,\in\,\Pi} \mathit{pos}(r)\right| + \left|\bigcup_{r\,\in\,\Pi} \mathit{neg}(r)\right|,
+  L(\Pi) \;=\; \sum_{r\,\in\,\Pi} \bigl(|\mathit{pos}(r)| + |\mathit{neg}(r)|\bigr),
 \]
-where $\mathit{pos}(r)$ and $\mathit{neg}(r)$ are the sets of distinct positive and negative body literal atoms of rule $r$, and $L(\Pi)$ counts each distinct literal atom once across the entire program. A solution $\Pi$ is \emph{more concise} than $\Pi'$ if $L(\Pi) < L(\Pi')$.
+where $\mathit{pos}(r)$ and $\mathit{neg}(r)$ are the positive and negative body literals of rule $r$, and $L(\Pi)$ is the total number of body literals across all rules. A solution $\Pi$ is \emph{more concise} than $\Pi'$ if $L(\Pi) < L(\Pi')$.
 \end{definition}
 
 Many other notions of optimality are applicable to ASP programs, including body literal and rule count, stratification, tightness, total grounded rules, and ASP solving time. This work focuses on literal count as a direct measure of complexity with stratification reported separately.
