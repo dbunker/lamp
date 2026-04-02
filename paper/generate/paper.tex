@@ -6,6 +6,7 @@
 \documentclass[11pt,a4paper]{article}
 %
 \usepackage{graphicx}
+\usepackage{multirow}
 
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, shapes.misc, arrows.meta, positioning, fit, backgrounds, calc}
@@ -597,7 +598,26 @@ Figure~\ref{fig:timing_boxplot} shows the per-benchmark wall-clock time distribu
     \end{tabular}
 \end{table}
 
-Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals}, \ref{fig:qwen3_literals}, and \ref{fig:ilasp_literals} compare the total literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) of the original ASP programs against that of ILASP and the LLM generated rules for each LLM tested using LAMP. Dot size indicates the number of examples. The left plot shows correct answer sets and the right shows first-attempt failures with recovered cases in gold and failed cases in red. 
+Table~\ref{tab:lit_by_correctness} gives the mean output literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) per system at original literal counts of 22 and 33, split by correctness. Correct solutions show a large reduction relative to the originals across all systems, averaging 3--5 literals against originals of 22 or 33. This is consistent with the synthetic benchmark structure, where generated programs may include rules not strictly necessary to produce the target answer set.
+
+\begin{table}[h]
+\centering
+\caption{Mean output literal count $L(\Pi)$ per system for benchmarks with 22 and 33 original body literals, split by correctness. \texttt{--} indicates no data.}
+\label{tab:lit_by_correctness}
+\begin{tabular}{llrrrr}
+\toprule
+Original literals & & gpt-5-mini & gpt-oss:20b & qwen3-coder:30b & ILASP \\
+\midrule
+\multirow{2}{*}{22} & Correct   & 4.81 & 4.91 & 4.40 & 3.67 \\
+                    & Incorrect & --   & 7.00 & 4.70 & --   \\
+\midrule
+\multirow{2}{*}{33} & Correct   & 3.54 & 3.96 & 4.26 & 2.71 \\
+                    & Incorrect & --   & 24.00 & 3.03 & --   \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals}, \ref{fig:qwen3_literals}, and \ref{fig:ilasp_literals} compare the unique literal count of the original ASP programs against that of ILASP and the LLM generated rules for each LLM tested using LAMP. Dot size indicates the number of examples. The left plot shows correct answer sets and the right shows first-attempt failures with recovered cases in gold and failed cases in red. 
 
 Figure \ref{fig:gpt_5_literals} shows \texttt{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some case reducing number of literals by 6, but in some cases increasing them by 2. LLM \texttt{gpt-oss:20b} shown in figure \ref{fig:gpt_oss_literals} had similar results generally needing even fewer literals, while \texttt{qwen3-coder:30b} shown in figure \ref{fig:qwen3_literals} had mixed results. Figure \ref{fig:ilasp_literals} shows ILASP is similarly able to reduce literal counts, though it fails to improve conciseness on the 3 benchmarks where it timed out.
 
