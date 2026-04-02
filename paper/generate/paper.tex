@@ -679,16 +679,11 @@ Table~\ref{tab:llm_stratification} shows that both ILASP and the LLM-based syste
 
 \subsection{Feature Importance}
 
-% - A. SHAP Values
-%     - Consistent Individualized Feature Attribution for Tree Ensembles
-%           - \cite{lundberg2019consistentindividualizedfeatureattribution}
-%           - 1802.03888
-
 Based on whether the LLM is able to get the correct stable model or not it is possible to deduce which ASP benchmark features are most difficult for LLMs to deduce thereby indicating higher complexity. To do this, syntactic and structural features of the input ASP program, such as number of predicates, facts, rules, and literal counts, are used to predict the likelihood of getting the correct stable model using the tree based machine learning algorithm XGBoost \cite{chen2016xgboostscalabletreeboosting}, trained on the \textit{qwen3-coder:30b} results. The other two LLMs had too few failures for a meaningful classifier.
 
 From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, the average improvement in the loss function from splits using that feature, or cover, the average number of samples affected by splits using that feature. For this analysis gain is used.
 
-The results can be seen in figure \ref{fig:importance}. The most important feature according to this analysis is \textit{num\_solution\_atoms\_original}, the total number of atoms in the answer set, which serves as a proxy for overall problem complexity. The next most important feature is \textit{num\_derived\_atoms\_original}, the number of atoms that must be deduced beyond the input facts, directly reflecting the deductive burden placed on the LLM. \textit{total\_neg\_literals\_original} also ranks highly, consistent with default negation being a known challenge for LLMs. As the XGBoost model is trained on a small sample, these importances should be treated as indicative rather than definitive.
+The results can be seen in figure \ref{fig:importance}. The most important feature is \textit{Solution atoms}, the total number of atoms in the answer set, serving as a proxy for overall problem complexity. The next most important is \textit{Derived atoms}, the number of atoms that must be deduced beyond the input facts, directly reflecting the deductive burden placed on the LLM. \textit{Negative literals} also ranks highly, consistent with default negation being a known challenge for LLMs. As the XGBoost model is trained on a small sample, these importances should be treated as indicative rather than definitive.
 
 \begin{figure}[h!]
     \centering
