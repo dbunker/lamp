@@ -529,7 +529,7 @@ The iterative feedback loop contributes meaningfully for all models. First attem
     \end{tabular}
 \end{table}
 
-Table~\ref{tab:ilasp_timeout} details the three benchmarks on which ILASP timed out (benchmark indices 7, 27, and 67). All three have elevated grounded rules and hypothesis space sizes relative to the dataset average (Table~\ref{tab:timeout_profile}), indicating a larger search space as the cause of timeout. \textit{gpt-5-mini} solved all three, \textit{gpt-oss:20b} solved benchmark 7 but failed on 27 and 67 while \textit{qwen3-coder:30b} failed all three.
+Table~\ref{tab:ilasp_timeout} details the three benchmarks on which ILASP timed out (benchmark indices 7, 27, and 67). All three have elevated grounded rules and hypothesis space sizes relative to the dataset average (Table~\ref{tab:timeout_profile}), indicating a larger search space as the cause of timeout. Benchmark 67 has a notably smaller hypothesis space than 7 and 27 yet still timed out, suggesting grounded rules and negation complexity are sufficient to cause timeout independent of hypothesis space size alone. \textit{gpt-5-mini} solved all three, \textit{gpt-oss:20b} solved benchmark 7 but failed on 27 and 67 while \textit{qwen3-coder:30b} failed all three.
 
 \begin{table}[h]
 \centering
@@ -562,8 +562,6 @@ Dataset avg & 11.00 & 13.28 & 3255.22 & 8.80 & 0.19 \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-Benchmark 67 is notable in that its hypothesis space (2{,}206) is considerably smaller than benchmarks 7 and 27 ($\sim$17--20k), yet it still timed out. With identical grounded rules and negative literal counts across all three, the timeout for benchmark 67 is not fully explained by hypothesis space size alone and may reflect harder search dynamics within a more constrained space.
 
 Figure~\ref{fig:outcome_stacked} shows the breakdown of benchmark outcomes per LLM across the three categories of correct on the first attempt (green), correct only after Clingo verified feedback (gold), and failed across all iterations (red).
 
