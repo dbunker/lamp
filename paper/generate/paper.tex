@@ -553,13 +553,13 @@ Benchmark & gpt-5-mini & gpt-oss:20b & qwen3-coder:30b & ILASP \\
 \label{tab:timeout_profile}
 \begin{tabular}{lrrrrr}
 \toprule
-Benchmark & Rules & Grounded rules & Hypothesis space & Neg.\ lit.\ atoms & Conflicts \\
+Benchmark & Grounded rules & Hypothesis space & Negative literals \\
 \midrule
-7           & 11 & 27 & 19906 & 11 & 0 \\
-27          & 11 & 20 & 16960 & 11 & 0 \\
-67          & 11 & 27 &  2206 & 11 & 1 \\
+7           & 27 & 19906 & 11 \\
+27          & 20 & 16960 & 11 \\
+67          & 27 &  2206 & 11 \\
 \midrule
-Dataset avg & 11.00 & 13.28 & 3255.22 & 8.80 & 0.19 \\
+Dataset avg & 13.28 & 3255.22 & 8.80 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -606,7 +606,7 @@ Table~\ref{tab:lit_by_correctness} gives the mean output literal count $L(\Pi)$ 
 \label{tab:lit_by_correctness}
 \begin{tabular}{llrrrr}
 \toprule
-Original literals & & gpt-5-mini & gpt-oss:20b & qwen3-coder:30b & ILASP \\
+Original \\ literals & & gpt-5-mini & gpt-oss:20b & qwen3-coder:30b & ILASP \\
 \midrule
 \multirow{2}{*}{22} & Correct   & 4.81 & 4.91 & 4.40 & 3.67 \\
                     & Incorrect & --   & 7.00 & 4.70 & --   \\
