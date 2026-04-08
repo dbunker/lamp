@@ -78,8 +78,6 @@ Knowledge representation and reasoning problems arise across many domains, inclu
 
 However, writing ASP programs that are both correct and performant remains challenging, as modeling choices can significantly affect solver behavior. Recent progress in Large Language Models (LLMs) offers new opportunities to reduce this modeling burden. LLMs have shown strong capabilities in code generation and program synthesis, suggesting they may assist in deriving ASP encodings from high level natural language specifications \cite{ishay2023leveraginglargelanguagemodels}.
 
-It has also been shown that LLMs can perform inductive logic programming, such as learning logic rules from background knowledge and positive and negative examples when combined with feedback from a formal inference engine, such as Prolog \cite{gandarela2025inductivelearninglogicaltheories}. Here the authors proposed a systematic evaluation framework graded by expressivity to quantify LLM strengths and limitations in logic theory induction.
-
 The LLM to ASP Modeling Protocol (LAMP) is designed to guide LLMs in deducing and optimizing ASP rules from given instance facts and expected answer sets. LAMP provides a structured interaction protocol that enables refinement of ASP encodings, with the goal of improving both correctness and performance. Beyond proposing the system itself, LAMP can be used as a framework for evaluating the capabilities of different LLMs in ASP program generation.
 
 Both LAMP and the classical Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilaspinductivelearninganswer} address the same underlying problem class. Given a set of instance facts and an expected answer set, find a program within a bounded hypothesis space that produces the correct answer sets. ILASP solves this via exhaustive search under the Learning from Answer Sets (LAS) framework while LAMP replaces exhaustive search with LLM guided generation and Clingo based iterative verification. As the expected input and output are the same a controlled comparison can be made between symbolic ILP search and LLM based generation on the same class of tasks.
@@ -733,7 +731,7 @@ A key distinction from LAMP is that LLM2LAS uses LLMs to \emph{build the ILP tas
 
 \subsection{Expressivity Graded Evaluation}
 
-Gandarela et al.~\cite{gandarela2025inductivelearninglogicaltheories} introduced the RuDaS benchmark framework and a systematic methodology for evaluating LLM based theory induction graded by rule expressivity as Chain, RDG, DRDG, and Mixed categories. A key finding from that work is that LLMs are limited by their capacity to track long predicate dependency chains, directly relevant to future LAMP experiments and improvements.
+Gandarela et al.~\cite{gandarela2025inductivelearninglogicaltheories} demonstrated that LLMs can perform inductive logic programming, learning logic rules from background knowledge and positive and negative examples when combined with feedback from a formal inference engine such as Prolog. The authors introduced the RuDaS benchmark framework and a systematic methodology for evaluating LLM based theory induction graded by rule expressivity as Chain, RDG, DRDG, and Mixed categories. A key finding from that work is that LLMs are limited by their capacity to track long predicate dependency chains, directly relevant to future LAMP experiments and improvements.
 
 Beyond ASP specific research, logic programming has been used as a tool to evaluate and scaffold LLM reasoning. Hybrid GOFAI LLM systems show how expert systems can be rebuilt using LLM generated logic rules by Garrido et al. (2025) \cite{garridomerchán2026gofaimeetsgenerativeai}, while Xu et al. (2025) \cite{xu2025socratessmartypantstestinglogic} shows programming based test evaluators systematically assess LLM reasoning reliability. These works support the use of formal solvers, as in LAMP, to ground and validate LLM outputs.
 
@@ -766,6 +764,6 @@ The ILASP baseline achieved 97.5\%, with the three failures being search space t
 Beyond assisting users in ASP modeling, this protocol provides a system for probing LLM reasoning and logic programming capabilities. Future work includes extending to richer ASP constructs such as disjunction and choice rules, incorporating solver-level performance metrics, and exploring fine-tuned or neuro symbolic hybrids to further improve robustness and scalability.
 
 \bibliography{custom}
-\bibliographystyle{splncs04}
+\bibliographystyle{plain}
 
 \end{document}
