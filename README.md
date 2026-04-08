@@ -6,7 +6,7 @@ Answer Set Programming (ASP) offers a compelling mechanism for knowledge represe
 
 ## Full Paper
 
-[LAMP Paper](/LAMP.pdf)
+[LAMP Paper](./LAMP.pdf)
 
 ## Overview
 
@@ -70,17 +70,24 @@ data/
 
 ## Dependencies
 
+Requires **Python 3.13+**.
+
 - [clingo](https://potassco.org/clingo/) — ASP solver (Python API)
 - [ILASP](https://www.ilasp.com/) — inductive ASP learner (CLI binary)
 - [openai](https://pypi.org/project/openai/) — OpenAI API client
 - [ollama](https://pypi.org/project/ollama/) — Ollama local model client
 - [pandas](https://pandas.pydata.org/) — result aggregation
+- [matplotlib](https://matplotlib.org/), [xgboost](https://xgboost.readthedocs.io/), [shap](https://shap.readthedocs.io/) — analysis and feature importance (used in `stats.ipynb`)
 
-Install dependencies with [uv](https://github.com/astral-sh/uv):
+Install Python dependencies with [uv](https://github.com/astral-sh/uv):
 
 ```
 uv sync
 ```
+
+### ILASP Binary
+
+The ILASP runner expects the binary at `../ilasp/ILASP` relative to the project root (i.e., a sibling `ilasp/` directory). Download the binary from [ilasp.com](https://www.ilasp.com/) and place it there, or update the `ilasp_path` argument in `ILASPClient.__init__`.
 
 ### API Key
 
@@ -105,7 +112,7 @@ uv run lamp.py llms --rerun          # step 3: force re-query even if cached
 uv run lamp.py aggregate             # step 4: compute match statistics
 ```
 
-Steps are cached — if output files already exist they are not recomputed (pass `--rerun` to force).
+Steps are cached — if output files already exist they are not recomputed. The `--rerun` flag is only available for the `llms` step; `generate` and `ilasp` skip silently if their outputs already exist.
 
 ### LLM Feedback Loop
 
