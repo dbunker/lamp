@@ -139,17 +139,34 @@ Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilaspinductivelea
 The hypothesis space $\mathcal{H}$ is defined by a \textit{mode bias}, which constrains the structure of rules that may appear in a learned hypothesis. A \textit{mode declaration} is either a \textit{head declaration} $\mathit{modeh}(a)$ or a \textit{body declaration} $\mathit{modeb}(a)$, specifying which atoms may appear in rule heads and bodies respectively. Each atom in a mode declaration may contain \textit{placeholder terms} of the form $\mathit{\#var}(t)$ (a variable of type $t$) or $\mathit{\#con}(t)$ (a constant of type $t$), which are instantiated during the search. A \textit{hypothesis} $H \in \mathcal{H}$ is a set of ASP rules consistent with the mode bias.
 
 \paragraph{Learning Examples.}
-ILASP supports three types of examples, each placing a different constraint on the answer sets of $B \cup H$:
+Examples place constraints on the answer sets of $B \cup H$:
 \begin{itemize}
-    \item \textbf{Positive examples} $e^+ \in E^+$: at least one answer set of $B \cup H$ must satisfy $e^+$.
-    \item \textbf{Negative examples} $e^- \in E^-$: no answer set of $B \cup H$ may satisfy $e^-$.
-    \item \textbf{Context-dependent examples} $e^{cd} \in E^{cd}$: a pair $\langle e_c, e_p \rangle$ where $e_c$ is a \textit{context} (an additional ASP program) and $e_p$ is a \textit{partial interpretation}. At least one answer set of $B \cup H \cup e_c$ must extend $e_p$, meaning it must include all atoms in $e_p^+$ and exclude all atoms in $e_p^-$.
+    \item \textbf{Positive examples} $e^+ \in E^+$, a set of ground atoms. At least one answer set of $B \cup H$ must be a superset of $e^+$.
+    \item \textbf{Negative examples} $e^- \in E^-$, a set of ground atoms. No answer set of $B \cup H$ may be a superset of $e^-$.
 \end{itemize}
 
-\noindent Context-dependent examples subsume positive and negative examples and are the primary example type in modern ILASP, enabling the expression of partial observations under specific conditions.
+\noindent To illustrate, suppose the goal is to learn which individuals are \texttt{allowed} entry, given background facts about adults and minors.
+
+\begin{lstlisting}[language=ASP, caption={Simple ILASP learning task.}]
+% Background knowledge B
+adult(alice). adult(carol). minor(bob).
+
+% Hypothesis space
+#modeh(allowed(var(person))).
+#modeb(adult(var(person))).
+#modeb(minor(var(person))).
+
+% alice must be allowed
+#pos(e1, { allowed(alice) }, { }).
+
+% bob must NOT be allowed
+#neg(e2, { }, { allowed(bob) }).
+\end{lstlisting}
+
+\noindent The positive example forces $H$ to derive \texttt{allowed(alice)}, ruling out an empty hypothesis. The negative example rules out over-general rules such as \texttt{allowed(X) :- minor(X)} or \texttt{allowed(X).}\ Together they uniquely identify \texttt{allowed(X) :- adult(X).} as the intended hypothesis.
 
 \paragraph{Learning Task.}
-A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^-, E^{cd} \rangle$. A hypothesis $H \in \mathcal{H}$ is an \textit{inductive solution} of $T$ if it covers all examples. Every positive and context-dependent example is satisfied by some answer set of $B \cup H \cup e_c$, and no answer set of $B \cup H$ satisfies any negative example. When hypotheses are assigned a \textit{cost} (typically the sum of rule lengths), the learning task seeks an \textit{optimal} solution. This is the inductive solution of minimum cost.
+A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^- \rangle$. A hypothesis $H \in \mathcal{H}$ is an \textit{inductive solution} of $T$ if it covers all examples: every positive example is satisfied by some answer set of $B \cup H$, and no answer set of $B \cup H$ satisfies any negative example. When hypotheses are assigned a \textit{cost} (typically the sum of rule lengths), the learning task seeks an \textit{optimal} solution. This is the inductive solution of minimum cost.
 
 \paragraph{Search Procedure.}
 ILASP reduces the learning task to a sequence of ASP solving problems. The hypothesis space is encoded as an ASP metaprogram, and the search for a covering hypothesis is directed by a \textit{conflict-driven} procedure \cite{law2020ilaspinductivelearninganswer}. Candidate hypotheses are proposed, checked against all examples, and conflicts, examples not yet covered, are used to prune the space and guide subsequent iterations. This conflict-driven approach, implemented in the \textsc{FastLAS} system, scales substantially better than exhaustive enumeration of $\mathcal{H}$ \cite{law2022conflictdriveninductivelogicprogramming}.
