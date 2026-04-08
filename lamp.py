@@ -350,9 +350,9 @@ def generate_benchmarks():
 
     # Generate rules based on various configurations
     predicates_range     = [10, 6]
-    possible_terms_range = [10, 6]
+    possible_terms_range = [10]
     facts_range          = [9, 6]
-    rules_range          = [11]
+    rules_range          = [3, 6, 11]
     literals_range       = [3, 2]
     neg_literals_range   = [2, 1, 0]
     min_derived_atoms_range = [3, 1]

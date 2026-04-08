@@ -297,13 +297,13 @@ To keep the benchmarks tractable for both LLM generation and ILP search, the ASP
 The following is an example representing the model facts that objects \texttt{"car"} and \texttt{"scooter"} are both vehicles, represented with the predicate \texttt{vehicle}, and the scooter is slow moving, represented with the predicate \texttt{slow\_moving}. It also has the rule that if an object is a vehicle and not slow moving it is highway possible, represented with the predicate \texttt{highway\_possible}.
 
 \begin{lstlisting}[language=ASP, caption={Vehicle example ASP program.}]
-vehicle("scooter").
-vehicle("car").
-slow_moving("scooter").
+vehicle(scooter).
+vehicle(car).
+slow_moving(scooter).
 highway_possible(X) :- vehicle(X), not slow_moving(X).
 \end{lstlisting}
 
-Running this results in the answer set \texttt{\{ vehicle("scooter"), vehicle("car"), slow\_moving("scooter"), highway\_possible("car") \}}. Given these facts and rules, \texttt{highway\_possible(car)} can be deduced, indicating the car is highway possible and, due to default negation, the scooter is not highway possible.
+Running this results in the answer set \texttt{\{ vehicle(scooter), vehicle(car), slow\_moving(scooter), highway\_possible(car) \}}. Given these facts and rules, \texttt{highway\_possible(car)} can be deduced, indicating the car is highway possible and, due to default negation, the scooter is not highway possible.
 
 This restricted ASP subset can now be formalized. A \emph{Problem Profile} specifies the size and shape of the problem of how many predicates and terms exist, how many facts are given, and how large the rules may be. Together with the input facts and a target answer set, it defines a concrete benchmark that both LAMP and ILASP can solve.
 
@@ -493,7 +493,7 @@ Experiments were conducted on the synthetic data with varying complexities as sp
 
 \subsection{Experimental Setup}
 
-A total of 120 synthetic ASP programs were created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. All ASP solving and analysis was done using Clingo. ILASP was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. Each LAMP run was allowed a maximum of 3 iterations, one initial generation followed by up to 2 rounds of feedback verified by Clingo. Both systems receive the same input instance $\mathcal{M}$ (Definition~\ref{def:input}), where the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The selected parameters used for complexity classes are listed in Table~\ref{tab:parameters}. All combinations were used except where positive and negative literals are constrained to sum to no more than the overall literal count.
+A total of 120 synthetic ASP programs were created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. All ASP solving and analysis was done using Clingo. ILASP was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. Each LAMP run was allowed a maximum of 3 iterations, one initial generation followed by up to 2 rounds of feedback verified by Clingo. Both systems receive the same input instance $\mathcal{M}$ (Definition~\ref{def:input}), where the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The selected parameters used for complexity classes are listed in Table~\ref{tab:parameters}. All combinations were used except where the negative literal count equals or exceeds the overall literal count, which would leave no positive literals.
 
 \begin{table}[h]
     \centering
@@ -504,9 +504,9 @@ A total of 120 synthetic ASP programs were created with varying features for tes
     \textbf{Parameter} & \textbf{Variations} \\
     \midrule
     Descriptors & [10, 6] \\
-    Objects & [10, 6] \\
+    Objects & [10] \\
     Facts & [9, 6] \\
-    Rules & [11] \\
+    Rules & [3, 6, 11] \\
     Overall Literals & [3, 2] \\
     Negative Literals & [2, 1, 0] \\
     Min Derived Atoms & [3, 1] \\
@@ -638,7 +638,7 @@ Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to g
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_gpt-5-mini.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_gpt-5-mini.pdf}
-    \caption{Literal counts for gpt-5-mini (correct on left, recovered in gold and failed in red on right).}
+    \caption{Unique literal counts for gpt-5-mini (correct on left, recovered in gold and failed in red on right).}
     \label{fig:gpt_5_literals}
 \end{figure}
 
@@ -646,7 +646,7 @@ Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to g
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_gpt-oss:20b.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_gpt-oss:20b.pdf}
-    \caption{Literal counts for gpt-oss:20b (correct on left, recovered in gold and failed in red on right).}
+    \caption{Unique literal counts for gpt-oss:20b (correct on left, recovered in gold and failed in red on right).}
     \label{fig:gpt_oss_literals}
 \end{figure}
 
@@ -654,7 +654,7 @@ Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to g
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_qwen3-coder:30b.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_qwen3-coder:30b.pdf}
-    \caption{Literal counts for qwen3-coder:30b (correct on left, recovered in gold and failed in red on right).}
+    \caption{Unique literal counts for qwen3-coder:30b (correct on left, recovered in gold and failed in red on right).}
     \label{fig:qwen3_literals}
 \end{figure}
 
@@ -662,7 +662,7 @@ Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to g
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_ilasp.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_ilasp.pdf}
-    \caption{ILASP literal counts (correct on left, recovered in gold and failed in red on right).}
+    \caption{ILASP unique literal counts (correct on left, timed out in red on right).}
     \label{fig:ilasp_literals}
 \end{figure}
 
@@ -776,7 +776,7 @@ This work proposed a structured LLM to ASP Modeling Protocol (LAMP) designed to 
 
 The tested models exhibited clear performance differences, with \textit{gpt-5-mini} achieving 100\% final accuracy (94.2\% on first attempt) and \textit{gpt-oss:20b} achieving 95.8\% (90\%), while \textit{qwen3-coder:30b} reached only 45\% (30.8\% first attempt) despite its programming focus. These results highlight that strong general code generation ability does not necessarily translate to proficiency in logic programming, underscoring the value of ASP specific evaluation frameworks.
 
-The ILASP baseline achieved 97.5\%, with the three failures being search space timeouts rather than reasoning errors. This shows LLMs do not follow the same classical ILP search. They navigate the hypothesis space differently, using token-level generation rather than exhaustive enumeration, and can succeed where exhaustive search may not. The iterative feedback loop further contributed recovery of many cases for the three LLMs, confirming its value as a component of the LAMP pipeline.
+The ILASP baseline achieved 97.5\%, with the three failures being search space timeouts rather than reasoning errors. This shows LLMs do not follow the same classical ILP search. They navigate the hypothesis space differently, using token-level generation rather than exhaustive enumeration, and can succeed where exhaustive search may not. The iterative feedback loop further contributed recovery of many cases for the three LLMs, confirming its value as a component of the LAMP pipeline. ILASP was faster on average but timed out on three benchmarks that LAMP solved, while both systems substantially reduced literal counts relative to the synthetic originals and produced more stratified programs than the benchmarks themselves. Feature analysis on \textit{qwen3-coder:30b} identified solution atom count, derived atom count, and negative literal count as the strongest predictors of LLM failure.
 
 Beyond assisting users in ASP modeling, this protocol provides a system for probing LLM reasoning and logic programming capabilities. Future work includes extending to richer ASP constructs such as disjunction and choice rules, incorporating solver level performance metrics, and exploring fine tuned or neuro symbolic hybrids to further improve robustness and scalability.
 
