@@ -101,10 +101,10 @@ This section presents the core background underpinning LAMP including Answer Set
 
 \subsection{Answer Set Programming}
 
-Answer Set Programming (ASP) is a declarative programming paradigm based on stable model semantics \cite{bogaerts2024stablemodelsemanticshigherorder}.
+Answer Set Programming (ASP) is a declarative programming paradigm based on stable model semantics \cite{DBLP:series/synthesis/2012Gebser}, well suited to combinatorial search and knowledge-intensive reasoning tasks. An ASP program consists of rules over atoms and literals, and its solutions are the \textit{answer sets} (stable models) of that program. The following paragraphs introduce the syntactic primitives, rule structure, grounding procedure, and stable-model semantics used throughout this paper.
 
 \paragraph{Syntactic Primitives.}
-A \textit{term} is either a constant (a lowercase symbol or integer such as\ $a$, $0$), a variable (an uppercase symbol, such as\ $X$), or a function symbol $f(t_1,\ldots,t_k)$ applied to terms. A \textit{predicate} $p/k$ is a symbol of arity $k \geq 0$. Applying it to $k$ terms yields an \textit{atom} $p(t_1,\ldots,t_k)$. A ground atom contains no variables. A \textit{literal} is either a positive literal $a$ (an atom) or a \textit{default-negated} literal $\mathit{not}\; a$, where $\mathit{not}$ denotes negation as failure and $\mathit{not}\; a$ holds whenever $a$ cannot be derived.
+A \textit{term} is either a constant represented as a lowercase symbol or integer such as\ $a$, $0$ or a variable represented as an uppercase symbol, such as\ $X$. A \textit{predicate} $p/k$ is a symbol of arity $k \geq 0$. Applying it to $k$ terms yields an \textit{atom} $p(t_1,\ldots,t_k)$. A ground atom contains no variables. A \textit{literal} is either a positive literal $a$ (an atom) or a \textit{default-negated} literal $\mathit{not}\; a$, where $\mathit{not}$ denotes negation as failure and $\mathit{not}\; a$ holds whenever $a$ cannot be derived.
 
 \paragraph{Rules and Programs.}
 An ASP program $\Pi$ is a finite set of \textit{rules} of the following form.
@@ -133,7 +133,7 @@ Deciding whether a ground ASP program has an answer set is $\Sigma_2^P$-complete
 
 \subsection{Learning from Answer Sets}\label{sec:ilasp}
 
-Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilaspinductivelearninganswer} is a framework for Inductive Logic Programming (ILP) that learns ASP programs from examples. ILASP operates over three inputs. These are a \textit{hypothesis space} $\mathcal{H}$, a \textit{background knowledge} program $B$, and a set of \textit{learning examples} $E$.
+Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilaspinductivelearninganswer} is a framework for Inductive Logic Programming (ILP) that learns ASP programs from examples, defining the same task that LAMP approaches via LLM guided generation. A learning task is specified by a \textit{hypothesis space} $\mathcal{H}$ constraining which rules may be learned, a \textit{background knowledge} program $B$ consisting of ASP rules that are given rather than learned, and a set of \textit{learning examples} $E$ specifying constraints on the answer sets that the learned hypothesis must produce. The following paragraphs define each component and describe the conflict-driven search procedure ILASP uses to find an optimal hypothesis.
 
 \paragraph{Hypothesis Space.}
 The hypothesis space $\mathcal{H}$ is defined by a \textit{mode bias}, which constrains the structure of rules that may appear in a learned hypothesis. A \textit{mode declaration} is either a \textit{head declaration} $\mathit{modeh}(a)$ or a \textit{body declaration} $\mathit{modeb}(a)$, specifying which atoms may appear in rule heads and bodies respectively. Each atom in a mode declaration may contain \textit{placeholder terms} of the form $\mathit{\#var}(t)$ (a variable of type $t$) or $\mathit{\#con}(t)$ (a constant of type $t$), which are instantiated during the search. A \textit{hypothesis} $H \in \mathcal{H}$ is a set of ASP rules consistent with the mode bias.
