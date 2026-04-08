@@ -101,10 +101,10 @@ This section presents the core background underpinning LAMP including Answer Set
 
 \subsection{Answer Set Programming}
 
-Answer Set Programming (ASP) is a declarative programming paradigm based on stable model semantics \cite{DBLP:series/synthesis/2012Gebser}, well suited to combinatorial search and knowledge-intensive reasoning tasks. An ASP program consists of rules over atoms and literals, and its solutions are the \textit{answer sets} (stable models) of that program. The following paragraphs introduce the syntactic primitives, rule structure, grounding procedure, and stable-model semantics used throughout this paper.
+Answer Set Programming (ASP) is a declarative programming paradigm based on stable model semantics \cite{DBLP:series/synthesis/2012Gebser}, well suited to combinatorial search and knowledge-intensive reasoning tasks. An ASP program consists of rules over atoms and literals, and its solutions are the stable models, referred to as \textit{answer sets}, of that program. The following paragraphs introduce the syntactic primitives, rule structure, grounding procedure, and stable-model semantics used throughout this paper.
 
 \paragraph{Syntactic Primitives.}
-A \textit{term} is either a constant represented as a lowercase symbol or integer such as\ $a$, $0$ or a variable represented as an uppercase symbol, such as\ $X$. A \textit{predicate} $p/k$ is a symbol of arity $k \geq 0$. Applying it to $k$ terms yields an \textit{atom} $p(t_1,\ldots,t_k)$. A ground atom contains no variables. A \textit{literal} is either a positive literal $a$ (an atom) or a \textit{default-negated} literal $\mathit{not}\; a$, where $\mathit{not}$ denotes negation as failure and $\mathit{not}\; a$ holds whenever $a$ cannot be derived.
+A \textit{term} is either a constant represented as a lowercase symbol or integer such as\ $a$, $0$ or a variable represented as an uppercase symbol, such as\ $X$. A \textit{predicate} $p/k$ is a symbol of arity $k \geq 0$. Applying it to $k$ terms yields an \textit{atom} $p(t_1,\ldots,t_k)$. A ground atom contains no variables. A \textit{literal} is either a positive literal $a$, an atom, or a \textit{default-negated} literal $\mathit{not}\; a$, where $\mathit{not}$ denotes negation as failure and $\mathit{not}\; a$ holds whenever $a$ cannot be derived.
 
 \paragraph{Rules and Programs.}
 An ASP program $\Pi$ is a finite set of \textit{rules} of the following form.
@@ -113,10 +113,10 @@ An ASP program $\Pi$ is a finite set of \textit{rules} of the following form.
     h \leftarrow b_1, \ldots, b_m, \mathit{not}\; c_1, \ldots, \mathit{not}\; c_n
 \end{equation}
 
-\noindent Here $h$ is the \textit{head} (a classical atom or empty), each $b_i$ is a positive body literal, and $\mathit{not}\; c_j$ denotes default negation of atom $c_j$. When $m = n = 0$ the rule is a \textit{fact} and when $h$ is empty the rule is a \textit{constraint} (written $\leftarrow \text{body}$), eliminating any answer set in which the body is satisfied.
+\noindent Here $h$ is the \textit{head}, a classical atom or empty, each $b_i$ is a positive body literal, and $\mathit{not}\; c_j$ denotes default negation of atom $c_j$. When $m = n = 0$ the rule is a \textit{fact} and when $h$ is empty the rule is a \textit{constraint} written $\leftarrow \text{body}$, eliminating any answer set in which the body is satisfied. A body is satisfied when every positive literal $b_i$ is in the answer set and every negated atom $c_j$ is absent from it, which in a normal rule would force $h$ into the answer set, but with no head there is nothing to derive, so the answer set is eliminated instead.
 
 \paragraph{Variables and Grounding.}
-Rules are written with first order variables, allowing compact expression over large domains. Prior to solving, a \textit{grounder}, such as \textsc{Gringo}, substitutes all domain consistent constants for each variable, producing an equivalent propositional ground program $\Pi_g$. A rule is \textit{safe} if every variable in the head or in a negative body literal also appears in a positive body literal, which guarantees that grounding is finite and well defined.
+Rules are written with first order variables---symbols such as $X$ and $Y$ that range over concrete objects rather than truth values---allowing compact expression over large domains. Prior to solving, a \textit{grounder}, such as \textsc{Gringo}, substitutes all relevant terms for each variable, producing an equivalent propositional ground program $\Pi_g$. A rule is \textit{safe} if every variable occurring in it also appears in a positive body literal, which ensures that grounding is well-defined.
 
 \paragraph{Semantics.}
 Let $\mathcal{A}$ denote the Herbrand base set of all ground atoms. Given a ground program $\Pi$ and a set $S \subseteq \mathcal{A}$, the \textit{Gelfond--Lifschitz reduct} $\Pi^S$ is obtained by the steps.
@@ -124,7 +124,7 @@ Let $\mathcal{A}$ denote the Herbrand base set of all ground atoms. Given a grou
     \item Remove every rule whose body contains $\mathit{not}\; c$ for some $c \in S$
     \item Remove all negative literals from the bodies of remaining rules.
 \end{enumerate}
-$S$ is a \textit{stable model}, referred to in ASP as an \textit{answer set}, of $\Pi$ if and only if $S$ is the minimal model of the reduct $\Pi^S$. A program may have zero, one, or multiple answer sets and solutions to the encoded problem correspond exactly to its answer sets.
+$S$ is a \textit{stable model}, referred to in ASP as an \textit{answer set}, of $\Pi$ if and only if $S$ is the \textit{minimal model} of the reduct $\Pi^S$. Because $\Pi^S$ is negation free, it has a unique minimal model, the smallest set of atoms satisfying every rule, where no atom is included unless it is forced by some rule in $\Pi^S$. A program may have zero, one, or multiple answer sets and solutions to the encoded problem correspond exactly to its answer sets.
 
 Modern ASP solvers, such as Clingo \cite{gebser2014clingoasp}, extend the core language with aggregates, choice rules, disjunctive heads, and optimization statements. LAMP uses Clingo as its verification oracle but operates over a restricted subset of normal rules only, as defined in Section~\ref{sec:benchmark}.
 
@@ -468,7 +468,7 @@ Given a solution $\Pi$ to instance $\mathcal{M}$, its \emph{literal count} is
 where $\mathit{pos}(r)$ and $\mathit{neg}(r)$ are the positive and negative body literals of rule $r$, and $L(\Pi)$ is the total number of body literals across all rules. A solution $\Pi$ is \emph{more concise} than $\Pi'$ if $L(\Pi) < L(\Pi')$.
 \end{definition}
 
-Many other notions of optimality are applicable to ASP programs, including body literal and rule count, stratification, tightness, total grounded rules, and ASP solving time. This work focuses on literal count as a direct measure of complexity with stratification reported separately.
+Many other notions of optimality are applicable to ASP programs, including body literal and rule count, total unique literals count, stratification, tightness, total grounded rules, and ASP solving time. This work focuses on literal count as a direct measure of complexity with stratification reported separately.
 
 \section{Experiments}
 
