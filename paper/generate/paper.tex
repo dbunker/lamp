@@ -64,7 +64,7 @@
 \pagestyle{plain}
 
 \begin{abstract}
-Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning, however developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the Clingo solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 100\% accuracy, \textit{gpt-oss:20b} 95.8\%, and \textit{qwen3-coder:30b} 45.0\%. Although ILASP was on average faster, the leading LLM solved all benchmarks on which ILASP timed out. Both LAMP and ILASP are also able to reduce literal counts and increase stratification at a similar level. Finally, feature analysis is used to determine predictors of LLM success or failure.
+Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning, however developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the Clingo solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 100\% accuracy, \textit{gpt-oss:20b} 95.8\%, and \textit{qwen3-coder:30b} 45.0\%. Although ILASP was on average faster, \textit{gpt-5-mini} solved all benchmarks on which ILASP timed out. Both LAMP and ILASP are also able to reduce literal counts and increase stratification at a similar level. Finally, feature analysis is used to determine predictors of LLM success or failure.
 \end{abstract}
 
 \section{Introduction}
@@ -85,7 +85,7 @@ Both LAMP and the classical Inductive Logic Programming (ILP) system Inductive L
 The relevant research questions of this work are the following.
 
 \noindent
-\textbf{RQ1.} Is a structured approach for LLM assisted ASP modeling possible using the LAMP system and if so under what conditions do LLMs outperform, match, or fall short of classical ILP ILASP on ASP rule induction?
+\textbf{RQ1.} Is a structured approach for LLM assisted ASP modeling possible using the LAMP system, and under what conditions does it produce correct ASP encodings?
 
 \noindent
 \textbf{RQ2.} How do LLMs and ILASP compare in terms of accuracy, speed, and program conciseness on ASP rule induction tasks?
@@ -485,7 +485,7 @@ Given a solution $\Pi$ to instance $\mathcal{M}$, its \emph{literal count} is
 where $\mathit{pos}(r)$ and $\mathit{neg}(r)$ are the positive and negative body literals of rule $r$, and $L(\Pi)$ is the total number of body literals across all rules. A solution $\Pi$ is \emph{more concise} than $\Pi'$ if $L(\Pi) < L(\Pi')$.
 \end{definition}
 
-Many other notions of optimality are applicable to ASP programs, including body literal and rule count, total unique literals count, stratification, tightness, total grounded rules, and ASP solving time. This work focuses on literal count as a direct measure of complexity with stratification reported separately.
+Many other notions of optimality are applicable to ASP programs, including body literal and rule count, stratification, tightness, total grounded rules, and ASP solving time. This work reports both literal count $L(\Pi)$ and unique literal count, the number of distinct body literals across all rules in $\Pi$. While $L(\Pi)$ measures total deductive weight, unique literal count captures predicate vocabulary breadth, where a program that reuses few predicates across many rules is structurally simpler than one with many distinct dependencies, even at the same $L(\Pi)$. Stratification is reported separately.
 
 \section{Experiments}
 
@@ -497,7 +497,7 @@ A total of 120 synthetic ASP programs were created with varying features for tes
 
 \begin{table}[h]
     \centering
-    \caption{Parameters associated with Definition~\ref{def:complexity}}
+    \caption{Parameters associated with Definition~\ref{def:complexity}. Overall Literals is a generation constraint on the sum $L^+ + L^-$ and is not a profile parameter.}
     \label{tab:parameters}
     \begin{tabular}{ll}
     \toprule
@@ -611,7 +611,7 @@ Figure~\ref{fig:timing_boxplot} shows the per benchmark wall clock time distribu
     \end{tabular}
 \end{table}
 
-Table~\ref{tab:lit_by_correctness} gives the mean output literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) per system at original literal counts of 22 and 33, split by correctness. Correct solutions show a large reduction relative to the originals across all systems, averaging 3--5 literals against originals of 22 or 33. This is consistent with the synthetic benchmark structure, where generated programs may include rules not strictly necessary to produce the target answer set.
+Table~\ref{tab:lit_by_correctness} gives the mean output literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) per system at original literal counts of 22 and 33, split by correctness. Correct solutions show a large reduction relative to the originals across all systems, averaging 3 to 5 literals against originals of 22 or 33. This is consistent with the synthetic benchmark structure, where generated programs may include rules not strictly necessary to produce the target answer set.
 
 \begin{table}[h]
 \centering
@@ -762,7 +762,7 @@ Planning provides another closely related line of research. Logical chain of tho
 
 \section{Future Work}
 
-Several directions for future work follow naturally. First, iterative prompting could be improved by more explicit chain of thought reasoning, potentially evaluating many candidate rules across multiple instance fact sets per iteration, with Clingo acting as a tool within an LLM based agent loop. The feature sets could also be extended to include greater arity, or additional language features, such as choice rules and head disjunction. Another approach would be from the specific perspective of solving complexity, focusing on solution space features such as, vector cover size, tree depth, feedback vertex set, clique width, tree width, among others \cite{hecher2024extendedversionofstructural}. Prompt optimization frameworks such as DSPy \cite{khattab2023dspycompilingdeclarativelanguage} could be used to automatically refine prompts and feedback strategies. Even without using LLMs fine tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, the models are always improving, so simply updating the models may result in large improvements.
+Several directions for future work follow naturally. First, iterative prompting could be improved by more explicit chain of thought reasoning, potentially evaluating many candidate rules across multiple instance fact sets per iteration, with Clingo acting as a tool within an LLM based agent loop. Another approach would be from the specific perspective of solving complexity, focusing on solution space features such as, vector cover size, tree depth, feedback vertex set, clique width, tree width, among others \cite{hecher2024extendedversionofstructural}. Prompt optimization frameworks such as DSPy \cite{khattab2023dspycompilingdeclarativelanguage} could be used to automatically refine prompts and feedback strategies. Even without using LLMs fine tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, the models are always improving, so simply updating the models may result in large improvements.
 
 Second, the synthetic datasets could be extended to richer ASP constructs, including higher arity predicates, choice rules, disjunction, and head disjunction, as well as more complex dependency structures such as those proposed by Gandarela et al. (2025) regarding logic program expressivity \cite{gandarela2025inductivelearninglogicaltheories}.
 
