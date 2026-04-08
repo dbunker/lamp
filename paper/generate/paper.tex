@@ -124,7 +124,7 @@ Let $\mathcal{A}$ denote the Herbrand base set of all ground atoms. Given a grou
     \item Remove every rule whose body contains $\mathit{not}\; c$ for some $c \in S$
     \item Remove all negative literals from the bodies of remaining rules.
 \end{enumerate}
-$S$ is a \textit{stable model}, referred to in ASP as an \textit{answer set}, of $\Pi$ if and only if $S$ is the \textit{minimal model} of the reduct $\Pi^S$. Because $\Pi^S$ is negation free, it has a unique minimal model, the smallest set of atoms satisfying every rule, where no atom is included unless it is forced by some rule in $\Pi^S$. A program may have zero, one, or multiple answer sets and solutions to the encoded problem correspond exactly to its answer sets.
+$S$ is a \textit{stable model}, referred to in ASP as an \textit{answer set}, of $\Pi$ if and only if $S$ is the \textit{minimal model} of the reduct $\Pi^S$. Because $\Pi^S$ is negation free, it has a unique minimal model, the smallest set of atoms satisfying every rule, where no atom is included unless it is forced by some rule in $\Pi^S$. A program may have zero, one, or multiple answer sets and solutions to the encoded problem correspond exactly to its answer sets. $AS(\Pi)$ is used to denote the set of answer sets of a program $\Pi$.
 
 Modern ASP solvers, such as Clingo \cite{gebser2014clingoasp}, extend the core language with aggregates, choice rules, disjunctive heads, and optimization statements. LAMP uses Clingo as its verification oracle but operates over a restricted subset of normal rules only, as defined in Section~\ref{sec:benchmark}.
 
@@ -317,8 +317,8 @@ A \emph{Problem Profile} is a tuple
 \]
 where:
 \begin{itemize}
-  \item $\mathcal{D}$ is a finite set of \emph{descriptors} (predicate symbols);
-  \item $\mathcal{T}$ is a finite set of \emph{objects} (constant symbols);
+  \item $\mathcal{D}$ is a finite set of predicate symbols;
+  \item $\mathcal{T}$ is a finite set of term constant symbols;
   \item $N_F \in \mathbb{N}$ is the number of \emph{instance facts};
   \item $R \in \mathbb{N}$ is the maximum number of \emph{rules};
   \item $L^+ \in \mathbb{N}$ is the maximum number of \emph{positive literals} in each rule body;
@@ -327,7 +327,7 @@ where:
 \end{itemize}
 \end{definition}
 
-From a Problem Profile we can define a concrete input instance. Each instance pairs a set of ground facts and a target answer set with a bounded schema that defines the hypothesis space both LAMP and ILASP search over.
+From a Problem Profile a concrete input instance can be defined. Each instance pairs a set of ground facts and a target answer set with a bounded schema that defines the hypothesis space both LAMP and ILASP search over.
 
 \begin{definition}[Input Instance]
 \label{def:input}
@@ -337,7 +337,7 @@ Given a Problem Profile stated as $\mathcal{C} = \langle\, \mathcal{D},\; \mathc
 \]
 where:
 \begin{itemize}
-  \item $F$ is the \emph{instance facts}, a set of $N_F$ ground atoms of the form $d(o)$ with descriptor $d \in \mathcal{D}$ and object $o \in \mathcal{T}$ (e.g.\ \texttt{d0(o0)});
+  \item $F$ is the \emph{instance facts}, a set of $N_F$ ground atoms of the form $d(o)$ with descriptor $d \in \mathcal{D}$ and object $o \in \mathcal{T}$ (e.g.\ \texttt{d0(o0)}), so $|F| = N_F$;
   \item $A^{*}$ is the \emph{target answer set}, the desired unique stable model that any correct solution $\Pi$ must produce; it must satisfy $F \subseteq A^{*}$ and $|A^{*} \setminus F| \geq A_{\min}$; and
   \item $\Phi$ is the \emph{candidate rule schema}, the full set of concrete ASP rules defining the hypothesis space from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
     \[
@@ -350,7 +350,7 @@ $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
 \[
   AS\!\left(F \cup \Pi\right) \;=\; \bigl\{\, A^{*} \,\bigr\}
 \]
-Meaning the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
+where $AS(\cdot)$ denotes the set of answer sets of a program. Meaning the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
 \end{definition}
 
 The candidate rule schema $\Phi$ corresponds directly to the mode bias of the associated ILASP learning task generated for each benchmark.
