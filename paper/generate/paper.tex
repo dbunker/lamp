@@ -1,5 +1,5 @@
 \documentclass[11pt,a4paper]{article}
-%
+
 \usepackage{graphicx}
 \usepackage{multirow}
 
@@ -63,11 +63,6 @@ Answer Set Programming (ASP) offers a compelling mechanism for knowledge represe
 \end{abstract}
 
 \section{Introduction}
-
-% - 1. LLMs Generating Answer Set Programs (NL -> ASP, spec -> ASP)
-%     - Leveraging Large Language Models to Generate Answer Set Programs (2023)
-%           - \cite{ishay2023leveraginglargelanguagemodels}
-%           - 2307.07699
 
 Knowledge representation and reasoning problems arise across many domains, including software and hardware customization, industrial manufacturing, service composition and others. These problems are characterized by combinatorial constraints that determine which combinations of components are valid. Answer Set Programming (ASP) models such problems, offering clear semantics with expressive capabilities for constraints, defaults, and combinatorial reasoning.
 
@@ -281,8 +276,6 @@ LLMs have been shown to generate logic programs from natural language specificat
   \label{fig:lamp_process}
 \end{figure}
 
-% Overview of the LAMP system architecture. Instance facts, the expected stable model, and the output format constraint $\Phi$ are used to construct a prompt for the LLM. The generated candidate program $\Pi_i$ is parsed and run through the Clingo solver. If the resulting answer set matches $A^*$ the program proceeds to evaluation; otherwise, feedback $\delta_i$ is returned and the loop repeats. Once a correct program is found, rule and literal counts are assessed and feature importance is computed to identify which ASP features most affect LLM performance.
-
 The LAMP framework operates on a formally defined benchmark structure that constrains the hypothesis space and the target answer set, as illustrated in Figure~\ref{fig:lamp_process}. This section defines that benchmark framework, describes how benchmark instances are generated, and then details the LAMP interaction protocol and evaluation criteria.
 
 \subsection{Benchmark Framework}\label{sec:benchmark}
@@ -393,38 +386,6 @@ This gives ILASP the same hypothesis space over which LAMP operates. For benchma
 
 \subsection{Prompting and Feedback Loop}
 
-% - 2. LLMs Generating Answer Set Programs (NL -> ASP, spec -> ASP)
-%     - Logic-of-Thought: Empowering Large Language Models with Logic Programs for Solving Puzzles in Natural Language (2025)
-%           - \cite{li2025logicofthoughtempoweringlargelanguage}
-%           - 2505.16114
-
-% - 4. Hybrid LLM + ASP Reasoning Pipelines
-%     - CLMASP: Coupling Large Language Models with Answer Set Programming for Robotic Task Planning (2024)
-%           - \cite{lin2024clmaspcouplinglargelanguage}
-%           - 2406.03367
-%     - Reliable Natural Language Understanding with Large Language Models and Answer Set Programming (2023)
-%           - \cite{rajasekharan2023reliablenaturallanguageunderstanding}
-%           - 2302.03780v3
-%     - A Reliable Common-Sense Reasoning Socialbot Built Using LLMs and Goal-Directed ASP (2024)
-%           - \cite{zeng2024reliablecommonsensereasoningsocialbot}
-%           - 2407.18498v1
-%     - Reliable Collaborative Conversational Agent System Based on LLMs and Answer Set Programming (2025)
-%           - \cite{zeng2025reliablecollaborativeconversationalagent}
-%           - 2505.06438
-
-% - 3. Fine-Tuning & Optimizing LLMs for ASP Code Generation
-%     - LLASP: Fine-tuning Large Language Models for Answer Set Programming (2024)
-%           - \cite{coppolillo2024llaspfinetuninglargelanguage}
-%           - 2407.18723
-
-% - B. Neuro-symbolic Loop Chain of Thought Pipeline
-%     - DSPy: Compiling Declarative Language Model Calls into Self-Improving Pipelines (2023)
-%           - \cite{khattab2023dspycompilingdeclarativelanguage}
-%           - 2310.03714v1
-%     - Dspy-based Neural-Symbolic Pipeline to Enhance Spatial Reasoning in LLMs (2024)
-%           - \cite{wang2024dspybasedneuralsymbolicpipelineenhance}
-%           - 2411.18564
-
 The initial prompt instructs the LLM to reconstruct ASP rules that, combined with the given facts, yield the target stable model. It states the rule schema constraints from $\Phi$ (single variable $X$, normal rules with bounded positive and negative body literals, no new facts), tells the LLM to prefer the minimal rule set, and provides the instance facts $F$ and target answer set $A^*$ as concrete inputs. The prompt also contains a short worked example demonstrating the expected output format. If Clingo reports a mismatch, a feedback message is appended to the conversation containing the facts, the expected stable model, and the actual stable model from the candidate rules, asking the LLM to produce corrected rules. This iterative interaction is formalized below.
 
 \begin{definition}[LAMP Interaction Protocol]
@@ -454,14 +415,6 @@ The final output $\Pi_n$ is accepted as the solution if it satisfies $\mathcal{M
 \end{definition}
 
 \subsection{Evaluation}
-
-% - 5. LLMs Evaluated or Constrained Using ASP
-%     - LLM-ARC: Enhancing LLMs with an Automated Reasoning Critic (2024)
-%           - \cite{kalyanpur2024llmarcenhancingllmsautomated}
-%           - 2406.17663
-%     - An Empirical Study of Conformal Prediction in LLM with ASP Scaffolds for Robust Reasoning (2025)
-%           - \cite{kaur2025empiricalstudyconformalprediction}
-%           - 2503.05439
 
 LAMP and ILASP systems are evaluated by correctness of answer set, time to solve and optimality of ASP programs. The ASP programs generated are evaluated after being run via Clingo. The correctness, number of rules, complexity and how close it is to the expected stable model can then be assessed.
 
@@ -508,11 +461,6 @@ A total of 120 synthetic ASP programs were created with varying features for tes
 \end{table}
 
 \subsection{Results and Discussion}
-
-% - 1. Benchmarking & Evaluation of LLMs on ASP / Logic Programming
-%     - Can LLMs Solve ASP Problems? Insights from a Benchmarking Study (Extended Version) (2025)
-%           - \cite{ren2025llmssolveaspproblems}
-%           - 2507.19749
 
 Overall results are shown in Table~\ref{tab:ilasp_results}. Both \textit{gpt-5-mini} and \textit{gpt-oss:20b} perform very well, deducing the correct ASP rules to get the expected stable model in almost all cases. LAMP using \textit{qwen3-coder:30b} performed significantly worse, reaching only 45.0\% final accuracy (54/120), with 30.8\% correct on the first attempt. Although \textit{qwen3-coder:30b} is tuned for programming, it may not have been tuned for ASP, resulting in poorer performance.
 
@@ -631,7 +579,7 @@ Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to g
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_gpt-5-mini.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_gpt-5-mini.pdf}
-    \caption{Unique literal counts for gpt-5-mini (correct on left, recovered in gold and failed in red on right).}
+    \caption{Unique literal counts for \textit{gpt-5-mini} (correct on left, recovered in gold and failed in red on right).}
     \label{fig:gpt_5_literals}
 \end{figure}
 
@@ -639,7 +587,7 @@ Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to g
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_gpt-oss:20b.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_gpt-oss:20b.pdf}
-    \caption{Unique literal counts for gpt-oss:20b (correct on left, recovered in gold and failed in red on right).}
+    \caption{Unique literal counts for \textit{gpt-oss:20b} (correct on left, recovered in gold and failed in red on right).}
     \label{fig:gpt_oss_literals}
 \end{figure}
 
@@ -647,7 +595,7 @@ Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to g
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_qwen3-coder:30b.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_qwen3-coder:30b.pdf}
-    \caption{Unique literal counts for qwen3-coder:30b (correct on left, recovered in gold and failed in red on right).}
+    \caption{Unique literal counts for \textit{qwen3-coder:30b} (correct on left, recovered in gold and failed in red on right).}
     \label{fig:qwen3_literals}
 \end{figure}
 
@@ -699,39 +647,6 @@ The results can be seen in Figure~\ref{fig:importance}. The most important featu
 \end{figure}
 
 \section{Related Work}
-
-% - 6. LLMs + Learning / Induction over ASP
-%     - Question Answering with LLMs and Learning from Answer Sets (2025)
-%           - \cite{borroto2025questionansweringllmslearning}
-%           - 2509.16590
-%     - Declarative Knowledge Distillation from Large Language Models for Visual Question Answering Datasets (2024)
-%           - \cite{eiter2024declarativeknowledgedistillationlarge}
-%           - 2410.09428
-%     - Towards Automatic Composition of ASP Programs from Natural Language Specifications (2024)
-%           - \cite{borroto2024automaticcompositionaspprograms}
-%           - 2403.04541
-
-% - 7. Related Logic Programming (Non-ASP but Methodologically Relevant)
-%     - GOFAI meets Generative AI: Development of Expert Systems by means of Large Language Models (2025)
-%           - \cite{garridomerchán2026gofaimeetsgenerativeai}
-%           - 2507.13550
-%     - Socrates or Smartypants: Testing Logic Reasoning Capabilities of Large Language Models with Logic Programming-based Test Oracles (2025)
-%           - \cite{xu2025socratessmartypantstestinglogic}
-%           - 2504.12312
-
-% - 7. Planning
-%     - Teaching LLMs to Plan: Logical Chain-of-Thought Instruction Tuning for Symbolic Planning (2025)
-%           - \cite{verma2025teachingllmsplanlogical}
-%           - 2509.13351
-%     - plasp 3: Towards Effective ASP Planning (2018)
-%           - \cite{dimopoulos2018plasp3effectiveasp}
-%           - 1812.04491v1
-%     - PEIRCE: Unifying Material and Formal Reasoning via LLM-Driven Neuro-Symbolic Refinement (2025)
-%           - \cite{quan2025peirceunifyingmaterialformal}
-%           - 2504.04110
-%     - Planning in the Dark: LLM-Symbolic Planning Pipeline without Experts (2025)
-%           - \cite{huang2024planningdarkllmsymbolicplanning}
-%           - 2409.15915
 
 \subsection{Inductive ASP Learning and LAS}
 
