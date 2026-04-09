@@ -97,7 +97,7 @@ This paper investigates the current capabilities of Large Language Models (LLMs)
 
 \section{Background}
 
-This section presents the core background underpinning LAMP including Answer Set Programming (ASP), Inductive Learning of Answer Set Programs (ILASP), and Large Language Models (LLMs).
+This section presents the core background underpinning LAMP including ASP, ILASP, and LLMs.
 
 \subsection{Answer Set Programming}
 
@@ -239,7 +239,7 @@ LLMs have been shown to generate logic programs from natural language specificat
     \node[proc=inputcol, minimum width=3.4cm, below=of facts]
       (model) {Expected Stable Model\\[2pt]\texttt{\scriptsize \{d0(o0), d2(o0),\ldots\}}};
     \node[proc=inputcol, minimum width=3.4cm, below=of model]
-      (format) {Candidate Rule Schema $\Phi$\\[2pt]\footnotesize\textit{arity-1, single var, bounded literals}};
+      (format) {Hypothesis Space $\Phi$\\[2pt]\footnotesize\textit{arity-1, single var, bounded literals}};
 
     % \node[grplabel, left=0.15cm of facts, rotate=90, anchor=south] {INPUTS};
 
@@ -339,7 +339,7 @@ where
 \begin{itemize}
   \item $F$ is the \emph{instance facts}, a set of $N_F$ ground atoms of the form $d(o)$ with descriptor $d \in \mathcal{D}$ and object $o \in \mathcal{T}$ (e.g.\ \texttt{d0(o0)}), so $|F| = N_F$.
   \item $A^{*}$ is the \emph{target answer set}, the desired unique stable model that any correct solution $\Pi$ must produce. It must satisfy $F \subseteq A^{*}$ and $|A^{*} \setminus F| \geq A_{\min}$.
-  \item $\Phi$ is the \emph{candidate rule schema}, the full set of concrete ASP rules defining the hypothesis space from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
+  \item $\Phi$ is the \emph{hypothesis space}, the full set of concrete ASP rules from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
     \[
       d_h(X) \;:\text{-}\; p_1(X),\; \ldots,\; p_{k}(X),\; \texttt{not}\; n_1(X),\; \ldots,\; \texttt{not}\; n_{m}(X).
     \]
@@ -353,7 +353,7 @@ $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
 where $AS(\cdot)$ denotes the set of answer sets of a program. Meaning the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
 \end{definition}
 
-The candidate rule schema $\Phi$ corresponds directly to the mode bias of the associated ILASP learning task generated for each benchmark.
+The hypothesis space $\Phi$ corresponds directly to the mode bias of the associated ILASP learning task generated for each benchmark.
 
 \subsection{Dataset Generation}
 
@@ -468,9 +468,9 @@ The final output $\Pi_n$ is accepted as the solution if it satisfies $\mathcal{M
 %           - \cite{kaur2025empiricalstudyconformalprediction}
 %           - 2503.05439
 
-LAMP and ILASP systems are evaluated by correctness of answer set, time to solve and optimality of ASP programs. The ASP programs generated are evaluated after being run via Clingo. The correctness, number of rules, complexity and how close it is to the expected stable model can then be assessed. This is similar to the process LLM-ARC employs as an actor critic method, where the LLM Actor generates ASP, while the automated reasoning critic evaluates the code \cite{kalyanpur2024llmarcenhancingllmsautomated}.
+LAMP and ILASP systems are evaluated by correctness of answer set, time to solve and optimality of ASP programs. The ASP programs generated are evaluated after being run via Clingo. The correctness, number of rules, complexity and how close it is to the expected stable model can then be assessed.
 
-As in other systems that use ASP as a scaffolding for robust reasoning \cite{kaur2025empiricalstudyconformalprediction}, the prompt also instructs the LLM to prefer the minimal rule set with fewest rules and literals, directly encouraging concise encodings.
+The prompt also instructs the LLM to prefer the minimal rule set with fewest rules and literals, directly encouraging concise encodings.
 
 Beyond correctness, the systems are evaluated on whether the LLM has produced a more concise encoding than the original synthetic program, formalized as follows.
 
@@ -752,7 +752,7 @@ Beyond ASP specific research, logic programming has been used as a tool to evalu
 
 \subsection{LLM Benchmarking on ASP}
 
-ASPBench \cite{szeider2026aspbenchnaturallanguagelogic} provides benchmarks specifically for grading LLM ASP induction. Ren et al.~\cite{ren2025llmssolveaspproblems} benchmark 14 LLMs across ASP entailment, verification, and answer set computation tasks, finding that answer set computation remains a significant challenge for LLMs without scaffolding, suggesting that structured prompting and iterative solver feedback, as in LAMP, are likely necessary for reliable ASP induction. Schrader et al.~\cite{schrader2025solverintheloopframeworkimprovingllms} adopt a related solver-in-the-loop strategy, but use solver feedback to curate training data for supervised fine tuning on natural language to ASP translation for logic puzzles, whereas LAMP uses solver feedback at inference time to guide rule induction from facts and a target answer set.
+ASPBench \cite{szeider2026aspbenchnaturallanguagelogic} provides benchmarks specifically for grading LLM ASP induction. Ren et al.~\cite{ren2025llmssolveaspproblems} benchmark 14 LLMs across ASP entailment, verification, and answer set computation tasks, finding that answer set computation remains a significant challenge for LLMs without scaffolding, suggesting that structured prompting and iterative solver feedback, as in LAMP, are likely necessary for reliable ASP induction. Schrader et al.~\cite{schrader2025solverintheloopframeworkimprovingllms} adopt a related solver-in-the-loop strategy, but use solver feedback to curate training data for supervised fine tuning on natural language to ASP translation for logic puzzles, whereas LAMP uses solver feedback at inference time to guide rule induction from facts and a target answer set. LLM-ARC \cite{kalyanpur2024llmarcenhancingllmsautomated} adopts an actor critic framing in which an LLM generates logic and an automated reasoning critic evaluates it, and Kaur et al.~\cite{kaur2025empiricalstudyconformalprediction} use ASP as a scaffold to improve LLM reasoning robustness under conformal prediction. Both pair LLMs with formal solvers in a pattern similar to LAMP, applied to general reasoning rather than rule induction.
 
 \subsection{Planning and NeuroSymbolic Pipelines}
 
@@ -764,7 +764,9 @@ Several directions for future work follow naturally. First, iterative prompting 
 
 Second, the synthetic datasets could be extended to richer ASP constructs, including higher arity predicates, choice rules, disjunction, and head disjunction, as well as more complex dependency structures such as those proposed by Gandarela et al. (2025) regarding logic program expressivity \cite{gandarela2025inductivelearninglogicaltheories}.
 
-Third, evaluation could move beyond synthetic configuration tasks to existing ASP datasets, including ASPBench \cite{szeider2026aspbenchnaturallanguagelogic}, OOASP models \cite{falkner2015ooaspconnectingobjectorientedlogic}, real world ASP encodings, planning benchmarks such as Plasp and PDDL to ASP translations \cite{dimopoulos2018plasp3effectiveasp}, and domains like rail scheduling. Fourth, deeper natural language interfaces to ASP could be explored, covering bidirectional translation between text and ground facts, rules, stable models, and multiple natural languages.
+Third, evaluation could move beyond synthetic configuration tasks to existing ASP datasets, including ASPBench \cite{szeider2026aspbenchnaturallanguagelogic}, OOASP models \cite{falkner2015ooaspconnectingobjectorientedlogic}, real world ASP encodings, planning benchmarks such as Plasp and PDDL to ASP translations \cite{dimopoulos2018plasp3effectiveasp}, and domains like rail scheduling.
+
+Fourth, deeper natural language interfaces to ASP could be explored, covering bidirectional translation between text and ground facts, rules, stable models, and multiple natural languages.
 
 Finally, optimization remains a promising avenue, including other ways of transforming ASP into more efficient ASP, compiling ASP fragments to lower level code, such as C, and tighter integration with solver level optimizations, enabling LLMs to reason not only about correctness but also about grounding and solving performance.
 
