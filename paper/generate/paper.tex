@@ -754,7 +754,7 @@ Beyond ASP specific research, logic programming has been used as a tool to evalu
 
 \subsection{LLM Benchmarking on ASP}
 
-ASPBench \cite{szeider2026aspbenchnaturallanguagelogic} provides benchmarks specifically for grading LLM ASP induction. Ren et al.~\cite{ren2025llmssolveaspproblems} benchmark 14 LLMs across ASP entailment, verification, and answer set computation tasks, finding that answer set computation remains a significant challenge for LLMs without scaffolding, suggesting that structured prompting and iterative solver feedback, as in LAMP, are likely necessary for reliable ASP induction.
+ASPBench \cite{szeider2026aspbenchnaturallanguagelogic} provides benchmarks specifically for grading LLM ASP induction. Ren et al.~\cite{ren2025llmssolveaspproblems} benchmark 14 LLMs across ASP entailment, verification, and answer set computation tasks, finding that answer set computation remains a significant challenge for LLMs without scaffolding, suggesting that structured prompting and iterative solver feedback, as in LAMP, are likely necessary for reliable ASP induction. Schrader et al.~\cite{schrader2025solverintheloopframeworkimprovingllms} adopt a related solver-in-the-loop strategy, but use solver feedback to curate training data for supervised fine tuning on natural language to ASP translation for logic puzzles, whereas LAMP uses solver feedback at inference time to guide rule induction from facts and a target answer set.
 
 \subsection{Planning and NeuroSymbolic Pipelines}
 
