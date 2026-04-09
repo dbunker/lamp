@@ -129,31 +129,29 @@ Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilaspinductivelea
 The hypothesis space $\mathcal{H}$ is defined by a \textit{mode bias}, which constrains the structure of rules that may appear in a learned hypothesis. A \textit{mode declaration} is either a \textit{head declaration} $\mathit{modeh}(a)$ or a \textit{body declaration} $\mathit{modeb}(a)$, specifying which atoms may appear in rule heads and bodies respectively. Each atom in a mode declaration may contain \textit{placeholder terms} of the form $\mathit{\#var}(t)$ (a variable of type $t$) or $\mathit{\#con}(t)$ (a constant of type $t$), which are instantiated during the search. A \textit{hypothesis} $H \in \mathcal{H}$ is a set of ASP rules consistent with the mode bias.
 
 \paragraph{Learning Examples.}
-Examples place constraints on the answer sets of $B \cup H$.
+Examples are context-dependent and constrain the answer sets of $B \cup H$. Each example specifies an inclusion set, an exclusion set, and a context program.
 \begin{itemize}
-    \item \textbf{Positive examples} $e^+ \in E^+$, a set of ground atoms. At least one answer set of $B \cup H$ must be a superset of $e^+$.
-    \item \textbf{Negative examples} $e^- \in E^-$, a set of ground atoms. No answer set of $B \cup H$ may be a superset of $e^-$.
+    \item \textbf{Positive examples} $e^+ \in E^+$: at least one answer set of $B \cup e_\mathit{context} \cup H$ must include all atoms in $e_\mathit{included}$ and contain no atom in $e_\mathit{excluded}$.
+    \item \textbf{Negative examples} $e^- \in E^-$: no answer set of $B \cup e_\mathit{context} \cup H$ may include all atoms in $e_\mathit{included}$ while excluding all atoms in $e_\mathit{excluded}$.
 \end{itemize}
 
-\noindent To illustrate, suppose the goal is to learn which individuals are \texttt{allowed} entry, given background facts about adults and minors.
+\noindent To illustrate, suppose the goal is to learn which individuals are \texttt{allowed} entry, given facts about adults and minors as example context.
 
 \begin{lstlisting}[language=ASP, caption={Simple ILASP learning task.}]
-% Background knowledge B
-adult(alice). adult(carol). minor(bob).
+% Background knowledge B, could contain shared facts and rules
 
 % Hypothesis space
 #modeh(allowed(var(person))).
 #modeb(adult(var(person))).
 #modeb(minor(var(person))).
 
-% alice must be allowed
-#pos(e1, { allowed(alice) }, { }).
-
-% bob must NOT be allowed
-#neg(e2, { }, { allowed(bob) }).
+% Context-dependent example: inclusion, exclusion, context
+#pos(e1, {allowed(alice)}, {allowed(bob)}, {
+  adult(alice). adult(carol). minor(bob).
+}).
 \end{lstlisting}
 
-\noindent The positive example forces $H$ to derive \texttt{allowed(alice)}, ruling out an empty hypothesis. The negative example rules out the overly general rule \texttt{allowed(X).}\ Together they uniquely identify \texttt{allowed(X) :- adult(X).} as the intended hypothesis.
+\noindent Background knowledge $B$ may contain shared facts and rules, but here the ground facts are supplied as the example context instead. The context-dependent positive example specifies an inclusion set, an exclusion set, and a context program. The inclusion set requires the hypothesis to derive \texttt{allowed(alice)}, ruling out an empty hypothesis. The exclusion set forbids \texttt{allowed(bob)}, ruling out the overly general rule \texttt{allowed(X).}\ Together they uniquely identify \texttt{allowed(X) :- adult(X).} as the intended hypothesis.
 
 \paragraph{Learning Task.}
 A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^- \rangle$. A hypothesis $H \in \mathcal{H}$ is an \textit{inductive solution} of $T$ if it covers all examples, meaning every positive example is satisfied by some answer set of $B \cup H$, and no answer set of $B \cup H$ satisfies any negative example. When hypotheses are assigned a \textit{cost}, typically the sum of rule lengths, the learning task seeks an \textit{optimal} solution. This is the inductive solution of minimum cost.
