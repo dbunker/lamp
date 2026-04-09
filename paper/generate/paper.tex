@@ -70,7 +70,7 @@ However, writing ASP programs that are both correct and performant remains chall
 
 The LLM to ASP Modeling Protocol (LAMP) is designed to guide LLMs in deducing and optimizing ASP rules from given instance facts and expected answer sets. LAMP provides a structured interaction protocol that enables refinement of ASP encodings, with the goal of improving both correctness and performance. Beyond proposing the system itself, LAMP can be used as a framework for evaluating the capabilities of different LLMs in ASP program generation.
 
-Both LAMP and the classical Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilaspinductivelearninganswer} address the same underlying problem class. Given a set of instance facts and an expected answer set, find a program within a bounded hypothesis space that produces the correct answer sets. ILASP solves this via exhaustive search under the Learning from Answer Sets (LAS) framework while LAMP replaces exhaustive search with LLM guided generation and Clingo based iterative verification. As the expected input and output are the same, a controlled comparison can be made between symbolic ILP search and LLM based generation on the same class of tasks.
+Both LAMP and the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilaspinductivelearninganswer} address the same underlying problem class. Given a set of instance facts and an expected answer set, find a program within a bounded hypothesis space that produces the correct answer set. ILASP solves this via exhaustive search under the Learning from Answer Sets (LAS) framework while LAMP replaces exhaustive search with LLM guided generation and Clingo based iterative verification. As the expected input and output are the same, a controlled comparison can be made between symbolic ILP search and LLM based generation on the same class of tasks.
 
 The relevant research questions of this work are the following.
 
@@ -293,7 +293,7 @@ highway_possible(X) :- vehicle(X), not slow_moving(X).
 
 Running this results in the answer set \texttt{\{ vehicle(scooter), vehicle(car), slow\_moving(scooter), highway\_possible(car) \}}. Given these facts and rules, \texttt{highway\_possible(car)} can be deduced, indicating the car is highway possible and, due to default negation, the scooter is not highway possible.
 
-This restricted ASP subset can now be formalized. A \emph{Problem Profile} specifies the size and shape of the problem of how many predicates and terms exist, how many facts are given, and how large the rules may be. Together with the input facts and a target answer set, it defines a concrete benchmark that both LAMP and ILASP can solve.
+This restricted ASP subset can now be formalized. A \emph{Problem Profile} specifies how many predicates and terms exist, how many facts are given, and how large the rules may be. Together with the input facts and a target answer set, it defines a concrete benchmark that both LAMP and ILASP can solve.
 
 Previous work on LLM based logic rule induction has characterized complexity by structural rule graph topology such as Chain, RDG (Rooted Directed Graph), DRDG (Disjunctive Rooted Directed Graph), and Mixed categories \cite{gandarela2025inductivelearninglogicaltheories}. Since this work is concerned with correct answer set deduction and rule optimization rather than rule graph structure, complexity is instead quantified by six numerical features. These include number of possible predicates, terms, facts, rules, positive body literals per rule, and negative body literals per rule. All generated programs are also limited to having exactly one answer set.
 
@@ -682,7 +682,7 @@ Finally, optimization remains a promising avenue, including other ways of transf
 
 \section{Conclusion}
 
-This work proposed a structured LLM to ASP Modeling Protocol (LAMP) designed to support the deduction and optimization of ASP rules from instance facts and expected stable models. The results show this as effective for guiding LLMs toward correct and often optimized ASP encodings. By constraining the modeling task and providing iterative feedback via an ASP solver, this system reduces the modeling burden associated with ASP while preserving correctness.
+This work proposed a structured LLM to ASP Modeling Protocol (LAMP) designed to support the deduction and optimization of ASP rules from instance facts and expected stable models. The results show this is effective for guiding LLMs toward correct and often optimized ASP encodings. By constraining the modeling task and providing iterative feedback via an ASP solver, this system reduces the modeling burden associated with ASP while preserving correctness.
 
 The tested models exhibited clear performance differences, with \textit{gpt-5-mini} achieving 100\% final accuracy (94.2\% on first attempt) and \textit{gpt-oss:20b} achieving 95.8\% (90\%), while \textit{qwen3-coder:30b} reached only 45\% (30.8\% first attempt) despite its programming focus. These results highlight that strong general code generation ability does not necessarily translate to proficiency in logic programming, underscoring the value of ASP specific evaluation frameworks.
 
