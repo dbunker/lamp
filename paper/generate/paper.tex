@@ -24,7 +24,7 @@
 \usepackage{xcolor}
 
 \usepackage{hyperref}
-\usepackage[normalem]{ulem}
+
 
 \lstdefinelanguage{ASP}{
   sensitive=true,
@@ -59,7 +59,7 @@
 \pagestyle{plain}
 
 \begin{abstract}
-Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning, however developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the Clingo solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 100\% accuracy, \textit{gpt-oss:20b} 95.8\%, and \textit{qwen3-coder:30b} 45.0\%. Although ILASP was on average faster, \textit{gpt-5-mini} solved all benchmarks on which ILASP timed out. Both LAMP and ILASP are also able to reduce literal counts and increase stratification to a similar degree. Finally, feature analysis is used to determine predictors of LLM success or failure.
+Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning. However, developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the \textsc{Clingo} solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 100\% final accuracy, \textit{gpt-oss:20b} 95.8\%, and \textit{qwen3-coder:30b} 45.0\%. Although ILASP was on average faster, \textit{gpt-5-mini} solved all benchmarks on which ILASP timed out. Both LAMP and ILASP are also able to reduce literal counts and increase stratification to a similar degree. Finally, feature analysis is used to determine predictors of LLM success or failure.
 \end{abstract}
 
 \section{Introduction}
@@ -70,7 +70,7 @@ However, writing ASP programs that are both correct and performant remains chall
 
 The LLM to ASP Modeling Protocol (LAMP) is designed to guide LLMs in deducing and optimizing ASP rules from given instance facts and expected answer sets. LAMP provides a structured interaction protocol that enables refinement of ASP encodings, with the goal of improving both correctness and performance. Beyond proposing the system itself, LAMP can be used as a framework for evaluating the capabilities of different LLMs in ASP program generation.
 
-Both LAMP and the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilaspinductivelearninganswer} address the same underlying problem class. Given a set of instance facts and an expected answer set, find a program within a bounded hypothesis space that produces the correct answer set. ILASP solves this via exhaustive search under the Learning from Answer Sets (LAS) framework while LAMP replaces exhaustive search with LLM guided generation and Clingo based iterative verification. As the expected input and output are the same, a controlled comparison can be made between symbolic ILP search and LLM based generation on the same class of tasks.
+Both LAMP and the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilaspinductivelearninganswer} address the same underlying problem class. Given a set of instance facts and an expected answer set, find a program within a bounded hypothesis space that produces the correct answer set. ILASP solves this via exhaustive search under the Learning from Answer Sets (LAS) framework while LAMP replaces exhaustive search with LLM guided generation and \textsc{Clingo} based iterative verification. As the expected input and output are the same, a controlled comparison can be made between symbolic ILP search and LLM based generation on the same class of tasks.
 
 The relevant research questions of this work are the following.
 
@@ -83,7 +83,7 @@ The relevant research questions of this work are the following.
 \noindent
 \textbf{RQ3.} Which features of the ASP benchmark most strongly predict LLM success or failure in LAMP?
 
-This paper investigates the current capabilities of Large Language Models (LLMs) regarding Answer Set Programming (ASP) and offers directions for future research at the intersection of artificial intelligence and constraint solving. The LAMP system can be compared against similar systems such as those based on LLMs fine tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, iterative scheduling and plan generation with LLMs and ASP \cite{lin2024clmaspcouplinglargelanguage}, and LLM based systems that can learn directly from ASP answer sets \cite{borroto2025questionansweringllmslearning}, as well as solver in the loop frameworks that use Clingo feedback to iteratively improve LLM generated ASP \cite{schrader2025solverintheloopframeworkimprovingllms}.
+While recent work has explored LLM and ASP integration through fine tuning \cite{coppolillo2024llaspfinetuninglargelanguage}, coupled planning pipelines \cite{lin2024clmaspcouplinglargelanguage}, learning from answer sets \cite{borroto2025questionansweringllmslearning}, and solver feedback \cite{schrader2025solverintheloopframeworkimprovingllms}, LAMP is distinct in using LLMs to directly generate and iteratively refine ASP hypotheses verified by \textsc{Clingo}, without requiring fine tuning or exhaustive search.
 
 \section{Background}
 
@@ -99,14 +99,14 @@ A \textit{term} is either a constant represented as a lowercase symbol or intege
 \paragraph{Rules and Programs.}
 An ASP program $\Pi$ is a finite set of \textit{rules} of the following form.
 
-\begin{equation}
+\[
     h \leftarrow b_1, \ldots, b_m, \mathit{not}\; c_1, \ldots, \mathit{not}\; c_n
-\end{equation}
+\]
 
 \noindent Here $h$ is the \textit{head}, a classical atom or empty, each $b_i$ is a positive body literal, and $\mathit{not}\; c_j$ denotes default negation of atom $c_j$. When $m = n = 0$ the rule is a \textit{fact} and when $h$ is empty the rule is a \textit{constraint} written $\leftarrow \text{body}$, eliminating any answer set in which the body is satisfied. A body is satisfied when every positive literal $b_i$ is in the answer set and every negated atom $c_j$ is absent from it, which in a normal rule would force $h$ into the answer set, but with no head there is nothing to derive, so the answer set is eliminated instead.
 
 \paragraph{Variables and Grounding.}
-Rules are written with first order variables---symbols such as $X$ and $Y$ that range over concrete objects rather than truth values---allowing compact expression over large domains. Prior to solving, a \textit{grounder}, such as \textsc{Gringo}, substitutes all relevant terms for each variable, producing an equivalent propositional ground program $\Pi_g$. A rule is \textit{safe} if every variable occurring in it also appears in a positive body literal, which ensures that grounding is well defined.
+Rules are written with first order variables, symbols such as $X$ and $Y$ that range over concrete objects rather than truth values, allowing compact expression over large domains. Prior to solving, a \textit{grounder}, such as \textsc{Gringo}, substitutes all relevant terms for each variable, producing an equivalent propositional ground program $\Pi_g$. A rule is \textit{safe} if every variable occurring in it also appears in a positive body literal, which ensures that grounding is well defined.
 
 \paragraph{Semantics.}
 Let $\mathcal{A}$ denote the Herbrand base set of all ground atoms. Given a ground program $\Pi$ and a set $S \subseteq \mathcal{A}$, the \textit{Gelfond--Lifschitz reduct} $\Pi^S$ is obtained by the steps.
@@ -116,7 +116,7 @@ Let $\mathcal{A}$ denote the Herbrand base set of all ground atoms. Given a grou
 \end{enumerate}
 $S$ is a \textit{stable model}, referred to in ASP as an \textit{answer set}, of $\Pi$ if and only if $S$ is the \textit{minimal model} of the reduct $\Pi^S$. Because $\Pi^S$ is negation free, it has a unique minimal model, the smallest set of atoms satisfying every rule, where no atom is included unless it is forced by some rule in $\Pi^S$. A program may have zero, one, or multiple answer sets and solutions to the encoded problem correspond exactly to its answer sets. $AS(\Pi)$ is used to denote the set of answer sets of a program $\Pi$.
 
-Modern ASP solvers, such as Clingo \cite{gebser2014clingoasp}, extend the core language with aggregates, choice rules, disjunctive heads, and optimization statements. LAMP uses Clingo as its verification oracle but operates over a restricted subset of normal rules only, as defined in Section~\ref{sec:benchmark}.
+Modern ASP solvers, such as \textsc{Clingo} \cite{gebser2014clingoasp}, extend the core language with aggregates, choice rules, disjunctive heads, and optimization statements. LAMP uses \textsc{Clingo} as its verification oracle but operates over a restricted subset of normal rules only, as defined in Section~\ref{sec:benchmark}.
 
 \paragraph{Solving Complexity.}
 Deciding whether a ground ASP program has an answer set is $\Sigma_2^P$-complete \cite{bichler2016powernongroundrulesanswer}. This places ASP one level above $\mathsf{NP}$ in the polynomial hierarchy, reflecting the two sources of computational hardness, the nondeterministic search over candidate sets $S \subseteq \mathcal{A}$, and the co-$\mathsf{NP}$ check that no proper subset of $S$ is also a stable model of $\Pi^S$. This work restricts to the \textit{normal} subset, where the bound drops one level to $\mathsf{NP}$-complete \cite{bichler2016powernongroundrulesanswer}. LAMP would apply unchanged to the disjunctive case.
@@ -156,19 +156,19 @@ adult(alice). adult(carol). minor(bob).
 \noindent The positive example forces $H$ to derive \texttt{allowed(alice)}, ruling out an empty hypothesis. The negative example rules out the overly general rule \texttt{allowed(X).}\ Together they uniquely identify \texttt{allowed(X) :- adult(X).} as the intended hypothesis.
 
 \paragraph{Learning Task.}
-A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^- \rangle$. A hypothesis $H \in \mathcal{H}$ is an \textit{inductive solution} of $T$ if it covers all examples, meaning every positive example is satisfied by some answer set of $B \cup H$, and no answer set of $B \cup H$ satisfies any negative example. When hypotheses are assigned a \textit{cost} (typically the sum of rule lengths), the learning task seeks an \textit{optimal} solution. This is the inductive solution of minimum cost.
+A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^- \rangle$. A hypothesis $H \in \mathcal{H}$ is an \textit{inductive solution} of $T$ if it covers all examples, meaning every positive example is satisfied by some answer set of $B \cup H$, and no answer set of $B \cup H$ satisfies any negative example. When hypotheses are assigned a \textit{cost}, typically the sum of rule lengths, the learning task seeks an \textit{optimal} solution. This is the inductive solution of minimum cost.
 
 \paragraph{Search Procedure.}
-ILASP reduces the learning task to a sequence of ASP solving problems. The hypothesis space is encoded as an ASP metaprogram, and the search for a covering hypothesis is directed by a \textit{conflict driven} procedure \cite{law2020ilaspinductivelearninganswer}. Candidate hypotheses are proposed, checked against all examples, and conflicts, examples not yet covered, are used to prune the space and guide subsequent iterations. This conflict driven approach, implemented in the \textsc{FastLAS} system, scales substantially better than exhaustive enumeration of $\mathcal{H}$ \cite{law2022conflictdriveninductivelogicprogramming}.
+ILASP reduces the learning task to a sequence of ASP solving problems. The hypothesis space is encoded as an ASP metaprogram, and the search for a covering hypothesis is directed by a \textit{conflict driven} procedure \cite{law2020ilaspinductivelearninganswer}. Candidate hypotheses are proposed and checked against all examples. Conflicts from examples not yet covered are then used to prune the space and guide subsequent iterations. This conflict driven approach, implemented in the \textsc{FastLAS} system, scales substantially better than exhaustive enumeration of $\mathcal{H}$ \cite{law2022conflictdriveninductivelogicprogramming}.
 
 \paragraph{Solving Complexity.}
 Learning an optimal inductive solution under the full ILASP framework is $\Sigma_3^P$-complete \cite{law2020ilaspinductivelearninganswer}, one level above the $\Sigma_2^P$-hardness of ASP itself. The additional level reflects the search over hypotheses $H \in \mathcal{H}$ layered on top of the $\Sigma_2^P$ check that $H$ is a valid inductive solution. Restricting to the normal fragment lowers the verification step by one level, so learning over the LAMP hypothesis space sits at $\Sigma_2^P$. This theoretical hardness motivates an alternative approach. Rather than exhaustive symbolic search, LAMP replaces the hypothesis search with LLM guided generation, bypassing the direct hypothesis space search.
 
 \subsection{Large Language Models for Code Generation}
 
-Large Language Models (LLMs) are neural language models trained on large amounts of text and source code, enabling strong performance on code generation tasks. Given a structured prompt, an LLM generates a candidate program token by token. Its output is non deterministic and may require post processing or validation against a formal oracle.
+Large Language Models (LLMs) are neural language models trained on large amounts of text and source code, enabling strong performance on code generation tasks. Given a structured prompt, an LLM generates a candidate program token by token. Its output is nondeterministic and may require post processing or validation against a formal oracle.
 
-LLMs have been shown to generate logic programs from natural language specifications \cite{ishay2023leveraginglargelanguagemodels, li2025logicofthoughtempoweringlargelanguage, lin2024clmaspcouplinglargelanguage} and to perform inductive logic programming when paired with a formal inference engine \cite{gandarela2025inductivelearninglogicaltheories}. A key pattern across these systems is \emph{iterative refinement} where the LLM generates a candidate, the candidate is verified symbolically, and any mismatch is encoded as feedback for the next prompt. LAMP instantiates this pattern for ASP, using Clingo as the verification oracle and Clingo derived feedback to guide successive generation attempts.
+LLMs have been shown to generate logic programs from natural language specifications \cite{ishay2023leveraginglargelanguagemodels, li2025logicofthoughtempoweringlargelanguage, lin2024clmaspcouplinglargelanguage} and to perform inductive logic programming when paired with a formal inference engine \cite{gandarela2025inductivelearninglogicaltheories}. A key pattern across these systems is \emph{iterative refinement} where the LLM generates a candidate, the candidate is verified symbolically, and any mismatch is encoded as feedback for the next prompt. LAMP instantiates this pattern for ASP, using \textsc{Clingo} as the verification oracle and \textsc{Clingo} derived feedback to guide successive generation attempts.
 
 \section{Methodology}
 
@@ -240,7 +240,7 @@ LLMs have been shown to generate logic programs from natural language specificat
     \node[proc=llmcol, minimum width=3.0cm, below=0.9cm of llm]
       (parse) {Parse Output to ASP};
     \node[proc=clingo, minimum width=3.0cm, below=0.8cm of parse]
-      (clingonode) {\textbf{Clingo Solver}};
+      (clingonode) {\textbf{\textsc{Clingo} Solver}};
     \node[decision, below=0.8cm of clingonode]
       (check) {\textbf{Answer Set $= A^*$?}};
     \node[proc=clingo, minimum width=3.0cm, left=2.2cm of check]
@@ -331,19 +331,19 @@ where
     \[
       d_h(X) \;:\text{-}\; p_1(X),\; \ldots,\; p_{k}(X),\; \texttt{not}\; n_1(X),\; \ldots,\; \texttt{not}\; n_{m}(X).
     \]
-    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, $X$ is a single universally quantified variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals (bounds from $\mathcal{C}$, Definition~\ref{def:complexity}).
+    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, $X$ is a single universally quantified variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals as bounded in Definition~\ref{def:complexity}.
 \end{itemize}
 A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$ with $|\Pi| \leq R$. Every rule in $\Pi$ is therefore unary, uses only predicates from $\mathcal{D}$, and respects the bounds $L^+$ and $L^-$.
 $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
 \[
   AS\!\left(F \cup \Pi\right) \;=\; \bigl\{\, A^{*} \,\bigr\}
 \]
-where $AS(\cdot)$ denotes the set of answer sets of a program. Meaning the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
+where $AS(\cdot)$ denotes the set of answer sets of a program, meaning the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
 \end{definition}
 
 The hypothesis space $\Phi$ corresponds directly to the mode bias of the associated ILASP learning task generated for each benchmark.
 
-\subsection{Dataset Generation}
+\subsection{Dataset Generation}\label{sec:datagen}
 
 To instantiate benchmarks across the complexity categories defined above, synthetic data is generated by introducing new possible predicates and terms as needed. To keep the programs sufficiently complex, but manageable by the LLMs, only one stable model is expected and at least one atom must be deduced. The vehicle example above would be represented as shown below.
 
@@ -386,7 +386,7 @@ This gives ILASP the same hypothesis space over which LAMP operates. For benchma
 
 \subsection{Prompting and Feedback Loop}
 
-The initial prompt instructs the LLM to reconstruct ASP rules that, combined with the given facts, yield the target stable model. It states the rule schema constraints from $\Phi$ (single variable $X$, normal rules with bounded positive and negative body literals, no new facts), tells the LLM to prefer the minimal rule set, and provides the instance facts $F$ and target answer set $A^*$ as concrete inputs. The prompt also contains a short worked example demonstrating the expected output format. If Clingo reports a mismatch, a feedback message is appended to the conversation containing the facts, the expected stable model, and the actual stable model from the candidate rules, asking the LLM to produce corrected rules. This iterative interaction is formalized below.
+The initial prompt instructs the LLM to reconstruct ASP rules that, combined with the given facts, yield the target stable model. It states the rule schema constraints from $\Phi$ including single variable $X$, normal rules with bounded body literals, and no new facts. It tells the LLM to prefer the minimal rule set and provides the instance facts $F$ and target answer set $A^*$ as concrete inputs. The prompt also contains a short worked example demonstrating the expected output format. If \textsc{Clingo} reports a mismatch, a feedback message is appended to the conversation containing the facts, the expected stable model, and the actual stable model from the candidate rules, asking the LLM to produce corrected rules. All LLMs were queried at the default temperature of 1 with each benchmark run once per model. This iterative interaction is formalized below.
 
 \begin{definition}[LAMP Interaction Protocol]
 \label{def:protocol}
@@ -398,7 +398,7 @@ is a sequence of pairs
   \,\bigr\rangle
 \]
 where each $\Pi_i$ is a candidate program generated by the LLM given $F$, $A^{*}$, and all prior feedback,
-and $\delta_i$ is the \emph{feedback signal} produced by running $F \cup \Pi_i$ through Clingo:
+and $\delta_i$ is the \emph{feedback signal} produced by running $F \cup \Pi_i$ through \textsc{Clingo}:
 \[
   \delta_i \;=\;
   \begin{cases}
@@ -416,9 +416,7 @@ The final output $\Pi_n$ is accepted as the solution if it satisfies $\mathcal{M
 
 \subsection{Evaluation}
 
-LAMP and ILASP systems are evaluated by correctness of answer set, time to solve and optimality of ASP programs. The ASP programs generated are evaluated after being run via Clingo. The correctness, number of rules, complexity and how close it is to the expected stable model can then be assessed.
-
-The prompt also instructs the LLM to prefer the minimal rule set with fewest rules and literals, directly encouraging concise encodings.
+LAMP and ILASP systems are evaluated by correctness of answer set, time to solve and optimality of ASP programs. The ASP programs generated are evaluated after being run via \textsc{Clingo}. The correctness, number of rules, complexity and how close it is to the expected stable model can then be assessed.
 
 Beyond correctness, the systems are evaluated on whether the LLM has produced a more concise encoding than the original synthetic program, formalized as follows.
 
@@ -435,13 +433,13 @@ Many other notions of optimality are applicable to ASP programs, including body 
 
 \section{Experiments}
 
-Experiments were conducted on the synthetic data with varying complexities as specified in the \textit{Dataset Generation} section. A variety of online and local open weight LLMs were selected for testing to get a broad view of capabilities.
+Experiments were conducted on the synthetic data with varying complexities as specified in Section~\ref{sec:datagen}. A variety of online and local open weight LLMs were selected for testing to get a broad view of capabilities.\footnote{Source code, benchmark data, and ILASP task files are available at \url{https://github.com/dbunker/lamp}.}
 
 \subsection{Experimental Setup}
 
-A total of 120 synthetic ASP programs were created with varying features for testing. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. All ASP solving and analysis was done using Clingo. ILASP was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. Each LAMP run was allowed a maximum of 3 iterations, one initial generation followed by up to 2 rounds of feedback verified by Clingo. Both systems receive the same input instance $\mathcal{M}$ (Definition~\ref{def:input}), where the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The selected parameters used for complexity classes are listed in Table~\ref{tab:parameters}. All combinations were used except where the negative literal count equals or exceeds the overall literal count, which would leave no positive literals.
+A total of 120 synthetic ASP programs were created with varying features for testing. All experiments were conducted on an Apple M3 Max with 48\,GB unified memory. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. For \textit{gpt-5-mini}, timing reflects server-side processing time reported by the OpenAI API, excluding network latency. All ASP solving and analysis was done using \textsc{Clingo}. ILASP version 4 was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. Each LAMP run was allowed a maximum of 3 iterations, one initial generation followed by up to 2 rounds of feedback verified by \textsc{Clingo}. Both systems receive the same input instance $\mathcal{M}$ (Definition~\ref{def:input}), where the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The selected parameters used for complexity classes are listed in Table~\ref{tab:parameters}. The positive literal bound is derived as $L^+ = \text{Overall Literals} - L^-$. All combinations were used except where the negative literal count equals or exceeds the overall literal count, which would leave no positive literals.
 
-\begin{table}[h]
+\begin{table}[htbp]
     \centering
     \caption{Parameters associated with Definition~\ref{def:complexity}. Overall Literals is a generation constraint on the sum $L^+ + L^-$ and is not a profile parameter.}
     \label{tab:parameters}
@@ -466,9 +464,9 @@ Overall results are shown in Table~\ref{tab:ilasp_results}. Both \textit{gpt-5-m
 
 ILASP achieved 97.5\% accuracy (117/120) of which all three failures were timeouts, not reasoning errors, occurring on benchmarks with high negation counts and large numbers of derived atoms. LLMs in LAMP, \textit{gpt-5-mini} and \textit{gpt-oss:20b}, solved 3 and 1 of the benchmarks, respectively, on which ILASP timed out, demonstrating that LLM guided search can succeed in some instances where ILP search cannot.
 
-The iterative feedback loop contributes meaningfully for all models. First attempt accuracy was 94.2\% for \textit{gpt-5-mini} (113/120), 90.0\% for \textit{gpt-oss:20b} (108/120), and 30.8\% for \textit{qwen3-coder:30b} (37/120). Subsequent Clingo verified feedback iterations recovered 7 additional cases for \textit{gpt-5-mini}, 7 for \textit{gpt-oss:20b}, and 17 for \textit{qwen3-coder:30b}. In all cases where the correct stable model was produced, the generated rules never exactly matched those of the original synthetic program, as multiple rule sets can produce the same answer set. Given the sample size of 120 benchmarks, differences of a few cases between systems should be interpreted with caution, as statistical significance may vary.
+The iterative feedback loop contributes meaningfully for all models. First attempt accuracy was 94.2\% for \textit{gpt-5-mini} (113/120), 90.0\% for \textit{gpt-oss:20b} (108/120), and 30.8\% for \textit{qwen3-coder:30b} (37/120). Subsequent \textsc{Clingo} verified feedback iterations recovered 7 additional cases for \textit{gpt-5-mini}, 7 for \textit{gpt-oss:20b}, and 17 for \textit{qwen3-coder:30b}. In all cases where the correct stable model was produced, the generated rules never exactly matched those of the original synthetic program, as multiple rule sets can produce the same answer set. Given the sample size of 120 benchmarks, differences of a few cases between systems should be interpreted with caution, as statistical significance may vary.
 
-\begin{table}[h]
+\begin{table}[htbp]
     \centering
     \caption{Comparison of all systems including ILASP baseline. First attempt is the accuracy on the initial generation. Final accuracy is after up to 2 feedback iterations. ILASP failures are all timeouts (420\,s limit). LLM failures are unresolved after all iterations.}
     \label{tab:ilasp_results}
@@ -486,7 +484,7 @@ The iterative feedback loop contributes meaningfully for all models. First attem
 
 Table~\ref{tab:ilasp_timeout} details the three benchmarks on which ILASP timed out (benchmark indices 7, 27, and 67). All three have elevated grounded rules and hypothesis space sizes relative to the dataset average (Table~\ref{tab:timeout_profile}), indicating a larger search space as the cause of timeout. Benchmark 67 has a notably smaller hypothesis space than 7 and 27 yet still timed out, suggesting grounded rules and negation complexity are sufficient to cause timeout independent of hypothesis space size alone. \textit{gpt-5-mini} solved all three, \textit{gpt-oss:20b} solved benchmark 7 but failed on 27 and 67 while \textit{qwen3-coder:30b} failed all three.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Outcomes for the 3 benchmarks where ILASP timed out (420\,s limit). \checkmark = correct stable model produced. $\times$ = failed.}
 \label{tab:ilasp_timeout}
@@ -501,7 +499,7 @@ Benchmark & gpt-5-mini & gpt-oss:20b & qwen3-coder:30b & ILASP \\
 \end{tabular}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Structural profile of the 3 ILASP timeout benchmarks vs.\ dataset average.}
 \label{tab:timeout_profile}
@@ -518,9 +516,9 @@ Dataset avg & 13.28 & 3255.22 & 8.80 \\
 \end{tabular}
 \end{table}
 
-Figure~\ref{fig:outcome_stacked} shows the breakdown of benchmark outcomes per LLM across the three categories of correct on the first attempt (green), correct only after Clingo verified feedback (gold), and failed across all iterations (red).
+Figure~\ref{fig:outcome_stacked} shows the breakdown of benchmark outcomes per LLM across the three categories of correct on the first attempt (green), correct only after \textsc{Clingo} verified feedback (gold), and failed across all iterations (red).
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{diagrams/outcome_stacked.pdf}
     \caption{Stacked bar chart of benchmark outcomes per model showing first attempt success (green), feedback success (gold), and failed (red).}
@@ -529,14 +527,14 @@ Figure~\ref{fig:outcome_stacked} shows the breakdown of benchmark outcomes per L
 
 Figure~\ref{fig:timing_boxplot} shows the per benchmark wall clock time distribution for each system as a box plot. \textit{gpt-5-mini} is the fastest LLM with a median of 18.0 and a maximum of 137.0, reflecting the low latency of the API hosted model. \textit{gpt-oss:20b} is slowest with median 50.8 and max 369.6 seconds due to the larger locally run model size. ILASP has a highly bimodal distribution. The median is only 0.66 seconds as most benchmarks are trivially solved by conflict driven search, but three benchmarks hit the 420.0 second ceiling, pulling the maximum to that value. \textit{qwen3-coder:30b} shows a near uniform distribution with a median of 40.3 and a maximum near the 420.0 timeout at 417.8 seconds, consistent with the model spending maximum iteration budget on hard cases it ultimately fails to solve. Table~\ref{tab:timing} gives the aggregate statistics.
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{diagrams/timing_boxplot.pdf}
     \caption{Per benchmark wall clock time distribution per system (seconds). Boxes show the interquartile range. Whiskers extend to the full range. ILASP failures are capped at the 420\,s timeout.}
     \label{fig:timing_boxplot}
 \end{figure}
 
-\begin{table}[h]
+\begin{table}[htbp]
     \centering
     \caption{Wall clock time per system (seconds). LLM times accumulate all feedback iterations. ILASP timeouts are recorded as 420\,s.}
     \label{tab:timing}
@@ -552,9 +550,9 @@ Figure~\ref{fig:timing_boxplot} shows the per benchmark wall clock time distribu
     \end{tabular}
 \end{table}
 
-Table~\ref{tab:lit_by_correctness} gives the mean output literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) per system at original literal counts of 22 and 33, split by correctness. Correct solutions show a large reduction relative to the originals across all systems, averaging 3 to 5 literals against originals of 22 or 33. This is consistent with the synthetic benchmark structure, where generated programs may include rules not strictly necessary to produce the target answer set.
+Table~\ref{tab:lit_by_correctness} gives the mean output literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) per system at original literal counts of 22 and 33, the two total body literal counts that arise across the 120 benchmarks, split by correctness. Correct solutions show a large reduction relative to the originals across all systems, averaging 3 to 5 literals against originals of 22 or 33. This is consistent with the synthetic benchmark structure, where generated programs may include rules not strictly necessary to produce the target answer set.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Mean output literal count $L(\Pi)$ per system for benchmarks with 22 and 33 original body literals, split by correctness. \texttt{--} indicates no data.}
 \label{tab:lit_by_correctness}
@@ -575,7 +573,7 @@ Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals}, \ref{fig:qwen3_lit
 
 Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some cases reducing the number of literals by 6, but in some cases increasing them by 2. As shown in Figure~\ref{fig:gpt_oss_literals}, \textit{gpt-oss:20b} had similar results generally needing even fewer literals, while \textit{qwen3-coder:30b} (Figure~\ref{fig:qwen3_literals}) had mixed results. ILASP (Figure~\ref{fig:ilasp_literals}) is similarly able to reduce literal counts, though it fails to improve conciseness on the 3 benchmarks where it timed out.
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_gpt-5-mini.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_gpt-5-mini.pdf}
@@ -583,7 +581,7 @@ Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to g
     \label{fig:gpt_5_literals}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_gpt-oss:20b.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_gpt-oss:20b.pdf}
@@ -591,7 +589,7 @@ Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to g
     \label{fig:gpt_oss_literals}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_qwen3-coder:30b.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_qwen3-coder:30b.pdf}
@@ -599,7 +597,7 @@ Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to g
     \label{fig:qwen3_literals}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.495\textwidth]{diagrams/Correct_ilasp.pdf}
     \includegraphics[width=0.495\textwidth]{diagrams/Incorrect_ilasp.pdf}
@@ -611,7 +609,7 @@ Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to g
 
 An ASP program is \emph{stratified} if no predicate depends negatively on itself (directly or transitively). Stratification is a structural property that simplifies semantics and is often correlated with lower solver complexity. Since the LAMP benchmarks include programs with varying negation depths, it is informative to assess whether LLM generated programs preserve this property.
 
-\begin{table}[h]
+\begin{table}[htbp]
     \centering
     \caption{Stratification of solved programs per system. Original is the 120 benchmark programs.}
     \label{tab:llm_stratification}
@@ -635,11 +633,11 @@ Table~\ref{tab:llm_stratification} shows that both ILASP and the LLM based syste
 
 Based on whether the LLM is able to get the correct stable model or not it is possible to deduce which ASP benchmark features are most difficult for LLMs to deduce thereby indicating higher complexity. To do this, syntactic and structural features of the input ASP program, such as number of predicates, facts, rules, and literal counts, are used to predict the likelihood of getting the correct stable model using the tree based machine learning algorithm XGBoost \cite{chen2016xgboostscalabletreeboosting}, trained on the \textit{qwen3-coder:30b} results. The other two LLMs had too few failures for a meaningful classifier.
 
-From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance, such as gain, the average improvement in the loss function from splits using that feature, or cover, the average number of samples affected by splits using that feature. For this analysis gain is used.
+From the XGBoost model the importance value of each feature can be calculated. There are multiple ways to get importance. Gain measures the average improvement in the loss function from splits using that feature. Cover measures the average number of samples affected by splits using that feature. For this analysis gain is used.
 
-The results can be seen in Figure~\ref{fig:importance}. The most important feature is \textit{Solution atoms}, the total number of atoms in the answer set, serving as a proxy for overall problem complexity. The next most important is \textit{Derived atoms}, the number of atoms that must be deduced beyond the input facts, directly reflecting the deductive burden placed on the LLM. \textit{Negative literals} also ranks highly, consistent with default negation being a known challenge for LLMs. As the XGBoost model is trained on a small sample, these importances should be treated as indicative rather than definitive.
+The results can be seen in Figure~\ref{fig:importance}. The most important feature is \textit{Solution atoms}, the total number of atoms in the answer set, serving as a proxy for overall problem complexity. The next most important is \textit{Derived atoms}, the number of atoms that must be deduced beyond the input facts, directly reflecting the deductive burden placed on the LLM. \textit{Negative literals} also ranks highly, consistent with default negation being a known challenge for LLMs. Under 5-fold cross-validation the classifier achieves 65.0\% accuracy with AUC 0.667, above the 55\% majority-class baseline but modest, so these importances should be treated as indicative rather than definitive.
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{diagrams/xgb_importance.pdf}
     \caption{XGBoost feature importance of ASP features predicting LLM success.}
@@ -666,17 +664,19 @@ ASPBench \cite{szeider2026aspbenchnaturallanguagelogic} provides benchmarks spec
 
 \subsection{Planning and NeuroSymbolic Pipelines}
 
-Planning provides another closely related line of research. Logical chain of thought tuning for symbolic planning by Verma et al. (2025) \cite{verma2025teachingllmsplanlogical} and LLM symbolic planning pipelines without expert input  by Huang et al. (2024) \cite{huang2024planningdarkllmsymbolicplanning} highlight the benefits of keeping solvers such as ASP planners in the loop. Established ASP planning benchmarks, including Plasp developed by Dimopoulos et al. \cite{dimopoulos2018plasp3effectiveasp}, offer realistic domains that could extend LAMP beyond product configuration. Neuro symbolic refinement frameworks such as PEIRCE further demonstrate how LLMs and formal reasoning systems can iteratively improve each other \cite{quan2025peirceunifyingmaterialformal}. Hybrid LLM and ASP systems have also been applied to natural language understanding \cite{rajasekharan2023reliablenaturallanguageunderstanding}, commonsense reasoning \cite{zeng2024reliablecommonsensereasoningsocialbot}, and collaborative conversational agents \cite{zeng2025reliablecollaborativeconversationalagent}.
+Planning provides another closely related line of research. Logical chain of thought tuning for symbolic planning by Verma et al. (2025) \cite{verma2025teachingllmsplanlogical} and LLM symbolic planning pipelines without expert input by Huang et al. (2024) \cite{huang2024planningdarkllmsymbolicplanning} highlight the benefits of keeping solvers such as ASP planners in the loop. Established ASP planning benchmarks, including Plasp developed by Dimopoulos et al. \cite{dimopoulos2018plasp3effectiveasp}, offer realistic domains that could extend LAMP beyond product configuration. Neuro symbolic refinement frameworks such as PEIRCE further demonstrate how LLMs and formal reasoning systems can iteratively improve each other \cite{quan2025peirceunifyingmaterialformal}. Hybrid LLM and ASP systems have also been applied to natural language understanding \cite{rajasekharan2023reliablenaturallanguageunderstanding}, commonsense reasoning \cite{zeng2024reliablecommonsensereasoningsocialbot}, and collaborative conversational agents \cite{zeng2025reliablecollaborativeconversationalagent}.
 
 \section{Future Work}
 
-Several directions for future work follow naturally. First, iterative prompting could be improved by more explicit chain of thought reasoning, potentially evaluating many candidate rules across multiple instance fact sets per iteration, with Clingo acting as a tool within an LLM based agent loop. Another approach would be from the specific perspective of solving complexity, focusing on solution space features such as vector cover size, tree depth, feedback vertex set, clique width, tree width, among others \cite{hecher2024extendedversionofstructural}. Prompt optimization frameworks such as DSPy \cite{khattab2023dspycompilingdeclarativelanguage} could be used to automatically refine prompts and feedback strategies. Even without using LLMs fine tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, the models are always improving, so simply updating the models may result in large improvements.
+Several directions for future work follow naturally. Iterative prompting could be improved by more explicit chain of thought reasoning, potentially evaluating many candidate rules across multiple instance fact sets per iteration, with \textsc{Clingo} acting as a tool within an LLM based agent loop. Another approach would be from the specific perspective of solving complexity, focusing on solution space features such as vertex cover size, tree depth, feedback vertex set, clique width, tree width, among others \cite{hecher2024extendedversionofstructural}. Prompt optimization frameworks such as DSPy \cite{khattab2023dspycompilingdeclarativelanguage} could be used to automatically refine prompts and feedback strategies. Even without using LLMs fine tuned to ASP \cite{coppolillo2024llaspfinetuninglargelanguage}, the models are always improving, so simply updating the models may result in large improvements.
 
-Second, the synthetic datasets could be extended to richer ASP constructs, including higher arity predicates, choice rules, disjunction, and head disjunction, as well as more complex dependency structures such as those proposed by Gandarela et al. (2025) regarding logic program expressivity \cite{gandarela2025inductivelearninglogicaltheories}.
+As all benchmarks were run once per model at the default temperature of 1, results may vary across runs. Repeated trials would strengthen statistical confidence in the reported accuracy differences.
 
-Third, evaluation could move beyond synthetic configuration tasks to existing ASP datasets, including ASPBench \cite{szeider2026aspbenchnaturallanguagelogic}, OOASP models \cite{falkner2015ooaspconnectingobjectorientedlogic}, real world ASP encodings, planning benchmarks such as Plasp and PDDL to ASP translations \cite{dimopoulos2018plasp3effectiveasp}, and domains like rail scheduling.
+The synthetic datasets could be extended to richer ASP constructs, including higher arity predicates, choice rules, disjunction, and head disjunction, as well as more complex dependency structures such as those proposed by Gandarela et al. (2025) regarding logic program expressivity \cite{gandarela2025inductivelearninglogicaltheories}.
 
-Fourth, deeper natural language interfaces to ASP could be explored, covering bidirectional translation between text and ground facts, rules, stable models, and multiple natural languages.
+Evaluation could move beyond synthetic configuration tasks to existing ASP datasets, including ASPBench \cite{szeider2026aspbenchnaturallanguagelogic}, OOASP models \cite{falkner2015ooaspconnectingobjectorientedlogic}, real world ASP encodings, planning benchmarks such as Plasp and PDDL to ASP translations \cite{dimopoulos2018plasp3effectiveasp}, and domains like rail scheduling.
+
+Deeper natural language interfaces to ASP could be explored, covering bidirectional translation between text and ground facts, rules, stable models, and multiple natural languages.
 
 Finally, optimization remains a promising avenue, including other ways of transforming ASP into more efficient ASP, compiling ASP fragments to lower level code, such as C, and tighter integration with solver level optimizations, enabling LLMs to reason not only about correctness but also about grounding and solving performance.
 
@@ -684,13 +684,13 @@ Finally, optimization remains a promising avenue, including other ways of transf
 
 This work proposed a structured LLM to ASP Modeling Protocol (LAMP) designed to support the deduction and optimization of ASP rules from instance facts and expected stable models. The results show this is effective for guiding LLMs toward correct and often optimized ASP encodings. By constraining the modeling task and providing iterative feedback via an ASP solver, this system reduces the modeling burden associated with ASP while preserving correctness.
 
-The tested models exhibited clear performance differences, with \textit{gpt-5-mini} achieving 100\% final accuracy (94.2\% on first attempt) and \textit{gpt-oss:20b} achieving 95.8\% (90\%), while \textit{qwen3-coder:30b} reached only 45\% (30.8\% first attempt) despite its programming focus. These results highlight that strong general code generation ability does not necessarily translate to proficiency in logic programming, underscoring the value of ASP specific evaluation frameworks.
+The tested models exhibited clear performance differences, with \textit{gpt-5-mini} achieving 100\% final accuracy (94.2\% on first attempt) and \textit{gpt-oss:20b} achieving 95.8\% (90.0\% on first attempt), while \textit{qwen3-coder:30b} reached only 45\% (30.8\% first attempt) despite its programming focus. These results highlight that strong general code generation ability does not necessarily translate to proficiency in logic programming, underscoring the value of ASP specific evaluation frameworks.
 
 The ILASP baseline achieved 97.5\%, with the three failures being search space timeouts rather than reasoning errors. This shows LLMs do not follow the same classical ILP search. They navigate the hypothesis space differently, using token-level generation rather than conflict driven search, and can succeed where conflict driven search may not. The iterative feedback loop further contributed recovery of many cases for the three LLMs, confirming its value as a component of the LAMP pipeline. ILASP was faster on average but timed out on three benchmarks that LAMP solved, while both systems substantially reduced literal counts relative to the synthetic originals and produced more stratified programs than the benchmarks themselves. Feature analysis on \textit{qwen3-coder:30b} identified solution atom count, derived atom count, and negative literal count as the strongest predictors of LLM failure.
 
 Beyond assisting users in ASP modeling, this protocol provides a system for probing LLM reasoning and logic programming capabilities. Future work includes extending to richer ASP constructs such as disjunction and choice rules, incorporating solver level performance metrics, and exploring fine tuned or neuro symbolic hybrids to further improve robustness and scalability.
 
-\bibliography{custom}
 \bibliographystyle{plain}
+\bibliography{custom}
 
 \end{document}
