@@ -119,7 +119,7 @@ $S$ is a \textit{stable model}, referred to in ASP as an \textit{answer set}, of
 Modern ASP solvers, such as \textsc{Clingo} \cite{gebser2014clingoasp}, extend the core language with aggregates, choice rules, disjunctive heads, and optimization statements. LAMP uses \textsc{Clingo} as its verification oracle but operates over a restricted subset of normal rules only, as defined in Section~\ref{sec:benchmark}.
 
 \paragraph{Solving Complexity.}
-Deciding whether a ground ASP program has an answer set is $\Sigma_2^P$-complete \cite{bichler2016powernongroundrulesanswer}. This places ASP one level above $\mathsf{NP}$ in the polynomial hierarchy, reflecting the two sources of computational hardness, the nondeterministic search over candidate sets $S \subseteq \mathcal{A}$, and the co-$\mathsf{NP}$ check that no proper subset of $S$ is also a stable model of $\Pi^S$. This work restricts to the \textit{normal} subset, where the bound drops one level to $\mathsf{NP}$-complete \cite{bichler2016powernongroundrulesanswer}. LAMP would apply unchanged to the disjunctive case.
+Deciding whether a ground ASP program has an answer set is $\Sigma_2^P$-complete \cite{bichler2016powernongroundrulesanswer}. This places ASP one level above $\mathsf{NP}$ in the polynomial hierarchy, reflecting the two sources of computational hardness, the nondeterministic search over candidate sets $S \subseteq \mathcal{A}$, and the co-$\mathsf{NP}$ check that no proper subset of $S$ is also a stable model of $\Pi^S$. This work restricts to the \textit{normal} subset, where the bound drops one level to $\mathsf{NP}$-complete \cite{bichler2016powernongroundrulesanswer}.
 
 \subsection{Learning from Answer Sets}\label{sec:ilasp}
 
@@ -435,7 +435,7 @@ Experiments were conducted on the synthetic data with varying complexities as sp
 
 \subsection{Experimental Setup}
 
-A total of 120 synthetic ASP programs were created with varying features for testing. All experiments were conducted on an Apple M3 Max with 48\,GB unified memory. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. For \textit{gpt-5-mini}, timing reflects server-side processing time reported by the OpenAI API, excluding network latency. All ASP solving and analysis was done using \textsc{Clingo}. ILASP version 4 was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. Each LAMP run was allowed a maximum of 3 iterations, one initial generation followed by up to 2 rounds of feedback verified by \textsc{Clingo}. Both systems receive the same input instance $\mathcal{M}$ (Definition~\ref{def:input}), where the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The selected parameters used for complexity classes are listed in Table~\ref{tab:parameters}. The positive literal bound is derived as $L^+ = \text{Overall Literals} - L^-$. All combinations were used except where the negative literal count equals or exceeds the overall literal count, which would leave no positive literals.
+A total of 120 synthetic ASP programs were created with varying features for testing. All experiments were conducted on an Apple M3 Max with 48\,GB unified memory. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. For \textit{gpt-5-mini}, timing reflects server-side processing time reported by the OpenAI API, excluding network latency. All ASP solving and analysis was done using \textsc{Clingo}. ILASP version 4 was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. Each LAMP run was allowed a maximum of 3 iterations, one initial generation followed by up to 2 rounds of feedback verified by \textsc{Clingo}, as diminishing returns were observed beyond this point. Both systems receive the same input instance $\mathcal{M}$ (Definition~\ref{def:input}), where the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The selected parameters used for complexity classes are listed in Table~\ref{tab:parameters}. The positive literal bound is derived as $L^+ = \text{Overall Literals} - L^-$. All combinations were used except where the negative literal count equals or exceeds the overall literal count, which would leave no positive literals.
 
 \begin{table}[htbp]
     \centering
@@ -448,7 +448,7 @@ A total of 120 synthetic ASP programs were created with varying features for tes
     Descriptors & [6, 10] \\
     Objects & [10] \\
     Facts & [6, 9] \\
-    Rules & [3, 6, 11] \\
+    Rules & [11] \\
     Overall Literals & [2, 3] \\
     Negative Literals & [0, 1, 2] \\
     Min Derived Atoms & [1, 3] \\
@@ -472,9 +472,9 @@ The iterative feedback loop contributes meaningfully for all models. First attem
     \toprule
     System & First attempt & Final & Failures & Failure type \\
     \midrule
-    gpt-5-mini       & 113/120 (94.2\%) & 120/120 (100\%)  & 0  & --- \\
-    gpt-oss:20b      & 108/120 (90.0\%) & 115/120 (95.8\%) & 5  & Max iterations \\
-    qwen3-coder:30b  & 37/120 (30.8\%)  & 54/120 (45.0\%)  & 66 & Max iterations \\
+    \textit{gpt-5-mini}       & 113/120 (94.2\%) & 120/120 (100\%)  & 0  & --- \\
+    \textit{gpt-oss:20b}      & 108/120 (90.0\%) & 115/120 (95.8\%) & 5  & Max iterations \\
+    \textit{qwen3-coder:30b}  & 37/120 (30.8\%)  & 54/120 (45.0\%)  & 66 & Max iterations \\
     ILASP            & ---              & 117/120 (97.5\%) & 3  & Timeout only \\
     \bottomrule
     \end{tabular}
@@ -488,7 +488,7 @@ Table~\ref{tab:ilasp_timeout} details the three benchmarks on which ILASP timed 
 \label{tab:ilasp_timeout}
 \begin{tabular}{lcccc}
 \toprule
-Benchmark & gpt-5-mini & gpt-oss:20b & qwen3-coder:30b & ILASP \\
+Benchmark & \textit{gpt-5-mini} & \textit{gpt-oss:20b} & \textit{qwen3-coder:30b} & ILASP \\
 \midrule
 7  & \checkmark & \checkmark & $\times$ & Timed out \\
 27 & \checkmark & $\times$   & $\times$ & Timed out \\
@@ -540,9 +540,9 @@ Figure~\ref{fig:timing_boxplot} shows the per benchmark wall clock time distribu
     \toprule
     Model & Total (s) & Mean (s) & Median (s) & Max (s) \\
     \midrule
-    gpt-5-mini       & 2837.00 & 23.64 & 18.00 & 137.00 \\
-    gpt-oss:20b      & 8579.97 & 71.50 & 50.78 & 369.64 \\
-    qwen3-coder:30b  & 5319.65 & 44.33 & 40.32 & 417.77 \\
+    \textit{gpt-5-mini}       & 2837.00 & 23.64 & 18.00 & 137.00 \\
+    \textit{gpt-oss:20b}      & 8579.97 & 71.50 & 50.78 & 369.64 \\
+    \textit{qwen3-coder:30b}  & 5319.65 & 44.33 & 40.32 & 417.77 \\
     ILASP            & 1917.36 & 15.98 &  0.66 & 420.00 \\
     \bottomrule
     \end{tabular}
@@ -556,7 +556,7 @@ Table~\ref{tab:lit_by_correctness} gives the mean output literal count $L(\Pi)$ 
 \label{tab:lit_by_correctness}
 \begin{tabular}{llrrrr}
 \toprule
-Orig. literals & & gpt-5-mini & gpt-oss:20b & qwen3-coder:30b & ILASP \\
+Orig. literals & & \textit{gpt-5-mini} & \textit{gpt-oss:20b} & \textit{qwen3-coder:30b} & ILASP \\
 \midrule
 \multirow{2}{*}{22} & Correct   & 4.81 & 4.91 & 4.40 & 3.67 \\
                     & Incorrect & --   & 7.00 & 4.70 & --   \\
@@ -617,9 +617,9 @@ An ASP program is \emph{stratified} if no predicate depends negatively on itself
     System & Stratified / Solved \\
     \midrule
     Original        & 49 / 120 \\
-    gpt-5-mini      & 119 / 120 \\
-    gpt-oss:20b     & 114 / 115 \\
-    qwen3-coder:30b & 54 / 54 \\
+    \textit{gpt-5-mini}      & 119 / 120 \\
+    \textit{gpt-oss:20b}     & 114 / 115 \\
+    \textit{qwen3-coder:30b} & 54 / 54 \\
     ILASP           & 117 / 117 \\
     \bottomrule
     \end{tabular}
