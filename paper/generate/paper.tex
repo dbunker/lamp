@@ -91,7 +91,7 @@ This section presents the core background underpinning LAMP including ASP, ILASP
 
 \subsection{Answer Set Programming}
 
-Answer Set Programming (ASP) is a declarative programming paradigm based on stable model semantics \cite{DBLP:series/synthesis/2012Gebser}, well suited to combinatorial search and knowledge intensive reasoning tasks. An ASP program consists of rules over atoms and literals, and its solutions are the stable models, referred to as \textit{answer sets}, of that program. The following paragraphs introduce the syntactic primitives, rule structure, grounding procedure, and stable model semantics used throughout this paper.
+Answer Set Programming (ASP) is a declarative programming paradigm based on stable model semantics \cite{DBLP:series/synthesis/2012Gebser}, well suited to combinatorial search and knowledge intensive reasoning tasks. An ASP program consists of rules over atoms and literals, and its solutions are the stable models, referred to as \textit{answer sets}, of that program. The following introduces the syntactic primitives, rule structure, grounding procedure, and stable model semantics used throughout this paper.
 
 \paragraph{Syntactic Primitives.}
 A \textit{term} is either a constant represented as a lowercase symbol or integer such as\ $a$, $0$ or a variable represented as an uppercase symbol, such as\ $X$. A \textit{predicate} $p/k$ is a symbol of arity $k \geq 0$. Applying it to $k$ terms yields an \textit{atom} $p(t_1,\ldots,t_k)$. A ground atom contains no variables. A \textit{literal} is either a positive literal $a$, an atom, or a \textit{default negated} literal $\mathit{not}\; a$, where $\mathit{not}$ denotes negation as failure and $\mathit{not}\; a$ holds whenever $a$ cannot be derived.
@@ -103,10 +103,10 @@ An ASP program $\Pi$ is a finite set of \textit{rules} of the following form.
     h \leftarrow b_1, \ldots, b_m, \mathit{not}\; c_1, \ldots, \mathit{not}\; c_n
 \]
 
-\noindent Here $h$ is the \textit{head}, a classical atom or empty, each $b_i$ is a positive body literal, and $\mathit{not}\; c_j$ denotes default negation of atom $c_j$. When $m = n = 0$ the rule is a \textit{fact} and when $h$ is empty the rule is a \textit{constraint} written $\leftarrow \text{body}$, eliminating any answer set in which the body is satisfied. A body is satisfied when every positive literal $b_i$ is in the answer set and every negated atom $c_j$ is absent from it, which in a normal rule would force $h$ into the answer set, but with no head there is nothing to derive, so the answer set is eliminated instead.
+\noindent Here $h$ is the \textit{head}, a classical atom or empty, each $b_i$ is a positive body literal, and $\mathit{not}\; c_j$ denotes default negation of atom $c_j$. When $m = n = 0$ the rule is a \textit{fact}. Every rule in an ASP program must be satisfied. A rule is satisfied either when the body is satisfied and $h$ is derived and therefore in the answer set, or the body is not satisfied. A body is satisfied when every positive literal $b_i$ is in the answer set and every negated atom $c_j$ is absent from it.
 
 \paragraph{Variables and Grounding.}
-Rules are written with first order variables, symbols such as $X$ and $Y$ that range over concrete objects rather than truth values, allowing compact expression over large domains. Prior to solving, a \textit{grounder}, such as \textsc{Gringo}, substitutes all relevant terms for each variable, producing an equivalent propositional ground program $\Pi_g$. A rule is \textit{safe} if every variable occurring in it also appears in a positive body literal, which ensures that grounding is well defined.
+Rules are written with first order variables, symbols such as $X$ and $Y$ that range over concrete terms rather than truth values, allowing compact expression over large domains. Prior to solving, a \textit{grounder}, such as \textsc{Gringo}, substitutes all relevant terms for each variable, producing an equivalent propositional ground program $\Pi_g$. A rule is \textit{safe} if every variable occurring in it also appears in a positive body literal, which ensures that grounding is well defined.
 
 \paragraph{Semantics.}
 Let $\mathcal{A}$ denote the Herbrand base set of all ground atoms. Given a ground program $\Pi$ and a set $S \subseteq \mathcal{A}$, the \textit{Gelfond--Lifschitz reduct} $\Pi^S$ is obtained by the steps.
@@ -114,7 +114,7 @@ Let $\mathcal{A}$ denote the Herbrand base set of all ground atoms. Given a grou
     \item Remove every rule whose body contains $\mathit{not}\; c$ for some $c \in S$
     \item Remove all negative literals from the bodies of remaining rules.
 \end{enumerate}
-$S$ is a \textit{stable model}, referred to in ASP as an \textit{answer set}, of $\Pi$ if and only if $S$ is the \textit{minimal model} of the reduct $\Pi^S$. Because $\Pi^S$ is negation free, it has a unique minimal model, the smallest set of atoms satisfying every rule, where no atom is included unless it is forced by some rule in $\Pi^S$. A program may have zero, one, or multiple answer sets and solutions to the encoded problem correspond exactly to its answer sets. $AS(\Pi)$ is used to denote the set of answer sets of a program $\Pi$.
+$S$ is a \textit{stable model}, referred to in ASP as an \textit{answer set}, of $\Pi$ if and only if $S$ is the \textit{minimal model} of the reduct $\Pi^S$. Because $\Pi^S$ is negation free, it has a unique minimal model, the smallest set of atoms satisfying every rule. A program may have zero, one, or multiple answer sets and solutions to the encoded problem correspond exactly to its answer sets. $AS(\Pi)$ is used to denote the set of answer sets of a program $\Pi$.
 
 Modern ASP solvers, such as \textsc{Clingo} \cite{gebser2014clingoasp}, extend the core language with aggregates, choice rules, disjunctive heads, and optimization statements. LAMP uses \textsc{Clingo} as its verification oracle but operates over a restricted subset of normal rules only, as defined in Section~\ref{sec:benchmark}.
 
@@ -151,7 +151,7 @@ Examples are context-dependent and constrain the answer sets of $B \cup H$. Each
 }).
 \end{lstlisting}
 
-\noindent Background knowledge $B$ may contain shared facts and rules, but here the ground facts are supplied as the example context instead. The context-dependent positive example specifies an inclusion set, an exclusion set, and a context program. The inclusion set requires the hypothesis to derive \texttt{allowed(alice)}, ruling out an empty hypothesis. The exclusion set forbids \texttt{allowed(bob)}, ruling out the overly general rule \texttt{allowed(X).}\ Together they uniquely identify \texttt{allowed(X) :- adult(X).} as the intended hypothesis.
+\noindent Background knowledge $B$ may contain shared facts and rules, but here the ground facts are supplied as the example context instead. The context dependent positive example specifies an inclusion set, an exclusion set, and a context program. The inclusion set requires the hypothesis to derive \texttt{allowed(alice)}, ruling out an empty hypothesis. The exclusion set forbids \texttt{allowed(bob)}, ruling out the overly general rule \texttt{allowed(X).}\ Together they uniquely identify \texttt{allowed(X) :- adult(X).} as the intended hypothesis.
 
 \paragraph{Learning Task.}
 A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^- \rangle$. A hypothesis $H \in \mathcal{H}$ is an \textit{inductive solution} of $T$ if it covers all examples, meaning every positive example is satisfied by some answer set of $B \cup H$, and no answer set of $B \cup H$ satisfies any negative example. When hypotheses are assigned a \textit{cost}, typically the sum of rule lengths, the learning task seeks an \textit{optimal} solution. This is the inductive solution of minimum cost.
@@ -278,9 +278,9 @@ The LAMP framework operates on a formally defined benchmark structure that const
 
 \subsection{Benchmark Framework}\label{sec:benchmark}
 
-To keep the benchmarks tractable for both LLM generation and ILP search, the ASP used here is deliberately restricted. Programs consist only of unary \textit{facts} of the form \texttt{descriptor(object)} and \textit{normal rules} of the form \texttt{new\_descriptor(X) :- descriptor\_0(X), [not] descriptor\_1(X), \ldots} which derive new object descriptions from initial instance facts. This subset is expressive enough to require fairly complex rule induction while remaining within a reasonable hypothesis space.
+To keep the benchmarks tractable for both LLM generation and ILP search, the ASP used here is deliberately restricted. Programs consist only of unary \textit{facts} of the form \texttt{predicate(term)} and \textit{normal rules} of the form \texttt{new\_predicate(X) :- predicate\_0(X), [not] predicate\_1(X), \ldots} which derive new predicates from initial instance facts. This subset is expressive enough to require fairly complex rule induction while remaining within a reasonable hypothesis space.
 
-The following is an example representing the model facts that objects \texttt{"car"} and \texttt{"scooter"} are both vehicles, represented with the predicate \texttt{vehicle}, and the scooter is slow moving, represented with the predicate \texttt{slow\_moving}. It also has the rule that if an object is a vehicle and not slow moving it is highway possible, represented with the predicate \texttt{highway\_possible}.
+The following is an example representing the model facts that terms \texttt{"car"} and \texttt{"scooter"} are both vehicles, represented with the predicate \texttt{vehicle}, and the scooter is slow moving, represented with the predicate \texttt{slow\_moving}. It also has the rule that if a term is a vehicle and not slow moving it is highway possible, represented with the predicate \texttt{highway\_possible}.
 
 \begin{lstlisting}[language=ASP, caption={Vehicle example ASP program.}]
 vehicle(scooter).
@@ -323,7 +323,7 @@ Given a Problem Profile stated as $\mathcal{C} = \langle\, \mathcal{D},\; \mathc
 \]
 where
 \begin{itemize}
-  \item $F$ is the \emph{instance facts}, a set of $N_F$ ground atoms of the form $d(o)$ with descriptor $d \in \mathcal{D}$ and object $o \in \mathcal{T}$ (e.g.\ \texttt{d0(o0)}), so $|F| = N_F$.
+  \item $F$ is the \emph{instance facts}, a set of $N_F$ ground atoms of the form $d(o)$ with predicate $d \in \mathcal{D}$ and term $o \in \mathcal{T}$ (e.g.\ \texttt{d0(o0)}), so $|F| = N_F$.
   \item $A^{*}$ is the \emph{target answer set}, the desired unique stable model that any correct solution $\Pi$ must produce. It must satisfy $F \subseteq A^{*}$ and $|A^{*} \setminus F| \geq A_{\min}$.
   \item $\Phi$ is the \emph{hypothesis space}, the full set of concrete ASP rules from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
     \[
@@ -445,13 +445,13 @@ A total of 120 synthetic ASP programs were created with varying features for tes
     \toprule
     \textbf{Parameter} & \textbf{Variations} \\
     \midrule
-    Descriptors & [6, 10] \\
-    Objects & [10] \\
+    Predicates & [6, 10] \\
+    Terms & [10] \\
     Facts & [6, 9] \\
     Rules & [11] \\
     Overall Literals & [2, 3] \\
     Negative Literals & [0, 1, 2] \\
-    Min Derived Atoms & [1, 3] \\
+    Minimum Derived Atoms & [1, 3] \\
     \bottomrule
     \end{tabular}
 \end{table}
@@ -475,7 +475,7 @@ The iterative feedback loop contributes meaningfully for all models. First attem
     \textit{gpt-5-mini}       & 113/120 (94.2\%) & 120/120 (100\%)  & 0  & --- \\
     \textit{gpt-oss:20b}      & 108/120 (90.0\%) & 115/120 (95.8\%) & 5  & Max iterations \\
     \textit{qwen3-coder:30b}  & 37/120 (30.8\%)  & 54/120 (45.0\%)  & 66 & Max iterations \\
-    ILASP            & ---              & 117/120 (97.5\%) & 3  & Timeout only \\
+    ILASP                     & ---              & 117/120 (97.5\%) & 3  & Timeout only \\
     \bottomrule
     \end{tabular}
 \end{table}
@@ -543,7 +543,7 @@ Figure~\ref{fig:timing_boxplot} shows the per benchmark wall clock time distribu
     \textit{gpt-5-mini}       & 2837.00 & 23.64 & 18.00 & 137.00 \\
     \textit{gpt-oss:20b}      & 8579.97 & 71.50 & 50.78 & 369.64 \\
     \textit{qwen3-coder:30b}  & 5319.65 & 44.33 & 40.32 & 417.77 \\
-    ILASP            & 1917.36 & 15.98 &  0.66 & 420.00 \\
+    ILASP                     & 1917.36 & 15.98 &  0.66 & 420.00 \\
     \bottomrule
     \end{tabular}
 \end{table}
@@ -616,11 +616,11 @@ An ASP program is \emph{stratified} if no predicate depends negatively on itself
     \toprule
     System & Stratified / Solved \\
     \midrule
-    Original        & 49 / 120 \\
+    Original                 & 49 / 120 \\
     \textit{gpt-5-mini}      & 119 / 120 \\
     \textit{gpt-oss:20b}     & 114 / 115 \\
     \textit{qwen3-coder:30b} & 54 / 54 \\
-    ILASP           & 117 / 117 \\
+    ILASP                    & 117 / 117 \\
     \bottomrule
     \end{tabular}
 \end{table}
