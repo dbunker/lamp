@@ -119,7 +119,7 @@ $S$ is a \textit{stable model}, referred to in ASP as an \textit{answer set}, of
 Modern ASP solvers, such as \textsc{Clingo} \cite{gebser2014clingoasp}, extend the core language with aggregates, choice rules, disjunctive heads, and optimization statements. LAMP uses \textsc{Clingo} as its verification oracle but operates over a restricted subset of normal rules only, as defined in Section~\ref{sec:benchmark}.
 
 \paragraph{Solving Complexity.}
-Solving non-ground normal ASP programs of bounded predicate arity is $\Sigma_2^P$\text{-complete} \cite{eiter2007complexityresultsboundedarity, bichler2016powernongroundrulesanswer}, one level above $\mathsf{NP}$ in the polynomial hierarchy. $\Sigma_2^P$ is the class of problems solvable by an $\mathsf{NP}$ machine with access to an $\mathsf{NP}$ oracle. The two levels of hardness arise from the nondeterministic search over candidate answer sets and the co\text{-}$\mathsf{NP}$ stability verification, where non-ground rule bodies of bounded arity can encode an entire $\mathsf{NP}$ check within a single rule.
+Solving non-ground normal ASP programs of bounded predicate arity is $\Sigma_2^P$\text{-complete} \cite{eiter2007complexityresultsboundedarity, bichler2016powernongroundrulesanswer}, one level above $\mathsf{NP}$ in the polynomial hierarchy. $\Sigma_2^P$ is the class of problems solvable by an $\mathsf{NP}$ machine with access to an $\mathsf{NP}$ oracle. The two levels of hardness arise because non-ground rule bodies of bounded arity can produce exponentially large ground programs, embedding additional complexity beyond the search over candidate answer sets.
 
 \subsection{Learning from Answer Sets}\label{sec:ilasp}
 
@@ -164,7 +164,7 @@ A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^- \rangl
 ILASP reduces the learning task to a sequence of ASP solving problems. The hypothesis space is encoded as an ASP metaprogram, and the search for a covering hypothesis is directed by a \textit{conflict driven} procedure \cite{law2020ilaspinductivelearninganswer}. Candidate hypotheses are proposed and checked against all examples. Conflicts from examples not yet covered are then used to prune the space and guide subsequent iterations. This conflict driven approach, implemented in the \textsc{FastLAS} system, scales substantially better than exhaustive enumeration of $\mathcal{H}$ \cite{law2022conflictdriveninductivelogicprogramming}.
 
 \paragraph{Solving Complexity.}
-Learning an optimal inductive solution under the ILASP framework over non-ground normal programs of bounded predicate arity is $\Sigma_3^P$\text{-complete} \cite{law2018complexitygeneralitylearning}, one level above the $\Sigma_2^P$\text{-completeness} of ASP solving. The additional level reflects the search over hypotheses $H \in \mathcal{H}$ layered on top of the $\Sigma_2^P$ verification that $H$ is a valid inductive solution. This theoretical hardness motivates an alternative approach. Rather than exhaustive symbolic search, LAMP replaces the hypothesis search with LLM guided generation, bypassing the direct hypothesis space search.
+Determining whether a satisfying hypothesis exists under the ILASP framework is $\Sigma_2^P$\text{-complete} even for propositional programs \cite{law2018complexitygeneralitylearning}, one level above the $\mathsf{NP}$\text{-completeness} of propositional ASP solving. The additional level reflects the search over hypotheses $H \in \mathcal{H}$ layered on top of verifying that $H$ covers all examples. This theoretical hardness motivates an alternative approach. Rather than exhaustive symbolic search, LAMP replaces the hypothesis search with LLM guided generation, bypassing the direct hypothesis space search.
 
 \subsection{Large Language Models for Code Generation}
 
@@ -231,7 +231,7 @@ LLMs have been shown to generate logic programs from natural language specificat
     \node[proc=inputcol, minimum width=3.4cm, below=of facts]
       (model) {Expected Stable Model\\[2pt]\texttt{\scriptsize \{d0(o0), d2(o0),\ldots\}}};
     \node[proc=inputcol, minimum width=3.4cm, below=of model]
-      (format) {Hypothesis Space $\Phi$\\[2pt]\footnotesize\textit{arity-1, single var, bounded literals}};
+      (format) {Hypothesis Space $\Phi$\\[2pt]\footnotesize\textit{arity-1, bounded literals}};
 
     % \node[grplabel, left=0.15cm of facts, rotate=90, anchor=south] {INPUTS};
 
@@ -282,7 +282,7 @@ The LAMP framework operates on a formally defined benchmark structure that const
 
 \subsection{Benchmark Framework}\label{sec:benchmark}
 
-To keep the benchmarks tractable for both LLM generation and ILP search, the ASP used here is deliberately restricted. Programs consist only of unary \textit{facts} of the form \texttt{predicate(term)} and \textit{normal rules} of the form \texttt{new\_predicate(X) :- predicate\_0(X), [not] predicate\_1(X), \ldots} which derive new predicates from initial instance facts. This subset is expressive enough to require fairly complex rule induction while remaining within a reasonable hypothesis space.
+To keep the benchmarks tractable for both LLM generation and ILP search, the ASP used here is deliberately restricted. Programs consist only of unary \textit{facts} of the form \texttt{predicate(term)} and \textit{normal rules} of the form \texttt{new\_predicate(V\_0) :- predicate\_0(V\_1), [not] predicate\_1(V\_2), \ldots} which derive new predicates from initial instance facts. This subset is expressive enough to require fairly complex rule induction while remaining within a reasonable hypothesis space.
 
 The following is an example representing the model facts that terms \texttt{"car"} and \texttt{"scooter"} are both vehicles, represented with the predicate \texttt{vehicle}, and the scooter is slow moving, represented with the predicate \texttt{slow\_moving}. It also has the rule that if a term is a vehicle and not slow moving it is highway possible, represented with the predicate \texttt{highway\_possible}.
 
@@ -384,11 +384,11 @@ From each benchmark instance $\mathcal{M}$, a corresponding ILASP task file is g
 }).
 \end{lstlisting}
 
-This gives ILASP the same hypothesis space over which LAMP operates. For benchmarks with a sufficiently small hypothesis space, a search space file can be generated by running ILASP in enumeration mode.
+This gives ILASP the same hypothesis space over which LAMP operates.
 
 \subsection{Prompting and Feedback Loop}
 
-The initial prompt instructs the LLM to reconstruct ASP rules that, combined with the given facts, yield the target stable model. It states the rule schema constraints from $\Phi$ including single variable $X$, normal rules with bounded body literals, and no new facts. It tells the LLM to prefer the minimal rule set and provides the instance facts $F$ and target answer set $A^*$ as concrete inputs. The prompt also contains a short worked example demonstrating the expected output format. If \textsc{Clingo} reports a mismatch, a feedback message is appended to the conversation containing the facts, the expected stable model, and the actual stable model from the candidate rules, asking the LLM to produce corrected rules. All LLMs were queried at the default temperature of 1 with each benchmark run once per model. This iterative interaction is formalized below.
+The initial prompt instructs the LLM to reconstruct ASP rules that, combined with the given facts, yield the target stable model. It states the rule schema constraints from $\Phi$ including normal rules with bounded body literals and no new facts. It tells the LLM to prefer the minimal rule set and provides the instance facts $F$ and target answer set $A^*$ as concrete inputs. The prompt also contains a short worked example demonstrating the expected output format. If \textsc{Clingo} reports a mismatch, a feedback message is appended to the conversation containing the facts, the expected stable model, and the actual stable model from the candidate rules, asking the LLM to produce corrected rules. All LLMs were queried at the default temperature of 1 with each benchmark run once per model. This iterative interaction is formalized below.
 
 \begin{definition}[LAMP Interaction Protocol]
 \label{def:protocol}
