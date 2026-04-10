@@ -168,11 +168,12 @@ class OpenAIClient(LLM):
         # frequency_penalty=1.0,
         # presence_penalty=1.0,
         # temperature=1.0,
+        # reasoning={"effort": "high"},
+        # max_output_tokens=1000
 
         response = self.client.responses.create(
             model=self.title,
-            input=messages,
-            # max_output_tokens=1000
+            input=messages
         )
 
         full_response = json.loads(response.model_dump_json())
@@ -195,12 +196,13 @@ class OllamaClient(LLM):
         self.client = Client(timeout=TIMEOUT)
         self.title = title
 
+    # think="high"
 
     def send_prompt(self, messages: list) -> str:
 
         response = self.client.chat(
             model=self.title,
-            messages=messages
+            messages=messages,
         )
 
         full_response = json.loads(response.model_dump_json())
@@ -554,8 +556,8 @@ def format_ilasp_task(original_kb: KnowledgeBase, original_stats: Dict) -> str:
     lines.append("")
 
     for pred in sorted(all_preds):
-        lines.append(f"#modeb(1, {pred}(var(obj))).")
-        lines.append(f"#modeb(1, {pred}(var(obj)), (negative)).")
+        lines.append(f"#modeb({pred}(var(obj))).")
+        lines.append(f"#modeb({pred}(var(obj)), (negative)).")
     lines.append("")
 
     inclusion = sorted(str(a) for a in derived_atoms)
@@ -686,9 +688,10 @@ def run_ilasp():
 def explicit_prompt(facts: str, stable_model: str) -> str:
     return f"""Reconstruct the missing ASP rules given only facts and a target stable model.
 
-Rules must have the form: d{{n}}(X) :- [not] d{{m}}(X), ...
-- Single variable X only; no constants, aggregates, choice rules, or disjunctions
-- No new facts (empty-body rules)
+Rules must have the form: d{{n}}(Vi) :- [not] d{{m}}(Vj), ...
+- Variables may differ across predicates (X, Y, Z, etc.)
+- No constants, aggregates, choice rules, or disjunctions
+- No new facts (empty body rules)
 - Combined with the given facts, rules must yield exactly the target stable model
 - Prefer the minimal rule set (fewest rules and literals)
 
@@ -699,7 +702,7 @@ Output reasoning if helpful, then end with ONLY the rules, one per line.
 If no rules are needed: % no additional rules required
 If impossible under the schema: % no solution using the allowed rule schema
 
-Example — Facts: d1(a). d2(a). | Target: {{d1(a), d2(a), d3(a)}}
+Example — Facts: d1(a). d1(b). d2(a). | Target: {{d1(a), d1(b), d2(a), d3(a)}}
 d3(X) :- d1(X), d2(X).
 """
 

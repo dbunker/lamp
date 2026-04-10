@@ -94,7 +94,7 @@ This section presents the core background underpinning LAMP including ASP, ILASP
 ASP is a declarative programming paradigm based on stable model semantics \cite{DBLP:series/synthesis/2012Gebser}, well suited to combinatorial search and knowledge intensive reasoning tasks. An ASP program consists of rules over atoms and literals, and its solutions are the stable models, referred to as \textit{answer sets}, of that program. The following introduces the syntactic primitives, rule structure, grounding procedure, and stable model semantics used throughout this paper.
 
 \paragraph{Syntactic Primitives.}
-A \textit{term} is either a constant represented as a lowercase symbol or integer such as\ $a$, $0$ or a variable represented as an uppercase symbol, such as\ $X$. A \textit{predicate} $p/k$ is a symbol of arity $k \geq 0$. Applying it to $k$ terms yields an \textit{atom} $p(t_1,\ldots,t_k)$. A ground atom contains no variables. A \textit{literal} is either a positive literal $a$, an atom, or a \textit{default negated} literal $\mathit{not}\; a$, where $\mathit{not}$ denotes negation as failure and $\mathit{not}\; a$ holds whenever $a$ cannot be derived.
+A \textit{term} is either a constant represented as a lowercase symbol or integer such as\ $a$, $0$ or a variable represented as an uppercase symbol, such as\ $X$. A \textit{predicate} $p/k$ is a symbol of arity $k \geq 0$. Applying it to $k$ terms yields an \textit{atom} $p(t_1,\ldots,t_k)$. A ground atom contains no variables. A \textit{literal} is either an atom $a$, called a positive literal, or a \textit{default negated} literal $\mathit{not}\; a$, where $\mathit{not}$ denotes negation as failure and $\mathit{not}\; a$ holds whenever $a$ cannot be derived.
 
 \paragraph{Rules and Programs.}
 An ASP program $\Pi$ is a finite set of \textit{rules} of the following form.
@@ -140,6 +140,10 @@ To illustrate, suppose the goal is to learn which individuals are \texttt{allowe
 \begin{lstlisting}[language=ASP, caption={Simple ILASP learning task.}]
 % Background knowledge B, could contain shared facts and rules
 
+#constant(person, alice).
+#constant(person, bob).
+#constant(person, carol).
+
 % Hypothesis space
 #modeh(allowed(var(person))).
 #modeb(adult(var(person))).
@@ -151,7 +155,7 @@ To illustrate, suppose the goal is to learn which individuals are \texttt{allowe
 }).
 \end{lstlisting}
 
-Background knowledge $B$ may contain shared facts and rules, but here the ground facts are supplied as the example context instead. The context dependent positive example specifies an inclusion set, an exclusion set, and a context program. The inclusion set requires the hypothesis to derive \texttt{allowed(alice)}, ruling out an empty hypothesis. The exclusion set forbids \texttt{allowed(bob)}, ruling out the overly general rule \texttt{allowed(X).}\ Together they uniquely identify \texttt{allowed(X) :- adult(X).} as the intended hypothesis.
+Background knowledge $B$ may contain shared facts and rules, but here the ground facts are supplied as the example context instead. The context dependent positive example specifies an inclusion set, an exclusion set, and a context program. The inclusion set requires the hypothesis to derive \texttt{allowed(alice)}, ruling out an empty hypothesis. The exclusion set forbids \texttt{allowed(bob)}, ruling out the overly general rule \texttt{allowed(X).}\ Together with the optimality criterion preferring shorter rules, they uniquely identify \texttt{allowed(X) :- adult(X).} as the intended hypothesis.
 
 \paragraph{Learning Task.}
 A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^- \rangle$. A hypothesis $H \in \mathcal{H}$ is an \textit{inductive solution} of $T$ if it covers all examples, meaning every positive example $e^+$ is satisfied by some answer set of $B \cup e^+_\mathit{context} \cup H$, and no answer set of $B \cup e^-_\mathit{context} \cup H$ satisfies any negative example $e^-$. When hypotheses are assigned a \textit{cost}, typically the sum of rule lengths, the learning task seeks an \textit{optimal} solution. This is the inductive solution of minimum cost.
@@ -327,11 +331,11 @@ where
   \item $A^{*}$ is the \emph{target answer set}, the desired unique stable model that any correct solution $\Pi$ must produce. It must satisfy $F \subseteq A^{*}$ and $|A^{*} \setminus F| \geq A_{\min}$.
   \item $\Phi$ is the \emph{hypothesis space}, the full set of concrete ASP rules from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
     \[
-      d_h(X) \;:\text{-}\; p_1(X),\; \ldots,\; p_{k}(X),\; \texttt{not}\; n_1(X),\; \ldots,\; \texttt{not}\; n_{m}(X).
+      d_h(V_0) \;:\text{-}\; p_1(V_1),\; \ldots,\; p_{k}(V_k),\; \texttt{not}\; n_1(V'_1),\; \ldots,\; \texttt{not}\; n_{m}(V'_m).
     \]
-    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, $X$ is a single universally quantified variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals as bounded in Definition~\ref{def:complexity}.
+    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, each $V_i$ and $V'_j$ is a variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals as bounded in Definition~\ref{def:complexity}. All predicates are unary and all rules must be safe.
 \end{itemize}
-A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$ with $|\Pi| \leq R$. Every rule in $\Pi$ is therefore unary, uses only predicates from $\mathcal{D}$, and respects the bounds $L^+$ and $L^-$.
+A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$ with $|\Pi| \leq R$. Every rule in $\Pi$ uses only predicates from $\mathcal{D}$ and respects the bounds $L^+$ and $L^-$.
 $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
 \[
   AS\!\left(F \cup \Pi\right) \;=\; \bigl\{\, A^{*} \,\bigr\}
@@ -362,12 +366,12 @@ From each benchmark instance $\mathcal{M}$, a corresponding ILASP task file is g
 
 #modeh(d2(var(obj))).
 
-#modeb(1, d0(var(obj))).
-#modeb(1, d0(var(obj)), (negative)).
-#modeb(1, d1(var(obj))).
-#modeb(1, d1(var(obj)), (negative)).
-#modeb(1, d2(var(obj))).
-#modeb(1, d2(var(obj)), (negative)).
+#modeb(d0(var(obj))).
+#modeb(d0(var(obj)), (negative)).
+#modeb(d1(var(obj))).
+#modeb(d1(var(obj)), (negative)).
+#modeb(d2(var(obj))).
+#modeb(d2(var(obj)), (negative)).
 
 #pos(eg1, {
   d2(o0)
