@@ -70,7 +70,7 @@ However, writing ASP programs that are both correct and performant remains chall
 
 The LLM to ASP Modeling Protocol (LAMP) is designed to guide LLMs in deducing and optimizing ASP rules from given instance facts and expected answer sets. LAMP provides a structured interaction protocol that enables refinement of ASP encodings, with the goal of improving both correctness and performance. Beyond proposing the system itself, LAMP can be used as a framework for evaluating the capabilities of different LLMs in ASP program generation.
 
-Both LAMP and the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilaspinductivelearninganswer} address the same underlying problem class. Given a set of instance facts and an expected answer set, find a program within a bounded hypothesis space that produces the correct answer set. ILASP solves this via exhaustive search under the Learning from Answer Sets (LAS) framework, while LAMP replaces exhaustive search with LLM guided generation and \textsc{Clingo} based iterative verification. As the expected input and output are the same, a controlled comparison can be made between symbolic ILP search and LLM based generation on the same class of tasks.
+Both LAMP and the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP) \cite{law2020ilaspinductivelearninganswer} address the same underlying problem class. Given a set of instance facts and an expected answer set, find a program within a bounded hypothesis space that produces the correct answer set. ILASP solves this via conflict driven search under the Learning from Answer Sets (LAS) framework, while LAMP replaces symbolic search with LLM guided generation and \textsc{Clingo} based iterative verification. As the expected input and output are the same, a controlled comparison can be made between symbolic ILP search and LLM based generation on the same class of tasks.
 
 The relevant research questions of this work are the following.
 
@@ -83,7 +83,7 @@ The relevant research questions of this work are the following.
 \noindent
 \textbf{RQ3.} Which features of the ASP benchmark appear to predict LLM success or failure in LAMP?
 
-While recent work has explored LLM and ASP integration through fine tuning \cite{coppolillo2024llaspfinetuninglargelanguage}, coupled planning pipelines \cite{lin2024clmaspcouplinglargelanguage}, learning from answer sets \cite{borroto2025questionansweringllmslearning}, and solver feedback \cite{schrader2025solverintheloopframeworkimprovingllms}, LAMP is distinct in using LLMs to directly generate and iteratively refine ASP hypotheses verified by \textsc{Clingo}, without requiring fine tuning or exhaustive search.
+While recent work has explored LLM and ASP integration through fine tuning \cite{coppolillo2024llaspfinetuninglargelanguage}, coupled planning pipelines \cite{lin2024clmaspcouplinglargelanguage}, learning from answer sets \cite{borroto2025questionansweringllmslearning}, and solver feedback \cite{schrader2025solverintheloopframeworkimprovingllms}, LAMP is distinct in using LLMs to directly generate and iteratively refine ASP hypotheses verified by \textsc{Clingo}, without requiring fine tuning or systematic hypothesis space search.
 
 \section{Background}
 
@@ -119,14 +119,14 @@ $S$ is a \textit{stable model}, referred to in ASP as an \textit{answer set}, of
 Modern ASP solvers, such as \textsc{Clingo} \cite{gebser2014clingoasp}, extend the core language with aggregates, choice rules, disjunctive heads, and optimization statements. LAMP uses \textsc{Clingo} as its verification oracle but operates over a restricted subset of normal rules only, as defined in Section~\ref{sec:benchmark}.
 
 \paragraph{Solving Complexity.}
-Solving non-ground normal ASP programs of bounded predicate arity is $\Sigma_2^P$\text{-complete} \cite{eiter2007complexityresultsboundedarity, bichler2016powernongroundrulesanswer}, one level above $\mathsf{NP}$ in the polynomial hierarchy. $\Sigma_2^P$ is the class of problems solvable by an $\mathsf{NP}$ machine with access to an $\mathsf{NP}$ oracle. The two levels of hardness arise because non-ground rule bodies of bounded arity can produce exponentially large ground programs, embedding additional complexity beyond the search over candidate answer sets.
+Solving non-ground normal ASP programs of bounded predicate arity is $\Sigma_2^P$\text{-complete} \cite{eiter2007complexityresultsboundedarity, bichler2016powernongroundrulesanswer}, one level above $\mathsf{NP}$ in the polynomial hierarchy. $\Sigma_2^P$ is the class of problems solvable by an $\mathsf{NP}$ machine with access to an $\mathsf{NP}$ oracle. The two levels of hardness arise because non-ground rules of bounded arity can compactly encode exponentially many ground instances, adding expressiveness beyond the search over candidate answer sets.
 
 \subsection{Learning from Answer Sets}\label{sec:ilasp}
 
 ILASP \cite{law2020ilaspinductivelearninganswer} is a framework for Inductive Logic Programming (ILP) that learns ASP programs from examples, defining the same task that LAMP approaches via LLM guided generation. A learning task is specified by a \textit{hypothesis space} $\mathcal{H}$ constraining which rules may be learned, a \textit{background knowledge} program $B$ consisting of ASP rules that are given rather than learned, and a set of \textit{learning examples} $E$ specifying constraints on the answer sets that the learned hypothesis must produce. The following paragraphs define each component and describe the conflict driven search procedure ILASP uses to find an optimal hypothesis.
 
 \paragraph{Hypothesis Space.}
-The hypothesis space $\mathcal{H}$ is defined by a \textit{mode bias}, which constrains the structure of rules that may appear in a learned hypothesis. A \textit{mode declaration} is either a \textit{head declaration} $\mathit{modeh}(a)$ or a \textit{body declaration} $\mathit{modeb}(a)$, specifying which atoms may appear in rule heads and bodies respectively. Each atom in a mode declaration may contain \textit{placeholder terms} of the form $\mathit{\#var}(t)$ (a variable of type $t$) or $\mathit{\#con}(t)$ (a constant of type $t$), which are instantiated during the search. A \textit{hypothesis} $H \in \mathcal{H}$ is a set of ASP rules consistent with the mode bias.
+The hypothesis space $\mathcal{H}$ is defined by a \textit{mode bias}, which constrains the structure of rules that may appear in a learned hypothesis. A \textit{mode declaration} is either a \textit{head declaration} $\mathit{modeh}(a)$ or a \textit{body declaration} $\mathit{modeb}(a)$, specifying which atoms may appear in rule heads and bodies respectively. Each atom in a mode declaration may contain \textit{placeholder terms} of the form $\mathit{var}(t)$ (a variable of type $t$) or $\mathit{const}(t)$ (a constant of type $t$), which are instantiated during the search. A \textit{hypothesis} $H \in \mathcal{H}$ is a set of ASP rules consistent with the mode bias.
 
 \paragraph{Learning Examples.}
 Examples are context dependent and constrain the answer sets of $B \cup H$. Each example specifies an inclusion set, an exclusion set, and a context program.
@@ -164,7 +164,7 @@ A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^- \rangl
 ILASP reduces the learning task to a sequence of ASP solving problems. The hypothesis space is encoded as an ASP metaprogram, and the search for a covering hypothesis is directed by a \textit{conflict driven} procedure \cite{law2020ilaspinductivelearninganswer}. Candidate hypotheses are proposed and checked against all examples. Conflicts from examples not yet covered are then used to prune the space and guide subsequent iterations. This conflict driven approach, implemented in the \textsc{FastLAS} system, scales substantially better than exhaustive enumeration of $\mathcal{H}$ \cite{law2022conflictdriveninductivelogicprogramming}.
 
 \paragraph{Solving Complexity.}
-Determining whether a satisfying hypothesis exists under the ILASP framework is $\Sigma_2^P$\text{-complete} even for propositional programs \cite{law2018complexitygeneralitylearning}, one level above the $\mathsf{NP}$\text{-completeness} of propositional ASP solving. The additional level reflects the search over hypotheses $H \in \mathcal{H}$ layered on top of verifying that $H$ covers all examples. This theoretical hardness motivates an alternative approach. Rather than exhaustive symbolic search, LAMP replaces the hypothesis search with LLM guided generation, bypassing the direct hypothesis space search.
+Determining whether a satisfying hypothesis exists under the ILASP framework is $\Sigma_2^P$\text{-complete} even for propositional programs \cite{law2018complexitygeneralitylearning}, one level above the $\mathsf{NP}$\text{-completeness} of propositional ASP solving. The additional level reflects the search over hypotheses $H \in \mathcal{H}$ layered on top of verifying that $H$ covers all examples. This theoretical hardness motivates an alternative approach. LAMP replaces the hypothesis search with LLM guided generation, trading formal completeness for heuristic flexibility.
 
 \subsection{Large Language Models for Code Generation}
 
@@ -282,7 +282,7 @@ The LAMP framework operates on a formally defined benchmark structure that const
 
 \subsection{Benchmark Framework}\label{sec:benchmark}
 
-To keep the benchmarks tractable for both LLM generation and ILP search, the ASP used here is deliberately restricted. Programs consist only of unary \textit{facts} of the form \texttt{predicate(term)} and \textit{normal rules} of the form \texttt{new\_predicate(V\_0) :- predicate\_0(V\_1), [not] predicate\_1(V\_2), \ldots} which derive new predicates from initial instance facts. This subset is expressive enough to require fairly complex rule induction while remaining within a reasonable hypothesis space.
+To keep the benchmarks tractable for both LLM generation and ILP search, the ASP used here is deliberately restricted. Programs consist only of unary \textit{facts} of the form \texttt{predicate(term)} and \textit{normal rules} of the form \texttt{new\_predicate(X) :- predicate\_0(X), [not] predicate\_1(Y), \ldots} which derive new predicates from initial instance facts, where variables may be shared across positions. This subset is expressive enough to require fairly complex rule induction while remaining within a reasonable hypothesis space.
 
 The following is an example representing the model facts that terms \texttt{"car"} and \texttt{"scooter"} are both vehicles, represented with the predicate \texttt{vehicle}, and the scooter is slow moving, represented with the predicate \texttt{slow\_moving}. It also has the rule that if a term is a vehicle and not slow moving it is highway possible, represented with the predicate \texttt{highway\_possible}.
 
@@ -328,12 +328,12 @@ Given a Problem Profile stated as $\mathcal{C} = \langle\, \mathcal{D},\; \mathc
 where
 \begin{itemize}
   \item $F$ is the \emph{instance facts}, a set of $N_F$ ground atoms of the form $d(o)$ with predicate $d \in \mathcal{D}$ and term $o \in \mathcal{T}$ such as \texttt{d0(o0)}, so $|F| = N_F$.
-  \item $A^{*}$ is the \emph{target answer set}, the desired unique stable model that any correct solution $\Pi$ must produce. It must satisfy $F \subseteq A^{*}$ and $|A^{*} \setminus F| \geq A_{\min}$.
+  \item $A^{*}$ is the \emph{target answer set}, the desired unique stable model that any correct solution $\Pi$ must produce. The atoms in $A^{*} \setminus F$ are the \emph{derived atoms}, those produced by rules rather than given as facts. It must satisfy $F \subseteq A^{*}$ and $|A^{*} \setminus F| \geq A_{\min}$.
   \item $\Phi$ is the \emph{hypothesis space}, the full set of concrete ASP rules from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
     \[
       d_h(V_0) \;:\text{-}\; p_1(V_1),\; \ldots,\; p_{k}(V_k),\; \texttt{not}\; n_1(V'_1),\; \ldots,\; \texttt{not}\; n_{m}(V'_m).
     \]
-    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, each $V_i$ and $V'_j$ is a variable, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals as bounded in Definition~\ref{def:complexity}. All predicates are unary and all rules must be safe.
+    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, each $V_i$ and $V'_j$ is drawn from a finite set of logical variables and may be shared across positions, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals as bounded in Definition~\ref{def:complexity}. All predicates are unary and all rules must be safe, meaning every variable in a rule appears in at least one positive body literal.
 \end{itemize}
 A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$ with $|\Pi| \leq R$. Every rule in $\Pi$ uses only predicates from $\mathcal{D}$ and respects the bounds $L^+$ and $L^-$.
 $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
@@ -358,7 +358,7 @@ d2(X) :- d0(X), not d1(X).
 
 This results in the answer set \texttt{\{\ d0(o0), d0(o1), d1(o1), d2(o0) \}}, corresponding to the vehicle example answer set.
 
-From each benchmark instance $\mathcal{M}$, a corresponding ILASP task file is generated. The predicates that appear in derived atoms $A^{*} \setminus F$ are declared as \texttt{\#modeh} atoms, and all predicates in $\mathcal{D}$ are declared as \texttt{\#modeb} atoms in both positive and negative forms. Since each benchmark has exactly one answer set, the derived predicates are uniquely determined by $A^{*}$, making the \texttt{\#modeh} declarations both necessary and sufficient. No valid solution can require a head predicate not already present in $A^{*} \setminus F$. The target answer set $A^{*}$ is encoded as a single context dependent \texttt{\#pos} example with the instance facts $F$ as context. The inclusion set contains the derived atoms $A^{*} \setminus F$, the exclusion set contains atoms formed by applying each derived predicate to all terms not present in $A^{*}$, and the context contains the instance facts. The corresponding ILASP task for the vehicle example above is shown below.
+From each benchmark instance $\mathcal{M}$, a corresponding ILASP task file is generated. The predicates that appear in derived atoms $A^{*} \setminus F$ are declared as \texttt{\#modeh} atoms, and all predicates in $\mathcal{D}$ are declared as \texttt{\#modeb} atoms in both positive and negative forms. Since each benchmark has exactly one answer set, the derived predicates are uniquely determined by $A^{*}$, making the \texttt{\#modeh} declarations both necessary and sufficient. No valid solution can require a head predicate not already present in $A^{*} \setminus F$. The target answer set $A^{*}$ is encoded as a single context dependent \texttt{\#pos} example with the instance facts $F$ as context. The inclusion set contains the derived atoms $A^{*} \setminus F$, the exclusion set contains all ground atoms formed from derived predicates and terms in $\mathcal{T}$ that do not appear in $A^{*}$, and the context contains the instance facts. The corresponding ILASP task for the vehicle example above is shown below.
 
 \begin{lstlisting}[language=ASP, caption={Corresponding ILASP task.}]
 #constant(obj, o0).
@@ -388,7 +388,7 @@ This gives ILASP the same hypothesis space over which LAMP operates.
 
 \subsection{Prompting and Feedback Loop}
 
-The initial prompt instructs the LLM to reconstruct ASP rules that, combined with the given facts, yield the target stable model. It states the rule schema constraints from $\Phi$ including normal rules with bounded body literals and no new facts. It tells the LLM to prefer the minimal rule set and provides the instance facts $F$ and target answer set $A^*$ as concrete inputs. The prompt also contains a short worked example demonstrating the expected output format. If \textsc{Clingo} reports a mismatch, a feedback message is appended to the conversation containing the facts, the expected stable model, and the actual stable model from the candidate rules, asking the LLM to produce corrected rules. All LLMs were queried at the default temperature of 1 with each benchmark run once per model. This iterative interaction is formalized below.
+The initial prompt instructs the LLM to reconstruct ASP rules that, combined with the given facts, yield the target stable model. It states the rule schema constraints from $\Phi$ including normal rules with bounded body literals and no new facts. It tells the LLM to prefer the minimal rule set and provides the instance facts $F$ and target answer set $A^*$ as concrete inputs. The prompt also contains a short worked example demonstrating the expected output format. If \textsc{Clingo} reports a mismatch, a feedback message is appended to the conversation containing the facts, the expected stable model, and the computed answer sets from the candidate rules, asking the LLM to produce corrected rules. All LLMs were queried at the default temperature of 1 with each benchmark run once per model. This iterative interaction is formalized below.
 
 \begin{definition}[LAMP Interaction Protocol]
 \label{def:protocol}
@@ -646,9 +646,9 @@ To identify which benchmark features predict LLM failure, an XGBoost classifier 
 
 \subsection{Inductive ASP Learning and LAS}
 
-Recent work has explored the integration of LLMs and ASP with several approaches studying how LLMs can learn from or reason over ASP directly. ILASP \cite{law2020ilaspinductivelearninganswer}, the leading ILP system for Learning from Answer Sets was combined with LLMs by Borroto et al. \cite{borroto2025questionansweringllmslearning} which investigated question answering and inductive learning from answer sets, introducing the LLM2LAS system, which uses LLMs to construct ILASP learning tasks from natural language stories and then runs ILASP to induce the required commonsense rules.
+Recent work has explored the integration of LLMs and ASP with several approaches studying how LLMs can learn from or reason over ASP directly. ILASP \cite{law2020ilaspinductivelearninganswer}, the leading ILP system for Learning from Answer Sets, was combined with LLMs by Borroto et al. \cite{borroto2025questionansweringllmslearning} which investigated question answering and inductive learning from answer sets, introducing the LLM2LAS system, which uses LLMs to construct ILASP learning tasks from natural language stories and then runs ILASP to induce the required commonsense rules.
 
-A key distinction from LAMP is that LLM2LAS uses LLMs to \emph{build the ILP task} and then defers to ILASP for search, whereas LAMP uses LLMs to \emph{directly generate} the hypothesis, bypassing exhaustive search. Declarative knowledge distillation techniques have been proposed to transfer structured reasoning from LLMs into symbolic representations by Eiter et al.~\cite{eiter2024declarativeknowledgedistillationlarge}.
+A key distinction from LAMP is that LLM2LAS uses LLMs to \emph{build the ILP task} and then defers to ILASP for search, whereas LAMP uses LLMs to \emph{directly generate} the hypothesis, bypassing systematic hypothesis space search. Declarative knowledge distillation techniques have been proposed to transfer structured reasoning from LLMs into symbolic representations by Eiter et al.~\cite{eiter2024declarativeknowledgedistillationlarge}.
 
 \subsection{Expressivity Graded Evaluation}
 
@@ -670,7 +670,7 @@ Several directions for future work follow naturally. Iterative prompting could b
 
 Repeated trials would strengthen statistical confidence in the reported accuracy differences.
 
-The synthetic datasets could be extended to richer ASP constructs, including higher arity predicates, choice rules, disjunction, and head disjunction, as well as more complex dependency structures such as those proposed by Gandarela et al.~\cite{gandarela2025inductivelearninglogicaltheories} regarding logic program expressivity.
+The synthetic datasets could be extended to richer ASP constructs, including higher arity predicates, choice rules, disjunctive heads, and aggregates, as well as more complex dependency structures such as those proposed by Gandarela et al.~\cite{gandarela2025inductivelearninglogicaltheories} regarding logic program expressivity.
 
 Evaluation could move beyond synthetic configuration tasks to existing ASP datasets, including ASPBench \cite{szeider2026aspbenchnaturallanguagelogic}, OOASP models \cite{falkner2015ooaspconnectingobjectorientedlogic}, real world ASP encodings, planning benchmarks such as Plasp and PDDL to ASP translations \cite{dimopoulos2018plasp3effectiveasp}, and domains like rail scheduling.
 
