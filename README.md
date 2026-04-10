@@ -35,7 +35,7 @@ Each benchmark is a `.lp` file containing ASP facts and rules. Benchmarks vary a
 | `num_predicates` | 6, 10 |
 | `num_possible_terms` | 10 |
 | `num_facts` | 6, 9 |
-| `num_rules` | 3, 6, 11 |
+| `num_rules` | 11 |
 | `num_literals` | 2, 3 |
 | `num_neg_literals` | 0, 1, 2 |
 | `min_derived_atoms` | 1, 3 |
@@ -120,4 +120,4 @@ LLM inference uses an iterative correction loop (default 3 iterations, configura
 
 ## Analysis
 
-[Jupyter Notebook](/stats.ipynb)
+[Jupyter Notebook](./stats.ipynb)
