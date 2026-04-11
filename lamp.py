@@ -1242,9 +1242,16 @@ def aggregate_results():
 
             solution_atoms = atoms_from_model(metrics)
 
+            llm_timed_out = False
             if kind == "llm":
                 time_seconds = _get_llm_time(model, index, path)
                 iter_count = _get_llm_iter_count(model, index, path)
+                # Cap LLM runs at TIMEOUT, consistent with ILASP. Runs exceeding
+                # TIMEOUT are treated as timeout failures by forcing solution_match
+                # to False below.
+                if pd.notna(time_seconds) and time_seconds > TIMEOUT:
+                    time_seconds = float(TIMEOUT)
+                    llm_timed_out = True
                 ilasp_metrics = _ILASP_METRICS_NONE.copy()
                 llm_chars = _get_llm_char_counts(model, index, path)
             elif kind == "ilasp":
@@ -1300,6 +1307,7 @@ def aggregate_results():
                 "rules": kb.rules,
                 "facts": kb.facts,
                 "time_seconds": time_seconds,
+                "llm_timed_out": llm_timed_out,
                 "iter_count": iter_count,
                 "solver_conflicts": solver.get("conflicts"),
                 "solver_choices": solver.get("choices"),
@@ -1316,6 +1324,7 @@ def aggregate_results():
 
     analysis_df = pd.DataFrame(rows).astype({
         "benchmark_name": "string",
+        "llm_timed_out": "bool",
         "example_index": "int64",
         "num_predicates": "int64",
         "num_possible_terms": "int64",
@@ -1376,6 +1385,8 @@ def aggregate_results():
     joined_df["solution_match"] = (
         joined_df["solution_atoms_llm"] == joined_df["solution_atoms_original"]
     )
+    # LLM runs exceeding TIMEOUT are treated as failures regardless of answer set.
+    joined_df.loc[joined_df["llm_timed_out_llm"] == True, "solution_match"] = False
 
     joined_df["rules_match"] = (
         joined_df["rules_llm"] == joined_df["rules_original"]

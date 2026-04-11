@@ -59,7 +59,7 @@
 \pagestyle{plain}
 
 \begin{abstract}
-Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning. However, developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the \textsc{Clingo} solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 100\% final accuracy, \textit{gpt-oss:20b} 95.8\%, and \textit{qwen3-coder:30b} 45.0\%. Although ILASP was on average faster, \textit{gpt-5-mini} solved all benchmarks on which ILASP timed out. Both LAMP and ILASP are also able to reduce literal counts and increase stratification to a similar degree. Finally, feature analysis is used to determine predictors of LLM success or failure.
+Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning. However, developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the \textsc{Clingo} solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 99.2\% final accuracy, \textit{gpt-oss:20b} 98.3\%, and \textit{qwen3-coder:30b} 64.2\%. Although ILASP was on average faster, both \textit{gpt-5-mini} and \textit{gpt-oss:20b} solved all benchmarks on which ILASP timed out. Both LAMP and ILASP are also able to reduce literal counts and increase stratification to a similar degree. Finally, feature analysis is used to determine predictors of LLM success or failure.
 \end{abstract}
 
 \section{Introduction}
@@ -462,29 +462,29 @@ A total of 120 synthetic ASP programs were created with varying features for tes
 
 \subsection{Results and Discussion}
 
-Overall results are shown in Table~\ref{tab:ilasp_results}. Both \textit{gpt-5-mini} and \textit{gpt-oss:20b} perform very well, deducing the correct ASP rules to get the expected stable model in almost all cases. LAMP using \textit{qwen3-coder:30b} performed significantly worse, reaching only 45.0\% final accuracy (54/120), with 30.8\% correct on the first attempt. Although \textit{qwen3-coder:30b} is tuned for programming, it may not have been tuned for ASP, resulting in poorer performance.
+Overall results are shown in Table~\ref{tab:ilasp_results}. Both \textit{gpt-5-mini} and \textit{gpt-oss:20b} perform very well, deducing the correct ASP rules to get the expected stable model in almost all cases. LAMP using \textit{qwen3-coder:30b} performed significantly worse, reaching only 64.2\% final accuracy (77/120), with 19.2\% correct on the first attempt. Although \textit{qwen3-coder:30b} is tuned for programming, it may not have been tuned for ASP, resulting in poorer performance.
 
-ILASP achieved 97.5\% accuracy (117/120), of which all three failures were timeouts, not reasoning errors, occurring on benchmarks with high negation counts and large numbers of derived atoms. LLMs in LAMP, \textit{gpt-5-mini} and \textit{gpt-oss:20b}, solved 3 and 1 of the benchmarks, respectively, on which ILASP timed out, demonstrating that LLM guided search can succeed in some instances where ILP search cannot.
+ILASP achieved 97.5\% accuracy (117/120), of which all three failures were timeouts, not reasoning errors, occurring on benchmarks with high negation counts and large numbers of derived atoms. LLMs in LAMP, \textit{gpt-5-mini} and \textit{gpt-oss:20b}, both solved all 3 of the benchmarks on which ILASP timed out, demonstrating that LLM guided search can succeed in some instances where ILP search cannot.
 
-The iterative feedback loop contributes meaningfully for all models. First attempt accuracy was 94.2\% for \textit{gpt-5-mini} (113/120), 90.0\% for \textit{gpt-oss:20b} (108/120), and 30.8\% for \textit{qwen3-coder:30b} (37/120). Subsequent \textsc{Clingo} verified feedback iterations recovered 7 additional cases for \textit{gpt-5-mini}, 7 for \textit{gpt-oss:20b}, and 17 for \textit{qwen3-coder:30b}. In all cases where the correct stable model was produced, the generated rules never exactly matched those of the original synthetic program, as multiple rule sets can produce the same answer set. Given the sample size of 120 benchmarks and a single run per model at the default temperature of 1, differences of a few cases between systems should be interpreted with caution, as results may vary across runs and statistical significance may vary.
+The iterative feedback loop contributes meaningfully for all models. First attempt accuracy was 90.8\% for \textit{gpt-5-mini} (109/120), 83.3\% for \textit{gpt-oss:20b} (100/120), and 19.2\% for \textit{qwen3-coder:30b} (23/120). Subsequent \textsc{Clingo} verified feedback iterations recovered 10 additional cases for \textit{gpt-5-mini}, 18 for \textit{gpt-oss:20b}, and 54 for \textit{qwen3-coder:30b}. In all cases where the correct stable model was produced, the generated rules never exactly matched those of the original synthetic program, as multiple rule sets can produce the same answer set. Given the sample size of 120 benchmarks and a single run per model at the default temperature of 1, differences of a few cases between systems should be interpreted with caution, as results may vary across runs and statistical significance may vary.
 
 \begin{table}[htbp]
     \centering
-    \caption{Comparison of all systems including ILASP baseline. First attempt is the accuracy on the initial generation. Final accuracy is after up to 2 feedback iterations. ILASP failures are all timeouts (420\,s limit). LLM failures are unresolved after all iterations.}
+    \caption{Comparison of all systems including ILASP baseline. First attempt is the accuracy on the initial generation. Final accuracy is after up to 2 feedback iterations. Failures for all systems are either max iterations reached or exceeding the 420\,s timeout.}
     \label{tab:ilasp_results}
-    \begin{tabular}{lrrrl}
+    \begin{tabular}{lrrr}
     \toprule
-    System & First attempt & Final & Failures & Failure type \\
+    System & First attempt & Final & Failures \\
     \midrule
-    \textit{gpt-5-mini}       & 113/120 (94.2\%) & 120/120 (100\%)  & 0  & --- \\
-    \textit{gpt-oss:20b}      & 108/120 (90.0\%) & 115/120 (95.8\%) & 5  & Max iterations \\
-    \textit{qwen3-coder:30b}  & 37/120 (30.8\%)  & 54/120 (45.0\%)  & 66 & Max iterations \\
-    ILASP                     & ---              & 117/120 (97.5\%) & 3  & Timeout only \\
+    \textit{gpt-5-mini}       & 109/120 (90.8\%) & 119/120 (99.2\%) & 1  \\
+    \textit{gpt-oss:20b}      & 100/120 (83.3\%) & 118/120 (98.3\%) & 2  \\
+    \textit{qwen3-coder:30b}  & 23/120 (19.2\%)  & 77/120 (64.2\%)  & 43 \\
+    ILASP                     & ---              & 117/120 (97.5\%) & 3  \\
     \bottomrule
     \end{tabular}
 \end{table}
 
-Table~\ref{tab:ilasp_timeout} details the three benchmarks on which ILASP timed out (benchmark indices 7, 27, and 67). All three have elevated grounded rules and hypothesis space sizes relative to the dataset average (Table~\ref{tab:timeout_profile}), indicating a larger search space as the cause of timeout. Benchmark 67 has a notably smaller hypothesis space than 7 and 27 yet still timed out, suggesting grounded rules and negation complexity are sufficient to cause timeout independent of hypothesis space size alone. \textit{gpt-5-mini} solved all three, \textit{gpt-oss:20b} solved benchmark 7 but failed on 27 and 67 while \textit{qwen3-coder:30b} failed all three.
+Table~\ref{tab:ilasp_timeout} details the three benchmarks on which ILASP timed out (benchmark indices 7, 27, and 67). All three have elevated grounded rules and hypothesis space sizes relative to the dataset average (Table~\ref{tab:timeout_profile}), indicating a larger search space as the cause of timeout. Benchmark 67 has a notably smaller hypothesis space than 7 and 27 yet still timed out, suggesting grounded rules and negation complexity are sufficient to cause timeout independent of hypothesis space size alone. Both \textit{gpt-5-mini} and \textit{gpt-oss:20b} solved all three, while \textit{qwen3-coder:30b} failed all three.
 
 \begin{table}[htbp]
 \centering
@@ -495,8 +495,8 @@ Table~\ref{tab:ilasp_timeout} details the three benchmarks on which ILASP timed 
 Benchmark & \textit{gpt-5-mini} & \textit{gpt-oss:20b} & \textit{qwen3-coder:30b} & ILASP \\
 \midrule
 7  & \checkmark & \checkmark & $\times$ & Timed out \\
-27 & \checkmark & $\times$   & $\times$ & Timed out \\
-67 & \checkmark & $\times$   & $\times$ & Timed out \\
+27 & \checkmark & \checkmark & $\times$ & Timed out \\
+67 & \checkmark & \checkmark & $\times$ & Timed out \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -527,7 +527,7 @@ Figure~\ref{fig:outcome_stacked} shows the breakdown of benchmark outcomes per L
     \label{fig:outcome_stacked}
 \end{figure}
 
-Figure~\ref{fig:timing_boxplot} shows the per benchmark wall clock time distribution for each system as a box plot. \textit{gpt-5-mini} is the fastest LLM with a median of 18.0 and a maximum of 137.0, reflecting the low latency of the API hosted model. \textit{gpt-oss:20b} is slowest with median 50.8 and max 369.6 seconds due to the larger locally run model size. ILASP has a highly bimodal distribution. The median is only 0.66 seconds as most benchmarks are trivially solved by conflict driven search, but three benchmarks hit the 420.0 second ceiling, pulling the maximum to that value. \textit{qwen3-coder:30b} shows a near uniform distribution with a median of 40.3 and a maximum near the 420.0 timeout at 417.8 seconds, consistent with the model spending maximum iteration budget on hard cases it ultimately fails to solve. Table~\ref{tab:timing} gives the aggregate statistics.
+Figure~\ref{fig:timing_boxplot} shows the per benchmark wall clock time distribution for each system as a box plot. \textit{gpt-5-mini} is the fastest LLM with a median of 22.7 and a maximum of 199.2, reflecting the low latency of the API hosted model. \textit{gpt-oss:20b} is slowest with median 43.2 and max 420.0 seconds, hitting the timeout on one benchmark, due to the larger locally run model size. ILASP has a highly bimodal distribution. The median is only 0.66 seconds as most benchmarks are trivially solved by conflict driven search, but three benchmarks hit the 420.0 second ceiling, pulling the maximum to that value. \textit{qwen3-coder:30b} shows a relatively tight distribution with a median of 35.7 and a maximum of 112.8 seconds, consistent with the model completing its iteration budget in roughly similar time regardless of difficulty. Table~\ref{tab:timing} gives the aggregate statistics.
 
 \begin{figure}[htbp]
     \centering
@@ -544,15 +544,15 @@ Figure~\ref{fig:timing_boxplot} shows the per benchmark wall clock time distribu
     \toprule
     Model & Total (s) & Mean (s) & Median (s) & Max (s) \\
     \midrule
-    \textit{gpt-5-mini}       & 2837.00 & 23.64 & 18.00 & 137.00 \\
-    \textit{gpt-oss:20b}      & 8579.97 & 71.50 & 50.78 & 369.64 \\
-    \textit{qwen3-coder:30b}  & 5319.65 & 44.33 & 40.32 & 417.77 \\
+    \textit{gpt-5-mini}       & 3805.46 & 31.71 & 22.70 & 199.22 \\
+    \textit{gpt-oss:20b}      & 8630.91 & 71.92 & 43.22 & 420.00 \\
+    \textit{qwen3-coder:30b}  & 4577.38 & 38.14 & 35.72 & 112.77 \\
     ILASP                     & 1917.36 & 15.98 &  0.66 & 420.00 \\
     \bottomrule
     \end{tabular}
 \end{table}
 
-Table~\ref{tab:lit_by_correctness} gives the mean output literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) per system at original literal counts of 22 and 33, 11 rules $\times$ 2 or 3 body literals per rule, split by correctness. Correct solutions show a large reduction relative to the originals across all systems, averaging 3 to 5 literals against originals of 22 or 33. This is consistent with the synthetic benchmark structure, where generated programs may include rules not strictly necessary to produce the target answer set.
+Table~\ref{tab:lit_by_correctness} gives the mean output literal count $L(\Pi)$ (Definition~\ref{def:conciseness}) per system at original literal counts of 22 and 33, 11 rules $\times$ 2 or 3 body literals per rule, split by correctness. Correct solutions show a large reduction relative to the originals across all systems, averaging 3 to 6 literals against originals of 22 or 33. This is consistent with the synthetic benchmark structure, where generated programs may include rules not strictly necessary to produce the target answer set.
 
 \begin{table}[htbp]
 \centering
@@ -562,18 +562,18 @@ Table~\ref{tab:lit_by_correctness} gives the mean output literal count $L(\Pi)$ 
 \toprule
 Orig. literals & & \textit{gpt-5-mini} & \textit{gpt-oss:20b} & \textit{qwen3-coder:30b} & ILASP \\
 \midrule
-\multirow{2}{*}{22} & Correct   & 4.81 & 4.91 & 4.40 & 3.67 \\
-                    & Incorrect & --   & 7.00 & 4.70 & --   \\
+\multirow{2}{*}{22} & Correct   & 4.81 & 5.15 & 5.85 & 3.67 \\
+                    & Incorrect & --   & 0.00 & 3.27 & --   \\
 \cmidrule(lr){1-6}
-\multirow{2}{*}{33} & Correct   & 3.54 & 3.96 & 4.26 & 2.71 \\
-                    & Incorrect & --   & 24.00 & 3.03 & --   \\
+\multirow{2}{*}{33} & Correct   & 3.49 & 3.82 & 3.84 & 2.71 \\
+                    & Incorrect & 14.00 & --   & 3.43 & --   \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Figures \ref{fig:gpt_5_literals}, \ref{fig:gpt_oss_literals}, \ref{fig:qwen3_literals}, and \ref{fig:ilasp_literals} compare the unique literal count of the original ASP programs against that of ILASP and the LLM generated rules for each LLM tested using LAMP. Dot size indicates the number of examples. In each figure, the left plot shows correct answer sets and the right shows first attempt failures, with recovered cases in gold and failed cases in red.
 
-Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to greatly reduce the number of literals needed, in some cases reducing the number of literals by 6, but in some cases increasing them by 2. As shown in Figure~\ref{fig:gpt_oss_literals}, \textit{gpt-oss:20b} had similar results generally needing even fewer literals, while \textit{qwen3-coder:30b} (Figure~\ref{fig:qwen3_literals}) had mixed results. ILASP (Figure~\ref{fig:ilasp_literals}) is similarly able to reduce literal counts, though it fails to improve conciseness on the 3 benchmarks where it timed out.
+Figure \ref{fig:gpt_5_literals} shows \textit{gpt-5-mini} is generally able to greatly reduce the number of unique literals needed, though in a small number of cases it produces slightly more than the original. As shown in Figure~\ref{fig:gpt_oss_literals}, \textit{gpt-oss:20b} had similar results, while \textit{qwen3-coder:30b} (Figure~\ref{fig:qwen3_literals}) had mixed results. ILASP (Figure~\ref{fig:ilasp_literals}) is similarly able to reduce literal counts, though it fails to improve conciseness on the 3 benchmarks where it timed out.
 
 \begin{figure}[htbp]
     \centering
@@ -621,19 +621,19 @@ An ASP program is \emph{stratified} if no predicate depends negatively on itself
     System & Stratified / Solved \\
     \midrule
     Original                 & 49 / 120 \\
-    \textit{gpt-5-mini}      & 119 / 120 \\
-    \textit{gpt-oss:20b}     & 114 / 115 \\
-    \textit{qwen3-coder:30b} & 54 / 54 \\
+    \textit{gpt-5-mini}      & 119 / 119 \\
+    \textit{gpt-oss:20b}     & 117 / 118 \\
+    \textit{qwen3-coder:30b} & 77 / 77 \\
     ILASP                    & 117 / 117 \\
     \bottomrule
     \end{tabular}
 \end{table}
 
-Table~\ref{tab:llm_stratification} shows that both ILASP and the LLM based systems produce programs that are substantially more stratified than the original benchmark programs, of which only 49 of 120 were stratified. ILASP, being a formal inductive learner, produces stratified programs in 117 of its 117 correct solutions. Among the LLMs, \textit{gpt-5-mini} achieves the highest degree of stratification, with 119 of its 120 correct programs being stratified, closely followed by \textit{gpt-oss:20b} at 114 of 115. Even \textit{qwen3-coder:30b}, which solved far fewer benchmarks, produced stratified programs in all 54 of its correct solutions. The degree of stratification indicates both learned and generated programs tend toward syntactic simplicity that avoids the cyclic negation present in the synthetic benchmarks.
+Table~\ref{tab:llm_stratification} shows that both ILASP and the LLM based systems produce programs that are substantially more stratified than the original benchmark programs, of which only 49 of 120 were stratified. ILASP, being a formal inductive learner, produces stratified programs in 117 of its 117 correct solutions. Among the LLMs, \textit{gpt-5-mini} stratifies all 119 of its correct programs, closely followed by \textit{gpt-oss:20b} at 117 of 118. Even \textit{qwen3-coder:30b}, which solved fewer benchmarks, produced stratified programs in all 77 of its correct solutions. The degree of stratification indicates both learned and generated programs tend toward syntactic simplicity that avoids the cyclic negation present in the synthetic benchmarks.
 
 \subsection{Feature Importance}
 
-To identify which benchmark features predict LLM failure, an XGBoost classifier \cite{chen2016xgboostscalabletreeboosting} was trained on syntactic and structural features of the input programs using the \textit{qwen3-coder:30b} results. The other two LLMs had too few failures for a meaningful classifier. Feature importance is measured by gain, the average improvement in loss from splits using that feature. Under five fold cross validation the classifier achieves 65.0\% accuracy with AUC 0.667, above the 55\% majority class baseline but modest, so the importances shown in Figure~\ref{fig:importance} should be treated as indicative. The top features, \textit{Solution atoms}, \textit{Derived atoms}, and \textit{Negative literals}, are consistent with known ASP difficulty factors. Larger answer sets and higher deductive burden increase problem complexity, and default negation is a recognized challenge for LLMs.
+To identify which benchmark features predict LLM failure, an XGBoost classifier \cite{chen2016xgboostscalabletreeboosting} was trained on syntactic and structural features of the input programs using the \textit{qwen3-coder:30b} results. The other two LLMs had too few failures for a meaningful classifier. Feature importance is measured by gain, the average improvement in loss from splits using that feature. Under five fold cross validation the classifier achieves 61.7\% accuracy with AUC 0.619, below the 64.2\% majority class baseline, so the importances shown in Figure~\ref{fig:importance} should be treated as weakly indicative only. The top features by gain, \textit{Solution atoms}, \textit{Possible terms}, and \textit{Predicates}, all reflect problem size and vocabulary breadth, consistent with the intuition that larger answer sets and broader predicate sets increase the modeling burden on the LLM.
 
 \begin{figure}[htbp]
     \centering
@@ -682,9 +682,9 @@ Finally, optimization remains a promising avenue, including other ways of transf
 
 This work proposed a structured LLM to ASP Modeling Protocol (LAMP) designed to support the deduction and optimization of ASP rules from instance facts and expected stable models. The results show this is effective for guiding LLMs toward correct and often optimized ASP encodings. By constraining the modeling task and providing iterative feedback via an ASP solver, this system reduces the modeling burden associated with ASP while preserving correctness.
 
-The tested models exhibited clear performance differences, with \textit{gpt-5-mini} achieving 100\% final accuracy (94.2\% on first attempt) and \textit{gpt-oss:20b} achieving 95.8\% (90.0\% on first attempt), while \textit{qwen3-coder:30b} reached only 45\% (30.8\% on first attempt) despite its programming focus. These results highlight that strong general code generation ability does not necessarily translate to proficiency in logic programming, underscoring the value of ASP specific evaluation frameworks.
+The tested models exhibited clear performance differences, with \textit{gpt-5-mini} achieving 99.2\% final accuracy (90.8\% on first attempt) and \textit{gpt-oss:20b} achieving 98.3\% (83.3\% on first attempt), while \textit{qwen3-coder:30b} reached only 64.2\% (19.2\% on first attempt) despite its programming focus. These results highlight that strong general code generation ability does not necessarily translate to proficiency in logic programming, underscoring the value of ASP specific evaluation frameworks.
 
-The ILASP baseline achieved 97.5\%, with the three failures being search space timeouts rather than reasoning errors. This shows LLMs do not follow the same classical ILP search. They navigate the hypothesis space differently, using token-level generation rather than conflict driven search, and can succeed where conflict driven search may not. The iterative feedback loop further contributed recovery of many cases for the three LLMs, confirming its value as a component of the LAMP pipeline. ILASP was faster on average but timed out on three benchmarks that LAMP solved, while both systems substantially reduced literal counts relative to the synthetic originals and produced more stratified programs than the benchmarks themselves. Feature analysis on \textit{qwen3-coder:30b} identified solution atom count, derived atom count, and negative literal count as predictors of LLM failure.
+The ILASP baseline achieved 97.5\%, with the three failures being search space timeouts rather than reasoning errors. This shows LLMs do not follow the same classical ILP search. They navigate the hypothesis space differently, using token-level generation rather than conflict driven search, and can succeed where conflict driven search may not. The iterative feedback loop further contributed recovery of many cases for the three LLMs, confirming its value as a component of the LAMP pipeline. ILASP was faster on average but timed out on three benchmarks that LAMP solved, while both systems substantially reduced literal counts relative to the synthetic originals and produced more stratified programs than the benchmarks themselves. Feature analysis on \textit{qwen3-coder:30b} suggested solution atom count, possible term count, and predicate count as the top predictors of LLM failure.
 
 Beyond assisting users in ASP modeling, this protocol provides a system for probing LLM reasoning and logic programming capabilities. Future work includes extending to richer ASP constructs such as disjunction and choice rules, incorporating solver level performance metrics, and exploring fine tuned or neuro symbolic hybrids to further improve robustness and scalability.
 
