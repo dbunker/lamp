@@ -556,8 +556,8 @@ def format_ilasp_task(original_kb: KnowledgeBase, original_stats: Dict) -> str:
     lines.append("")
 
     for pred in sorted(all_preds):
-        lines.append(f"#modeb({pred}(var(obj))).")
-        lines.append(f"#modeb({pred}(var(obj)), (negative)).")
+        lines.append(f"#modeb(1, {pred}(var(obj))).")
+        lines.append(f"#modeb(1, {pred}(var(obj)), (negative)).")
     lines.append("")
 
     inclusion = sorted(str(a) for a in derived_atoms)

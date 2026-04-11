@@ -103,7 +103,7 @@ An ASP program $\Pi$ is a finite set of \textit{rules} of the following form.
     h \leftarrow b_1, \ldots, b_m, \mathit{not}\; c_1, \ldots, \mathit{not}\; c_n
 \]
 
-Here $h$ is the \textit{head}, a classical atom or empty, each $b_i$ is a positive body literal, and $\mathit{not}\; c_j$ denotes default negation of atom $c_j$. When $m = n = 0$ the rule is a \textit{fact}. Every rule in an ASP program must be satisfied. A rule is satisfied either when the body is satisfied and $h$ is derived and therefore in the answer set, or the body is not satisfied. A body is satisfied when every positive literal $b_i$ is in the answer set and every negated atom $c_j$ is absent from it.
+Here $h$ is the \textit{head}, a classical atom or empty, each $b_i$ is a positive body literal, and $\mathit{not}\; c_j$ denotes default negation of atom $c_j$. When $m = n = 0$ the rule is a \textit{fact}. Every rule in an ASP program must be satisfied by a candidate answer set $S$. A rule is satisfied by $S$ when either the body is not satisfied in $S$, or the head $h$ is in $S$. A body is satisfied in $S$ when every positive literal $b_i$ is in $S$ and every negated atom $c_j$ is absent from $S$.
 
 \paragraph{Variables and Grounding.}
 Rules are written with first order variables, symbols such as $X$ and $Y$ that range over concrete terms rather than truth values, allowing compact expression over large domains. Prior to solving, a \textit{grounder}, such as \textsc{Gringo}, substitutes all relevant terms for each variable, producing an equivalent propositional ground program $\Pi_g$. A rule is \textit{safe} if every variable occurring in it also appears in a positive body literal, which ensures that grounding is well defined.
@@ -123,7 +123,7 @@ Solving non-ground normal ASP programs of bounded predicate arity is $\Sigma_2^P
 
 \subsection{Learning from Answer Sets}\label{sec:ilasp}
 
-ILASP \cite{law2020ilaspinductivelearninganswer} is a framework for Inductive Logic Programming (ILP) that learns ASP programs from examples, defining the same task that LAMP approaches via LLM guided generation. A learning task is specified by a \textit{hypothesis space} $\mathcal{H}$ constraining which rules may be learned, a \textit{background knowledge} program $B$ consisting of ASP rules that are given rather than learned, and a set of \textit{learning examples} $E$ specifying constraints on the answer sets that the learned hypothesis must produce. The following paragraphs define each component and describe the conflict driven search procedure ILASP uses to find an optimal hypothesis.
+ILASP \cite{law2020ilaspinductivelearninganswer} is an Inductive Logic Programming (ILP) solver that learns ASP programs from examples, defining the same task that LAMP approaches via LLM guided generation. A learning task is specified by a \textit{hypothesis space} $\mathcal{H}$ constraining which rules may be learned, a \textit{background knowledge} program $B$ consisting of ASP rules that are given rather than learned, and a set of \textit{learning examples} $E$ specifying constraints on the answer sets that the learned hypothesis must produce. The following paragraphs define each component and describe the conflict driven search procedure ILASP uses to find an optimal hypothesis.
 
 \paragraph{Hypothesis Space.}
 The hypothesis space $\mathcal{H}$ is defined by a \textit{mode bias}, which constrains the structure of rules that may appear in a learned hypothesis. A \textit{mode declaration} is either a \textit{head declaration} $\mathit{modeh}(a)$ or a \textit{body declaration} $\mathit{modeb}(a)$, specifying which atoms may appear in rule heads and bodies respectively. Each atom in a mode declaration may contain \textit{placeholder terms} of the form $\mathit{var}(t)$ (a variable of type $t$) or $\mathit{const}(t)$ (a constant of type $t$), which are instantiated during the search. A \textit{hypothesis} $H \in \mathcal{H}$ is a set of ASP rules consistent with the mode bias.
@@ -158,13 +158,13 @@ To illustrate, suppose the goal is to learn which individuals are \texttt{allowe
 Background knowledge $B$ may contain shared facts and rules, but here the ground facts are supplied as the example context instead. The context dependent positive example specifies an inclusion set, an exclusion set, and a context program. The inclusion set requires the hypothesis to derive \texttt{allowed(alice)}, ruling out an empty hypothesis. The exclusion set forbids \texttt{allowed(bob)}, ruling out the overly general rule \texttt{allowed(X).}\ Together with the optimality criterion preferring shorter rules, they uniquely identify \texttt{allowed(X) :- adult(X).} as the intended hypothesis.
 
 \paragraph{Learning Task.}
-A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^- \rangle$. A hypothesis $H \in \mathcal{H}$ is an \textit{inductive solution} of $T$ if it covers all examples, meaning every positive example $e^+$ is satisfied by some answer set of $B \cup e^+_\mathit{context} \cup H$, and no answer set of $B \cup e^-_\mathit{context} \cup H$ satisfies any negative example $e^-$. When hypotheses are assigned a \textit{cost}, typically the sum of rule lengths, the learning task seeks an \textit{optimal} solution. This is the inductive solution of minimum cost.
+A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^- \rangle$. A hypothesis $H \in \mathcal{H}$ is an \textit{inductive solution} of $T$ if it covers all examples, meaning for every $e^+ \in E^+$ some answer set of $B \cup e^+_\mathit{context} \cup H$ satisfies $e^+$, and for every $e^- \in E^-$ no answer set of $B \cup e^-_\mathit{context} \cup H$ satisfies $e^-$. When hypotheses are assigned a \textit{cost}, typically the sum of rule lengths, the learning task seeks an \textit{optimal} solution. This is the inductive solution of minimum cost.
 
 \paragraph{Search Procedure.}
-ILASP reduces the learning task to a sequence of ASP solving problems. The hypothesis space is encoded as an ASP metaprogram, and the search for a covering hypothesis is directed by a \textit{conflict driven} procedure \cite{law2020ilaspinductivelearninganswer}. Candidate hypotheses are proposed and checked against all examples. Conflicts from examples not yet covered are then used to prune the space and guide subsequent iterations. This conflict driven approach, implemented in the \textsc{FastLAS} system, scales substantially better than exhaustive enumeration of $\mathcal{H}$ \cite{law2022conflictdriveninductivelogicprogramming}.
+ILASP reduces the learning task to a sequence of ASP solving problems. The hypothesis space is encoded as an ASP metaprogram, and the search for a covering hypothesis is directed by a \textit{conflict driven} procedure \cite{law2020ilaspinductivelearninganswer}. Candidate hypotheses are proposed and checked against all examples. Conflicts from examples not yet covered are then used to prune the space and guide subsequent iterations. This conflict driven approach scales substantially better than exhaustive enumeration of $\mathcal{H}$ \cite{law2022conflictdriveninductivelogicprogramming}.
 
 \paragraph{Solving Complexity.}
-Determining whether a satisfying hypothesis exists under the ILASP framework is $\Sigma_2^P$\text{-complete} even for propositional programs \cite{law2018complexitygeneralitylearning}, one level above the $\mathsf{NP}$\text{-completeness} of propositional ASP solving. The additional level reflects the search over hypotheses $H \in \mathcal{H}$ layered on top of verifying that $H$ covers all examples. This theoretical hardness motivates an alternative approach. LAMP replaces the hypothesis search with LLM guided generation, trading formal completeness for heuristic flexibility.
+Determining whether a satisfying hypothesis exists under the LAS framework is $\Sigma_2^P$\text{-complete} even for propositional programs \cite{law2018complexitygeneralitylearning}, one level above the $\mathsf{NP}$\text{-completeness} of propositional ASP solving. The additional level reflects the search over hypotheses $H \in \mathcal{H}$ layered on top of verifying that $H$ covers all examples. This theoretical hardness motivates an alternative approach. LAMP replaces the hypothesis search with LLM guided generation, trading formal completeness for heuristic flexibility.
 
 \subsection{Large Language Models for Code Generation}
 
@@ -282,7 +282,7 @@ The LAMP framework operates on a formally defined benchmark structure that const
 
 \subsection{Benchmark Framework}\label{sec:benchmark}
 
-To keep the benchmarks tractable for both LLM generation and ILP search, the ASP used here is deliberately restricted. Programs consist only of unary \textit{facts} of the form \texttt{predicate(term)} and \textit{normal rules} of the form \texttt{new\_predicate(X) :- predicate\_0(X), [not] predicate\_1(Y), \ldots} which derive new predicates from initial instance facts, where variables may be shared across positions. This subset is expressive enough to require fairly complex rule induction while remaining within a reasonable hypothesis space.
+To keep the benchmarks tractable for both LLM generation and ILP search, the ASP used here is deliberately restricted. Programs consist only of unary \textit{facts} of the form \texttt{predicate(term)} and \textit{normal rules} of the form \texttt{new\_predicate(X) :- predicate\_0(X), [not] predicate\_1(X), \ldots} which derive new predicates from initial instance facts, where \texttt{[not]} denotes optional default negation and rules may use multiple variables shared across body positions. This subset is expressive enough to require fairly complex rule induction while remaining within a reasonable hypothesis space.
 
 The following is an example representing the model facts that terms \texttt{"car"} and \texttt{"scooter"} are both vehicles, represented with the predicate \texttt{vehicle}, and the scooter is slow moving, represented with the predicate \texttt{slow\_moving}. It also has the rule that if a term is a vehicle and not slow moving it is highway possible, represented with the predicate \texttt{highway\_possible}.
 
@@ -297,10 +297,10 @@ Running this results in the answer set \texttt{\{ vehicle(scooter), vehicle(car)
 
 This restricted ASP subset can now be formalized. A \emph{Problem Profile} specifies how many predicates and terms exist, how many facts are given, and how large the rules may be. Together with the input facts and a target answer set, it defines a concrete benchmark that both LAMP and ILASP can solve.
 
-Previous work on LLM based logic rule induction has characterized complexity by structural rule graph topology such as Chain, RDG (Rooted Directed Graph), DRDG (Disjunctive Rooted Directed Graph), and Mixed categories \cite{gandarela2025inductivelearninglogicaltheories}. Since this work is concerned with correct answer set deduction and rule optimization rather than rule graph structure, complexity is instead quantified by six numerical features. These include the number of possible predicates, terms, facts, rules, positive body literals per rule, and negative body literals per rule. All generated programs are also limited to having exactly one answer set.
+Previous work on LLM based logic rule induction has characterized complexity by structural rule graph topology such as Chain, RDG (Rooted Directed Graph), DRDG (Disjunctive Rooted Directed Graph), and Mixed categories \cite{gandarela2025inductivelearninglogicaltheories}. Since this work is concerned with correct answer set deduction and rule optimization rather than rule graph structure, complexity is instead quantified by seven numerical features. These include the number of possible predicates, terms, facts, rules, positive body literals per rule, negative body literals per rule, and the minimum number of derived atoms in the answer set. All generated programs are also limited to having exactly one answer set.
 
 \begin{definition}[Problem Profile]
-\label{def:complexity}
+\label{def:profile}
 A \emph{Problem Profile} is a tuple
 \[
   \mathcal{C} \;=\; \langle\, \mathcal{D},\; \mathcal{T},\; N_F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle
@@ -321,7 +321,7 @@ From a Problem Profile a concrete input instance can be defined. Each instance p
 
 \begin{definition}[Input Instance]
 \label{def:input}
-Given a Problem Profile stated as $\mathcal{C} = \langle\, \mathcal{D},\; \mathcal{T},\; N_F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle$ as stated in Definition~\ref{def:complexity}, an \emph{instance} of $\mathcal{C}$ is a tuple
+Given a Problem Profile stated as $\mathcal{C} = \langle\, \mathcal{D},\; \mathcal{T},\; N_F,\; R,\; L^+,\; L^-,\; A_{\min} \,\rangle$ as stated in Definition~\ref{def:profile}, an \emph{instance} of $\mathcal{C}$ is a tuple
 \[
   \mathcal{M} \;=\; \langle\, F,\; A^{*},\; \Phi \,\rangle
 \]
@@ -333,7 +333,7 @@ where
     \[
       d_h(V_0) \;:\text{-}\; p_1(V_1),\; \ldots,\; p_{k}(V_k),\; \texttt{not}\; n_1(V'_1),\; \ldots,\; \texttt{not}\; n_{m}(V'_m).
     \]
-    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, each $V_i$ and $V'_j$ is drawn from a finite set of logical variables and may be shared across positions, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals as bounded in Definition~\ref{def:complexity}. All predicates are unary and all rules must be safe, meaning every variable in a rule appears in at least one positive body literal.
+    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, each $V_i$ and $V'_j$ is drawn from a finite set of logical variables and may be shared across positions, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals as bounded in Definition~\ref{def:profile}. All predicates are unary and all rules must be safe, meaning every variable in a rule appears in at least one positive body literal.
 \end{itemize}
 A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$ with $|\Pi| \leq R$. Every rule in $\Pi$ uses only predicates from $\mathcal{D}$ and respects the bounds $L^+$ and $L^-$.
 $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
@@ -347,7 +347,7 @@ The hypothesis space $\Phi$ corresponds directly to the mode bias of the associa
 
 \subsection{Dataset Generation}\label{sec:datagen}
 
-To instantiate benchmarks across the complexity categories defined above, synthetic data is generated by introducing new possible predicates and terms as needed. To keep the programs sufficiently complex, but manageable by the LLMs, only one stable model is expected and at least one atom must be deduced. The vehicle example above would be represented as shown below.
+To instantiate benchmarks from the problem profiles defined above, synthetic data is generated by introducing new possible predicates and terms as needed. To keep the programs sufficiently complex, but manageable by the LLMs, only one stable model is expected and at least one atom must be deduced. The vehicle example above would be represented as shown below.
 
 \begin{lstlisting}[language=ASP, caption={Benchmark ASP program.}]
 d0(o0).
@@ -366,12 +366,12 @@ From each benchmark instance $\mathcal{M}$, a corresponding ILASP task file is g
 
 #modeh(d2(var(obj))).
 
-#modeb(d0(var(obj))).
-#modeb(d0(var(obj)), (negative)).
-#modeb(d1(var(obj))).
-#modeb(d1(var(obj)), (negative)).
-#modeb(d2(var(obj))).
-#modeb(d2(var(obj)), (negative)).
+#modeb(1, d0(var(obj))).
+#modeb(1, d0(var(obj)), (negative)).
+#modeb(1, d1(var(obj))).
+#modeb(1, d1(var(obj)), (negative)).
+#modeb(1, d2(var(obj))).
+#modeb(1, d2(var(obj)), (negative)).
 
 #pos(eg1, {
   d2(o0)
@@ -418,7 +418,7 @@ The final output $\Pi_n$ is accepted as the solution if it satisfies $\mathcal{M
 
 \subsection{Evaluation}
 
-LAMP and ILASP systems are evaluated by correctness of answer set, time to solve and optimality of ASP programs. The ASP programs generated are evaluated after being run via \textsc{Clingo}. The correctness, number of rules, complexity and how close it is to the expected stable model can then be assessed.
+LAMP and ILASP systems are evaluated by correctness of answer set, time to solve and optimality of ASP programs. The ASP programs generated are evaluated after being run via \textsc{Clingo}. The correctness, number of rules, and how close it is to the expected stable model can then be assessed.
 
 Beyond correctness, the systems are evaluated on whether the LLM has produced a more concise encoding than the original synthetic program, formalized as follows.
 
@@ -439,11 +439,11 @@ Experiments were conducted on the synthetic data with varying complexities as sp
 
 \subsection{Experimental Setup}
 
-A total of 120 synthetic ASP programs were created with varying features for testing. All experiments were conducted on an Apple M3 Max with 48\,GB unified memory. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. For \textit{gpt-5-mini}, timing reflects server processing time reported by the OpenAI API, excluding network latency. All ASP solving and analysis was done using \textsc{Clingo}. ILASP version 4 was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. Each LAMP run was allowed a maximum of 3 iterations, one initial generation followed by up to 2 rounds of feedback verified by \textsc{Clingo}, as diminishing returns were observed beyond this point. Both systems receive the same input instance $\mathcal{M}$ (Definition~\ref{def:input}), where the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The selected parameters used for complexity classes are listed in Table~\ref{tab:parameters}. The positive literal bound is derived as $L^+ = \text{Overall Literals} - L^-$. All combinations were used except where the negative literal count equals or exceeds the overall literal count, which would leave no positive literals.
+A total of 120 synthetic ASP programs were created with varying features for testing. All experiments were conducted on an Apple M3 Max with 48\,GB unified memory. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. For \textit{gpt-5-mini}, timing reflects server processing time reported by the OpenAI API, excluding network latency. All ASP solving and analysis was done using \textsc{Clingo}. ILASP version 4 was run on each benchmark with a timeout of 420 seconds. Benchmarks not solved within this limit were recorded as failures. Each LAMP run was allowed a maximum of 3 iterations, one initial generation followed by up to 2 rounds of feedback verified by \textsc{Clingo}, as diminishing returns were observed beyond this point. Both systems receive the same input instance $\mathcal{M}$ (Definition~\ref{def:input}), where the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The selected parameters used to construct problem profiles are listed in Table~\ref{tab:parameters}. The positive literal bound is derived as $L^+ = \text{Overall Literals} - L^-$. All combinations were used except where the negative literal count equals or exceeds the overall literal count, which would leave no positive literals.
 
 \begin{table}[htbp]
     \centering
-    \caption{Parameters associated with Definition~\ref{def:complexity}. Overall Literals is a generation constraint on the sum $L^+ + L^-$ and is not a profile parameter.}
+    \caption{Parameters associated with Definition~\ref{def:profile}. Overall Literals is a generation constraint on the sum $L^+ + L^-$ and is not a profile parameter.}
     \label{tab:parameters}
     \begin{tabular}{ll}
     \toprule
