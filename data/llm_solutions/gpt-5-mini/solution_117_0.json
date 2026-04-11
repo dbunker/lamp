@@ -17,7 +17,7 @@
         "d3(o2)",
         "d3(o0)"
       ],
-      "time_seconds": 9e-06
+      "time_seconds": 0.000183
     }
   ],
   "warnings": [],
@@ -27,8 +27,8 @@
     "choices": 0.0,
     "atoms": 12.0,
     "rules": 12.0,
-    "time_total": 9e-05,
-    "time_solve": 2.1e-05,
+    "time_total": 0.001057,
+    "time_solve": 0.000258,
     "time_total_python": 0.0
   }
 }

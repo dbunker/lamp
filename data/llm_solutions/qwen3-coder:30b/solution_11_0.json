@@ -13,7 +13,7 @@
         "d1(o8)",
         "d0(o1)"
       ],
-      "time_seconds": 1.8e-05
+      "time_seconds": 0.000127
     }
   ],
   "warnings": [],
@@ -23,8 +23,8 @@
     "choices": 0.0,
     "atoms": 8.0,
     "rules": 8.0,
-    "time_total": 0.000107,
-    "time_solve": 2.7e-05,
+    "time_total": 0.00064,
+    "time_solve": 0.000145,
     "time_total_python": 0.0
   }
 }

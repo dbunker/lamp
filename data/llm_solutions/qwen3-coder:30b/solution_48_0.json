@@ -15,10 +15,11 @@
         "d1(o8)",
         "d4(o8)",
         "d4(o0)",
+        "d4(o6)",
         "d0(o7)",
         "d3(o4)"
       ],
-      "time_seconds": 0.000106
+      "time_seconds": 0.000108
     }
   ],
   "warnings": [],
@@ -26,10 +27,10 @@
     "models_found": 1,
     "conflicts": 0.0,
     "choices": 0.0,
-    "atoms": 13.0,
-    "rules": 13.0,
-    "time_total": 0.00089,
-    "time_solve": 0.000187,
+    "atoms": 14.0,
+    "rules": 14.0,
+    "time_total": 0.000875,
+    "time_solve": 0.000178,
     "time_total_python": 0.0
   }
 }

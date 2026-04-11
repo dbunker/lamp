@@ -5,8 +5,8 @@ d2(o1).
 d3(o5).
 d4(o3).
 
-d5(X) :- d0(X).
-d4(X) :- d2(X).
-d3(X) :- d1(X), not d2(X).
-d1(X) :- not d2(X), d0(X).
-d0(X) :- not d2(X), d3(X).
+d1(V) :- d3(V).
+d0(V) :- not d2(V), d5(V).
+d4(V) :- d2(V).
+d5(V) :- d3(V).
+d3(V) :- d0(V).

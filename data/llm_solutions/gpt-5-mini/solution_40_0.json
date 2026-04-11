@@ -20,7 +20,7 @@
         "d0(o7)",
         "d0(o6)"
       ],
-      "time_seconds": 1e-05
+      "time_seconds": 0.000192
     }
   ],
   "warnings": [],
@@ -30,8 +30,8 @@
     "choices": 0.0,
     "atoms": 15.0,
     "rules": 15.0,
-    "time_total": 0.000108,
-    "time_solve": 2.3e-05,
+    "time_total": 0.001112,
+    "time_solve": 0.000271,
     "time_total_python": 0.0
   }
 }

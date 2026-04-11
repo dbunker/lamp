@@ -1,0 +1,83 @@
+{
+  "id": "resp_0ec6e2c392f4b9f90069d9647132b0819ea889abbeb4be8eec",
+  "created_at": 1775854705.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_0ec6e2c392f4b9f90069d964718208819e87addebcaa05355e",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_0ec6e2c392f4b9f90069d96487d0ec819eb4176ef07537b7a0",
+      "content": [
+        {
+          "annotations": [],
+          "text": "I block d1 for atoms that have d2 to avoid deriving d1(o3).\n\nd1(X) :- d4(X), not d2(X).\nd4(X) :- d2(X).\nd5(X) :- d2(X).\nd0(X) :- d4(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 581,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1782,
+    "output_tokens_details": {
+      "reasoning_tokens": 1664
+    },
+    "total_tokens": 2363
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1775854728,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true,
+  "wall_time_seconds": 23.597970962524414
+}

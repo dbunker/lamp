@@ -4,17 +4,17 @@
     {
       "index": 1,
       "atoms": [
-        "d3(o2)",
-        "d3(o7)",
         "d4(o7)",
         "d4(o6)",
         "d4(o2)",
         "d5(o2)",
         "d5(o7)",
+        "d3(o2)",
+        "d3(o7)",
         "d1(o2)",
         "d1(o7)"
       ],
-      "time_seconds": 7e-06
+      "time_seconds": 0.000185
     }
   ],
   "warnings": [],
@@ -24,8 +24,8 @@
     "choices": 0.0,
     "atoms": 9.0,
     "rules": 9.0,
-    "time_total": 8.4e-05,
-    "time_solve": 1.8e-05,
+    "time_total": 0.00109,
+    "time_solve": 0.000288,
     "time_total_python": 0.0
   }
 }

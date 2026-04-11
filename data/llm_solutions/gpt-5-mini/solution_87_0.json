@@ -5,17 +5,17 @@
       "index": 1,
       "atoms": [
         "d5(o2)",
-        "d5(o8)",
         "d5(o3)",
+        "d5(o8)",
         "d3(o0)",
         "d3(o2)",
-        "d3(o8)",
         "d3(o3)",
+        "d3(o8)",
+        "d1(o8)",
         "d4(o2)",
-        "d4(o3)",
-        "d1(o8)"
+        "d4(o3)"
       ],
-      "time_seconds": 8e-06
+      "time_seconds": 0.00018
     }
   ],
   "warnings": [],
@@ -25,8 +25,8 @@
     "choices": 0.0,
     "atoms": 10.0,
     "rules": 10.0,
-    "time_total": 8e-05,
-    "time_solve": 1.7e-05,
+    "time_total": 0.000917,
+    "time_solve": 0.000208,
     "time_total_python": 0.0
   }
 }

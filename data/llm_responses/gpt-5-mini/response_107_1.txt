@@ -1,0 +1,83 @@
+{
+  "id": "resp_08ae084eb4ff1efc0069d9639622c0819e96df6562b747d81c",
+  "created_at": 1775854486.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-5-mini-2025-08-07",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_08ae084eb4ff1efc0069d963966454819eaed0fdac5180fc07",
+      "summary": [],
+      "type": "reasoning",
+      "content": null,
+      "encrypted_content": null,
+      "status": null
+    },
+    {
+      "id": "msg_08ae084eb4ff1efc0069d963aa7ebc819e90bc0faf38c50c67",
+      "content": [
+        {
+          "annotations": [],
+          "text": "d2(X) :- d4(X).\nd2(X) :- d3(X).\nd4(X) :- d2(X), not d3(X).\nd5(X) :- d2(X).\nd0(X) :- d2(X).",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 1.0,
+  "background": false,
+  "conversation": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "generate_summary": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 755,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1472,
+    "output_tokens_details": {
+      "reasoning_tokens": 1408
+    },
+    "total_tokens": 2227
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1775854507,
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "prompt_cache_retention": null,
+  "store": true,
+  "wall_time_seconds": 21.60746693611145
+}

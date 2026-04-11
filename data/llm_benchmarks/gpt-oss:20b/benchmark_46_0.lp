@@ -8,6 +8,5 @@ d2(o8).
 d3(o8).
 d1(o7).
 
-d4(X) :- not d5(X), d2(X), not d3(X).
-d4(X) :- d5(X).
+d4(X) :- d1(X), not d3(X).
 d1(X) :- d2(X).

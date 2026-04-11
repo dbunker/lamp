@@ -4,74 +4,32 @@
     {
       "index": 1,
       "atoms": [
-        "d5(o1)",
-        "d2(o3)",
-        "d1(o5)",
         "d0(o5)",
         "d0(o4)",
-        "d0(o2)"
+        "d0(o2)",
+        "d4(o5)",
+        "d4(o4)",
+        "d4(o2)",
+        "d1(o5)",
+        "d3(o4)",
+        "d3(o2)",
+        "d5(o1)",
+        "d5(o3)",
+        "d2(o3)",
+        "d2(o1)"
       ],
-      "time_seconds": 1.4e-05
+      "time_seconds": 0.0001
     }
   ],
-  "warnings": [
-    {
-      "code": "AtomUndefined",
-      "message": "<block>:8:11-20: info: atom does not occur in any rule head:\n  e(o5,o3)\n"
-    },
-    {
-      "code": "AtomUndefined",
-      "message": "<block>:9:11-20: info: atom does not occur in any rule head:\n  e(o5,o1)\n"
-    },
-    {
-      "code": "AtomUndefined",
-      "message": "<block>:10:19-28: info: atom does not occur in any rule head:\n  e(o5,o2)\n"
-    },
-    {
-      "code": "AtomUndefined",
-      "message": "<block>:11:19-28: info: atom does not occur in any rule head:\n  e(o5,o4)\n"
-    },
-    {
-      "code": "AtomUndefined",
-      "message": "<block>:12:11-20: info: atom does not occur in any rule head:\n  e(o5,o4)\n"
-    },
-    {
-      "code": "AtomUndefined",
-      "message": "<block>:13:19-28: info: atom does not occur in any rule head:\n  e(o5,o2)\n"
-    },
-    {
-      "code": "AtomUndefined",
-      "message": "<block>:14:11-20: info: atom does not occur in any rule head:\n  e(o5,o1)\n"
-    },
-    {
-      "code": "AtomUndefined",
-      "message": "<block>:15:11-20: info: atom does not occur in any rule head:\n  e(o5,o3)\n"
-    },
-    {
-      "code": "AtomUndefined",
-      "message": "<block>:16:11-20: info: atom does not occur in any rule head:\n  e(o5,o5)\n"
-    },
-    {
-      "code": "AtomUndefined",
-      "message": "<block>:17:11-20: info: atom does not occur in any rule head:\n  e(o5,o5)\n"
-    },
-    {
-      "code": "AtomUndefined",
-      "message": "<block>:18:11-20: info: atom does not occur in any rule head:\n  e(o5,o5)\n"
-    },
-    {
-      "code": "AtomUndefined",
-      "message": "<block>:19:11-20: info: atom does not occur in any rule head:\n  e(o5,o5)\n"
-    }
-  ],
+  "warnings": [],
   "statistics": {
     "models_found": 1,
     "conflicts": 0.0,
     "choices": 0.0,
-    "atoms": 6.0,
-    "rules": 6.0,
-    "time_total": 0.000258,
-    "time_solve": 2.4e-05,
+    "atoms": 13.0,
+    "rules": 13.0,
+    "time_total": 0.000849,
+    "time_solve": 0.00017,
     "time_total_python": 0.0
   }
 }
