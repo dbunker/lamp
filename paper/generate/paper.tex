@@ -119,7 +119,7 @@ $S$ is a \textit{stable model}, referred to in ASP as an \textit{answer set}, of
 Modern ASP solvers, such as \textsc{Clingo} \cite{gebser2014clingoasp}, extend the core language with aggregates, choice rules, disjunctive heads, and optimization statements. LAMP uses \textsc{Clingo} as its verification oracle but operates over a restricted subset of normal rules only, as defined in Section~\ref{sec:benchmark}.
 
 \paragraph{Solving Complexity.}
-Solving non-ground normal ASP programs of bounded predicate arity is $\Sigma_2^P$\text{-complete} \cite{eiter2007complexityresultsboundedarity, bichler2016powernongroundrulesanswer}, one level above $\mathsf{NP}$ in the polynomial hierarchy. $\Sigma_2^P$ is the class of problems solvable by an $\mathsf{NP}$ machine with access to an $\mathsf{NP}$ oracle. The two levels of hardness arise because non-ground rules of bounded arity can compactly encode exponentially many ground instances, adding expressiveness beyond the search over candidate answer sets.
+Solving non-ground normal ASP programs of bounded predicate arity is $\Sigma_2^P$-complete \cite{eiter2007complexityresultsboundedarity, bichler2016powernongroundrulesanswer}, one level above $\mathsf{NP}$ in the polynomial hierarchy. $\Sigma_2^P$ is the class of problems solvable by an $\mathsf{NP}$ machine with access to an $\mathsf{NP}$ oracle. The two levels of hardness arise because non-ground rules of bounded arity can compactly encode exponentially many ground instances, adding expressiveness beyond the search over candidate answer sets.
 
 \subsection{Learning from Answer Sets}\label{sec:ilasp}
 
@@ -164,7 +164,7 @@ A \textit{learning task} is a tuple $T = \langle B, \mathcal{H}, E^+, E^- \rangl
 ILASP reduces the learning task to a sequence of ASP solving problems. The hypothesis space is encoded as an ASP metaprogram, and the search for a covering hypothesis is directed by a \textit{conflict driven} procedure \cite{law2020ilaspinductivelearninganswer}. Candidate hypotheses are proposed and checked against all examples. Conflicts from examples not yet covered are then used to prune the space and guide subsequent iterations. This conflict driven approach scales substantially better than exhaustive enumeration of $\mathcal{H}$ \cite{law2022conflictdriveninductivelogicprogramming}.
 
 \paragraph{Solving Complexity.}
-Determining whether a satisfying hypothesis exists under the LAS framework is $\Sigma_2^P$\text{-complete} even for propositional programs \cite{law2018complexitygeneralitylearning}, one level above the $\mathsf{NP}$\text{-completeness} of propositional ASP solving. The additional level reflects the search over hypotheses $H \in \mathcal{H}$ layered on top of verifying that $H$ covers all examples. This theoretical hardness motivates an alternative approach. LAMP replaces the hypothesis search with LLM guided generation, trading formal completeness for heuristic flexibility.
+Determining whether a satisfying hypothesis exists under the LAS framework is $\Sigma_2^P$-complete even for propositional programs \cite{law2018complexitygeneralitylearning}, one level above the $\mathsf{NP}$-completeness of propositional ASP solving. The additional level reflects the search over hypotheses $H \in \mathcal{H}$ layered on top of verifying that $H$ covers all examples. This theoretical hardness motivates an alternative approach. LAMP replaces the hypothesis search with LLM guided generation, trading formal completeness for heuristic flexibility.
 
 \subsection{Large Language Models for Code Generation}
 
@@ -333,7 +333,7 @@ where
     \[
       d_h(V_0) \;:\text{-}\; p_1(V_1),\; \ldots,\; p_{k}(V_k),\; \texttt{not}\; n_1(V'_1),\; \ldots,\; \texttt{not}\; n_{m}(V'_m).
     \]
-    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, each $V_i$ and $V'_j$ is drawn from a finite set of logical variables and may be shared across positions, $1 \leq k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals as bounded in Definition~\ref{def:profile}. All predicates are unary and all rules must be safe, meaning every variable in a rule appears in at least one positive body literal.
+    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, each $V_i$ and $V'_j$ is drawn from a finite set of logical variables and may be shared across positions, $1 \leq k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals as bounded in Definition~\ref{def:profile}. All predicates are unary and all rules must be safe, meaning every variable in a rule appears in at least one positive body literal. Since all predicates are unary, each positive body literal introduces at most one variable, so at most $L^+$ distinct variables may occur per rule.
 \end{itemize}
 A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$ with $|\Pi| \leq R$. Every rule in $\Pi$ uses only predicates from $\mathcal{D}$ and respects the bounds $L^+$ and $L^-$.
 $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
