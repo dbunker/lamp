@@ -59,7 +59,7 @@
 \pagestyle{plain}
 
 \begin{abstract}
-Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning. However, developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the \textsc{Clingo} solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 99.2\% final accuracy, \textit{gpt-oss:20b} 98.3\%, and \textit{qwen3-coder:30b} 64.2\%. Although ILASP was on average faster, both \textit{gpt-5-mini} and \textit{gpt-oss:20b} solved all benchmarks on which ILASP timed out. Both LAMP and ILASP are also able to reduce literal counts and increase stratification to a similar degree. Finally, feature analysis is used to determine predictors of LLM success or failure.
+Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning. However, developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the \textsc{Clingo} solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5\% accuracy, with failures due to search space timeouts. Among LLMs, \textit{gpt-5-mini} reaches 99.2\% final accuracy, \textit{gpt-oss:20b} 98.3\%, and \textit{qwen3-coder:30b} 64.2\%. Although ILASP was on average faster, both \textit{gpt-5-mini} and \textit{gpt-oss:20b} solved all benchmarks on which ILASP timed out. Both LAMP and ILASP substantially reduce literal counts and increase stratification relative to the synthetic originals, with ILASP producing the most concise programs. Finally, feature analysis is used to determine predictors of LLM success or failure.
 \end{abstract}
 
 \section{Introduction}
@@ -94,7 +94,7 @@ This section presents the core background underpinning LAMP including ASP, ILASP
 ASP is a declarative programming paradigm based on stable model semantics \cite{DBLP:series/synthesis/2012Gebser}, well suited to combinatorial search and knowledge intensive reasoning tasks. An ASP program consists of rules over atoms and literals, and its solutions are the stable models, referred to as \textit{answer sets}, of that program. The following introduces the syntactic primitives, rule structure, grounding procedure, and stable model semantics used throughout this paper.
 
 \paragraph{Syntactic Primitives.}
-A \textit{term} is either a constant represented as a lowercase symbol or integer such as\ $a$, $0$ or a variable represented as an uppercase symbol, such as\ $X$. A \textit{predicate} $p/k$ is a symbol of arity $k \geq 0$. Applying it to $k$ terms yields an \textit{atom} $p(t_1,\ldots,t_k)$. A ground atom contains no variables. A \textit{literal} is either an atom $a$, called a positive literal, or a \textit{default negated} literal $\mathit{not}\; a$, where $\mathit{not}$ denotes negation as failure and $\mathit{not}\; a$ holds whenever $a$ cannot be derived.
+A \textit{term} is either a constant represented as a lowercase symbol or integer such as\ $a$, $0$ or a variable represented as an uppercase symbol, such as\ $X$. A \textit{predicate} is a named symbol that takes $k$ terms as arguments, yielding an \textit{atom} $p(t_1,\ldots,t_k)$. A ground atom contains no variables. A \textit{literal} is either an atom $a$, called a positive literal, or a \textit{default negated} literal $\mathit{not}\; a$, where $\mathit{not}$ denotes negation as failure and $\mathit{not}\; a$ holds whenever $a$ cannot be derived.
 
 \paragraph{Rules and Programs.}
 An ASP program $\Pi$ is a finite set of \textit{rules} of the following form.
@@ -103,15 +103,15 @@ An ASP program $\Pi$ is a finite set of \textit{rules} of the following form.
     h \leftarrow b_1, \ldots, b_m, \mathit{not}\; c_1, \ldots, \mathit{not}\; c_n
 \]
 
-Here $h$ is the \textit{head}, a classical atom or empty, each $b_i$ is a positive body literal, and $\mathit{not}\; c_j$ denotes default negation of atom $c_j$. When $m = n = 0$ the rule is a \textit{fact}. Every rule in an ASP program must be satisfied by a candidate answer set $S$. A rule is satisfied by $S$ when either the body is not satisfied in $S$, or the head $h$ is in $S$. A body is satisfied in $S$ when every positive literal $b_i$ is in $S$ and every negated atom $c_j$ is absent from $S$.
+Here $h$ is the \textit{head}, an atom or empty, each $b_i$ is a positive body literal, and $\mathit{not}\; c_j$ denotes default negation of atom $c_j$. When $m = n = 0$ the rule is a \textit{fact}.
 
 \paragraph{Variables and Grounding.}
 Rules are written with first order variables, symbols such as $X$ and $Y$ that range over concrete terms rather than truth values, allowing compact expression over large domains. Prior to solving, a \textit{grounder}, such as \textsc{Gringo}, substitutes all relevant terms for each variable, producing an equivalent propositional ground program $\Pi_g$. A rule is \textit{safe} if every variable occurring in it also appears in a positive body literal, which ensures that grounding is well defined.
 
 \paragraph{Semantics.}
-Let $\mathcal{A}$ denote the Herbrand base set of all ground atoms. Given a ground program $\Pi$ and a set $S \subseteq \mathcal{A}$, the \textit{Gelfond--Lifschitz reduct} $\Pi^S$ is obtained by the following steps.
+Let $\mathcal{A}$ denote the Herbrand base set of all ground atoms. A rule is \textit{satisfied} by a set $S \subseteq \mathcal{A}$ when either the body is not satisfied in $S$, or the head $h$ is in $S$. A body is satisfied in $S$ when every positive literal $b_i$ is in $S$ and every negated atom $c_j$ is absent from $S$. Given a ground program $\Pi$ and a set $S \subseteq \mathcal{A}$, the \textit{Gelfond--Lifschitz reduct} $\Pi^S$ is obtained by the following steps.
 \begin{enumerate}
-    \item Remove every rule whose body contains $\mathit{not}\; c$ for some $c \in S$
+    \item Remove every rule whose body contains $\mathit{not}\; c$ for some $c \in S$.
     \item Remove all negative literals from the bodies of remaining rules.
 \end{enumerate}
 $S$ is a \textit{stable model}, referred to in ASP as an \textit{answer set}, of $\Pi$ if and only if $S$ is the \textit{minimal model} of the reduct $\Pi^S$. Because $\Pi^S$ is negation free, it has a unique minimal model, the smallest set of atoms satisfying every rule. A program may have zero, one, or multiple answer sets, and solutions to the encoded problem correspond exactly to its answer sets. $AS(\Pi)$ is used to denote the set of answer sets of a program $\Pi$.
@@ -146,8 +146,8 @@ To illustrate, suppose the goal is to learn which individuals are \texttt{allowe
 
 % Hypothesis space
 #modeh(allowed(var(person))).
-#modeb(adult(var(person))).
-#modeb(minor(var(person))).
+#modeb(1, adult(var(person))).
+#modeb(1, minor(var(person))).
 
 % Context dependent example: inclusion, exclusion, context
 #pos(e1, {allowed(alice)}, {allowed(bob)}, {
@@ -333,7 +333,7 @@ where
     \[
       d_h(V_0) \;:\text{-}\; p_1(V_1),\; \ldots,\; p_{k}(V_k),\; \texttt{not}\; n_1(V'_1),\; \ldots,\; \texttt{not}\; n_{m}(V'_m).
     \]
-    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, each $V_i$ and $V'_j$ is drawn from a finite set of logical variables and may be shared across positions, $k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals as bounded in Definition~\ref{def:profile}. All predicates are unary and all rules must be safe, meaning every variable in a rule appears in at least one positive body literal.
+    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, each $V_i$ and $V'_j$ is drawn from a finite set of logical variables and may be shared across positions, $1 \leq k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals as bounded in Definition~\ref{def:profile}. All predicates are unary and all rules must be safe, meaning every variable in a rule appears in at least one positive body literal.
 \end{itemize}
 A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$ with $|\Pi| \leq R$. Every rule in $\Pi$ uses only predicates from $\mathcal{D}$ and respects the bounds $L^+$ and $L^-$.
 $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
@@ -343,7 +343,7 @@ $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
 where $AS(\cdot)$ denotes the set of answer sets of a program, meaning the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
 \end{definition}
 
-The hypothesis space $\Phi$ corresponds directly to the mode bias of the associated ILASP learning task generated for each benchmark.
+The hypothesis space $\Phi$ contains the ILASP mode bias as a subset, since ILASP restricts rule heads to predicates appearing in $A^{*} \setminus F$. Under the single answer set constraint, both search spaces yield the same set of valid solutions.
 
 \subsection{Dataset Generation}\label{sec:datagen}
 
@@ -439,7 +439,7 @@ Experiments were conducted on the synthetic data with varying complexities as sp
 
 \subsection{Experimental Setup}
 
-A total of 120 synthetic ASP programs were created with varying features for testing. All experiments were conducted on an Apple M3 Max with 48\,GB unified memory. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. For \textit{gpt-5-mini}, timing reflects server processing time reported by the OpenAI API, excluding network latency. All ASP solving and analysis was done using \textsc{Clingo}. ILASP version 4 was run on each benchmark with a timeout of 420 seconds, using the flags \texttt{-ml=3} and \texttt{--max-rule-length=5} which bound the maximum total literals in the learned program and the maximum length of any individual rule respectively. These runtime bounds restrict ILASP to a subset of the full hypothesis space $\Phi$ defined in Definition~\ref{def:input}. Benchmarks not solved within this limit were recorded as failures. Each LAMP run was allowed a maximum of 3 iterations, one initial generation followed by up to 2 rounds of feedback verified by \textsc{Clingo}, as diminishing returns were observed beyond this point. Both systems receive the same input instance $\mathcal{M}$ (Definition~\ref{def:input}), where the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The selected parameters used to construct problem profiles are listed in Table~\ref{tab:parameters}. The positive literal bound is derived as $L^+ = \text{Overall Literals} - L^-$. All combinations were used except where the negative literal count equals or exceeds the overall literal count, which would leave no positive literals.
+A total of 120 synthetic ASP programs were created with varying features for testing. All experiments were conducted on an Apple M3 Max with 48\,GB unified memory. The LLMs chosen included \textit{gpt-5-mini}, which was run via OpenAI's API platform, as well as open weight models \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} which were run locally using Ollama. For \textit{gpt-5-mini}, timing reflects server processing time reported by the OpenAI API, excluding network latency. All ASP solving and analysis was done using \textsc{Clingo}. ILASP version 4 was run on each benchmark with a timeout of 420 seconds using default settings, which bound the maximum body literals per rule to 3 and the maximum total literals per rule to 5. Benchmarks not solved within this limit were recorded as failures. Each LAMP run was allowed a maximum of 3 iterations, one initial generation followed by up to 2 rounds of feedback verified by \textsc{Clingo}, as diminishing returns were observed beyond this point. Both systems receive the same input instance $\mathcal{M}$ (Definition~\ref{def:input}), where the target answer set $A^*$ is provided directly to the LLM in the prompt and encoded as a \texttt{\#pos} example for ILASP. The selected parameters used to construct problem profiles are listed in Table~\ref{tab:parameters}. The positive literal bound is derived as $L^+ = \text{Overall Literals} - L^-$. All combinations were used except where the negative literal count equals or exceeds the overall literal count, which would leave no positive literals, yielding 120 valid combinations.
 
 \begin{table}[htbp]
     \centering
@@ -450,8 +450,8 @@ A total of 120 synthetic ASP programs were created with varying features for tes
     \textbf{Parameter} & \textbf{Variations} \\
     \midrule
     Predicates & [6, 10] \\
-    Terms & [10] \\
-    Facts & [6, 9] \\
+    Terms & [6, 10] \\
+    Facts & [5, 6, 9] \\
     Rules & [11] \\
     Overall Literals & [2, 3] \\
     Negative Literals & [0, 1, 2] \\
@@ -633,7 +633,7 @@ Table~\ref{tab:llm_stratification} shows that both ILASP and the LLM based syste
 
 \subsection{Feature Importance}
 
-To identify which benchmark features predict LLM failure, an XGBoost classifier \cite{chen2016xgboostscalabletreeboosting} was trained on syntactic and structural features of the input programs using the \textit{qwen3-coder:30b} results. The other two LLMs had too few failures for a meaningful classifier. Feature importance is measured by gain, the average improvement in loss from splits using that feature. Under five fold cross validation the classifier achieves 61.7\% accuracy with AUC 0.619, below the 64.2\% majority class baseline, so the importances shown in Figure~\ref{fig:importance} should be treated as weakly indicative only. The top features by gain, \textit{Solution atoms}, \textit{Possible terms}, and \textit{Predicates}, all reflect problem size and vocabulary breadth, consistent with the intuition that larger answer sets and broader predicate sets increase the modeling burden on the LLM.
+To explore which benchmark features are associated with LLM failure, an XGBoost classifier \cite{chen2016xgboostscalabletreeboosting} was trained on syntactic and structural features of the input programs using the \textit{qwen3-coder:30b} results. The other two LLMs had too few failures for a meaningful classifier. Feature importance is measured by gain, the average improvement in loss from splits using that feature. Under five fold cross validation the classifier achieves 61.7\% accuracy with AUC 0.619, below the 64.2\% majority class baseline, indicating that no single feature or combination of features reliably separates successes from failures at this sample size. The gain values in Figure~\ref{fig:importance} are therefore best read as descriptive correlates rather than reliable predictors. The features with the highest gain, \textit{Solution atoms}, \textit{Possible terms}, and \textit{Predicates}, all reflect problem size and vocabulary breadth, consistent with the intuition that larger answer sets and broader predicate sets increase the modeling burden on the LLM.
 
 \begin{figure}[htbp]
     \centering

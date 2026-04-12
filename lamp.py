@@ -351,9 +351,9 @@ def generate_benchmark(config: ModelConfig, index):
 def generate_benchmarks():
 
     # Generate rules based on various configurations
-    predicates_range     = [6, 10]
-    possible_terms_range = [10]
-    facts_range          = [6, 9]
+    predicates_range     = [10, 6]
+    possible_terms_range = [10, 6]
+    facts_range          = [9, 6, 5]
     rules_range          = [11]
     literals_range       = [2, 3]
     neg_literals_range   = [0, 1, 2]
