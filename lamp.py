@@ -495,6 +495,41 @@ def atoms_from_model(stats: Dict):
     values = stats["witnesses"][0]["atoms"]
     return set(parse_atom(value) for value in values)
 
+def validate_hypothesis_space(rules: List[Rule], allowed_predicates: Set[str]) -> List[str]:
+    """Validate that generated rules conform to the hypothesis space Phi (Definition 2).
+    Checks: no facts, predicates in allowed set, unary atoms, and rule safety.
+    Returns a list of violation messages. Empty if all rules are valid."""
+    violations = []
+    for rule in rules:
+        if len(rule.body) == 0:
+            violations.append(f"Fact generated (empty body): {rule}")
+            continue
+        if rule.head.pred not in allowed_predicates:
+            violations.append(f"Head predicate '{rule.head.pred}' not in hypothesis space: {rule}")
+        for lit in rule.body:
+            if lit.atom.pred not in allowed_predicates:
+                violations.append(f"Body predicate '{lit.atom.pred}' not in hypothesis space: {rule}")
+        if len(rule.head.terms) != 1:
+            violations.append(f"Head not unary (arity {len(rule.head.terms)}): {rule}")
+        for lit in rule.body:
+            if len(lit.atom.terms) != 1:
+                violations.append(f"Body literal not unary (arity {len(lit.atom.terms)}): {rule}")
+        pos_vars = set()
+        for lit in rule.body:
+            if lit.pos:
+                for term in lit.atom.terms:
+                    if term[0].isupper():
+                        pos_vars.add(term)
+        for term in rule.head.terms:
+            if term[0].isupper() and term not in pos_vars:
+                violations.append(f"Unsafe: head variable '{term}' not in positive body: {rule}")
+        for lit in rule.body:
+            if not lit.pos:
+                for term in lit.atom.terms:
+                    if term[0].isupper() and term not in pos_vars:
+                        violations.append(f"Unsafe: negative variable '{term}' not in positive body: {rule}")
+    return violations
+
 ########## ILASP ##########
 
 class ILASPClient:
@@ -831,6 +866,10 @@ def run_llms(max_iter: int = 3, rerun=True):
 
                 if original_values == llm_values:
                     logging.info(f"Correct on iteration {run_index}: {llm_values}")
+                    allowed_preds = set(a.pred for a in original_values)
+                    violations = validate_hypothesis_space(llm_kb.rules, allowed_preds)
+                    if violations:
+                        logging.warning(f"Hypothesis space violations on benchmark {index}: {violations}")
                     break
                 else:
                     logging.info(f"Iteration {run_index} failed. Expected: {original_values}, Got: {llm_values}")
