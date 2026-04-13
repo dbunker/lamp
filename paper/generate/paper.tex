@@ -343,7 +343,7 @@ $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
 where $AS(\cdot)$ denotes the set of answer sets of a program, meaning the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
 \end{definition}
 
-The ILASP hypothesis space, determined by the mode bias, is a subset of $\Phi$, since ILASP restricts rule heads to predicates appearing in $A^{*} \setminus F$. Under the single answer set constraint, both search spaces yield the same set of valid solutions. The encoding uses a single positive example without negative examples. In practice, all ILASP solutions produced for these benchmarks were stratified (Table~\ref{tab:llm_stratification}), guaranteeing a unique answer set, and no incorrect solutions were observed.
+The ILASP hypothesis space, determined by the mode bias, is a subset of $\Phi$, since ILASP restricts rule heads to predicates appearing in $A^{*} \setminus F$. The encoding uses a single positive example without negative examples. In practice, all ILASP solutions produced for these benchmarks were stratified (Table~\ref{tab:llm_stratification}), guaranteeing a unique answer set and ensuring both search spaces yield the same set of valid solutions.
 
 \subsection{Dataset Generation}\label{sec:datagen}
 
