@@ -103,7 +103,7 @@ An ASP program $\Pi$ is a finite set of \textit{rules} of the following form.
     h \leftarrow b_1, \ldots, b_m, \mathit{not}\; c_1, \ldots, \mathit{not}\; c_n
 \]
 
-Here $h$ is the \textit{head}, an atom or empty, each $b_i$ is a positive body literal, and $\mathit{not}\; c_j$ denotes default negation of atom $c_j$. When $m = n = 0$ the rule is a \textit{fact}.
+Here $h$ is the \textit{head}, an atom or empty, each $b_i$ is a positive body literal, and $\mathit{not}\; c_j$ denotes default negation of atom $c_j$. When $h$ is an atom and $m = n = 0$ the rule is a \textit{fact}.
 
 \paragraph{Variables and Grounding.}
 Rules are written with first order variables, symbols such as $X$ and $Y$ that range over concrete terms rather than truth values, allowing compact expression over large domains. Prior to solving, a \textit{grounder}, such as \textsc{Gringo}, substitutes all relevant terms for each variable, producing an equivalent propositional ground program $\Pi_g$. A rule is \textit{safe} if every variable occurring in it also appears in a positive body literal, which ensures that grounding is well defined.
@@ -329,11 +329,11 @@ where
 \begin{itemize}
   \item $F$ is the \emph{instance facts}, a set of $N_F$ ground atoms of the form $d(o)$ with predicate $d \in \mathcal{D}$ and term $o \in \mathcal{T}$ such as \texttt{d0(o0)}, so $|F| = N_F$.
   \item $A^{*}$ is the \emph{target answer set}, the desired unique stable model that any correct solution $\Pi$ must produce. The atoms in $A^{*} \setminus F$ are the \emph{derived atoms}, those produced by rules rather than given as facts. It must satisfy $F \subseteq A^{*}$ and $|A^{*} \setminus F| \geq A_{\min}$.
-  \item $\Phi$ is the \emph{hypothesis space}, the full set of concrete ASP rules from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
+  \item $\Phi$ is the \emph{hypothesis space}, the full set of candidate ASP rules from which $\Pi$ is drawn. Each rule in $\Phi$ has the form
     \[
-      d_h(V_0) \;:\text{-}\; p_1(V_1),\; \ldots,\; p_{k}(V_k),\; \texttt{not}\; n_1(V'_1),\; \ldots,\; \texttt{not}\; n_{m}(V'_m).
+      d_h(V_0) \;:\text{-}\; b_1(V_1),\; \ldots,\; b_{m}(V_m),\; \texttt{not}\; c_1(V'_1),\; \ldots,\; \texttt{not}\; c_{n}(V'_n).
     \]
-    where $d_h,\, p_i,\, n_j \in \mathcal{D}$, each $V_i$ and $V'_j$ is drawn from a finite set of logical variables and may be shared across positions, $1 \leq k \leq L^+$ positive body literals, and $m \leq L^-$ negative body literals as bounded in Definition~\ref{def:profile}. All predicates are unary and all rules must be safe, meaning every variable in a rule appears in at least one positive body literal. Since all predicates are unary, each positive body literal introduces at most one variable, so at most $L^+$ distinct variables may occur per rule.
+    where $d_h,\, b_i,\, c_j \in \mathcal{D}$, each $V_i$ and $V'_j$ is drawn from a finite set of logical variables and may be shared across positions, $1 \leq m \leq L^+$ positive body literals, and $n \leq L^-$ negative body literals as bounded in Definition~\ref{def:profile}. All predicates are unary and all rules must be safe, meaning every variable in a rule appears in at least one positive body literal. Since all predicates are unary, each positive body literal introduces at most one variable, so at most $L^+$ distinct variables may occur per rule.
 \end{itemize}
 A \emph{candidate program} $\Pi$ is any subset $\Pi \subseteq \Phi$ with $|\Pi| \leq R$. Every rule in $\Pi$ uses only predicates from $\mathcal{D}$ and respects the bounds $L^+$ and $L^-$.
 $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
@@ -343,7 +343,7 @@ $\Pi$ is a \emph{solution} to $\mathcal{M}$ if and only if
 where $AS(\cdot)$ denotes the set of answer sets of a program, meaning the unique answer set of $F \cup \Pi$ is exactly $A^{*}$.
 \end{definition}
 
-The ILASP hypothesis space, determined by the mode bias, is a subset of $\Phi$, since ILASP restricts rule heads to predicates appearing in $A^{*} \setminus F$. Under the single answer set constraint, both search spaces yield the same set of valid solutions. The encoding uses a single positive example without negative examples, relying on ILASP's optimality criterion to avoid hypotheses that introduce additional answer sets beyond $A^{*}$.
+The ILASP hypothesis space, determined by the mode bias, is a subset of $\Phi$, since ILASP restricts rule heads to predicates appearing in $A^{*} \setminus F$. Under the single answer set constraint, both search spaces yield the same set of valid solutions. The encoding uses a single positive example without negative examples. In practice, all ILASP solutions produced for these benchmarks were stratified (Table~\ref{tab:llm_stratification}), guaranteeing a unique answer set, and no incorrect solutions were observed.
 
 \subsection{Dataset Generation}\label{sec:datagen}
 
