@@ -2,7 +2,7 @@
 
 ## Abstract
 
-Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning, however developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the Clingo solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5% accuracy, with failures due to search space timeouts. Among LLMs, *gpt-5-mini* reaches 100% accuracy, *gpt-oss:20b* 95.8%, and *qwen3-coder:30b* 45.0\%. Although ILASP was on average faster, *gpt-5-mini* solved all benchmarks on which ILASP timed out. Both LAMP and ILASP are also able to reduce literal counts and increase stratification at a similar level. Finally, feature analysis is used to determine predictors of LLM success or failure.
+Answer Set Programming (ASP) offers a compelling mechanism for knowledge representation and reasoning. However, developing such programs remains challenging. This work introduces the LLM to ASP Modeling Protocol (LAMP), a system by which an LLM iteratively generates and refines candidate ASP rules with each candidate verified by the Clingo solver. LAMP is evaluated against the leading Inductive Logic Programming (ILP) system Inductive Learning of Answer Set Programs (ILASP), across 120 synthetic benchmarks of varying complexity. ILASP achieves 97.5% accuracy, with failures due to search space timeouts. Among LLMs, *gpt-5-mini* reaches 99.2% final accuracy, *gpt-oss:20b* 98.3%, and *qwen3-coder:30b* 64.2\%. Although ILASP was on average faster, both *gpt-5-mini* and *gpt-oss:20b* solved all benchmarks on which ILASP timed out. Both LAMP and ILASP substantially reduce literal counts and increase stratification relative to the synthetic originals, with ILASP producing the most concise programs. Finally, feature analysis is used to determine predictors of LLM success or failure.
 
 ## Full Paper
 
@@ -33,8 +33,8 @@ Each benchmark is a `.lp` file containing ASP facts and rules. Benchmarks vary a
 | Parameter | Values |
 |---|---|
 | `num_predicates` | 6, 10 |
-| `num_possible_terms` | 10 |
-| `num_facts` | 6, 9 |
+| `num_possible_terms` | 6, 10 |
+| `num_facts` | 5, 6, 9 |
 | `num_rules` | 11 |
 | `num_literals` | 2, 3 |
 | `num_neg_literals` | 0, 1, 2 |
