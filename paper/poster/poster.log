@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.17)  28 APR 2026 15:06
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.17)  28 APR 2026 16:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -772,7 +772,7 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 \posterboxwidth=\skip73
 \posterbodywidth=\skip74
 LaTeX Font Info:    Trying to load font information for T1+lmr on input line 12
-1.
+2.
  (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -783,24 +783,24 @@ File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
 ) (./poster.aux)
 \openout1 = `poster.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 121.
-LaTeX Font Info:    ... okay on input line 121.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 121.
-LaTeX Font Info:    ... okay on input line 121.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 121.
-LaTeX Font Info:    ... okay on input line 121.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 121.
-LaTeX Font Info:    ... okay on input line 121.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 121.
-LaTeX Font Info:    ... okay on input line 121.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 121.
-LaTeX Font Info:    ... okay on input line 121.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 121.
-LaTeX Font Info:    ... okay on input line 121.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 121.
-LaTeX Font Info:    ... okay on input line 121.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 121.
-LaTeX Font Info:    ... okay on input line 121.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 122.
+LaTeX Font Info:    ... okay on input line 122.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -861,114 +861,124 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 \c@lstlisting=\count352
-Package hyperref Info: Link coloring OFF on input line 121.
+Package hyperref Info: Link coloring OFF on input line 122.
  (./poster.out) (./poster.out)
 \@outlinefile=\write4
 \openout4 = `poster.out'.
 
-LaTeX Font Info:    Calculating math sizes for size <21> on input line 166.
+<poster_template.pdf, id=7, 2601.72pt x 3468.96pt>
+File: poster_template.pdf Graphic file (type pdf)
+<use poster_template.pdf>
+Package pdftex.def Info: poster_template.pdf  used on input line 142.
+(pdftex.def)             Requested size: 473.36871pt x 448.8981pt.
+LaTeX Font Info:    Trying to load font information for T1+lmss on input line 1
+51.
+
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/t1lmss.fd
+File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+LaTeX Font Info:    Calculating math sizes for size <21> on input line 181.
 LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 1
-66.
+81.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OML+lmm on input line 1
-66.
+81.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 
-166.
+181.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 
-166.
+181.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <21> on input line 166.
+(Font)              <21> on input line 181.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <14.69994> on input line 166.
+(Font)              <14.69994> on input line 181.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.5> on input line 166.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 166
+(Font)              <10.5> on input line 181.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 181
 .
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 166
+LaTeX Font Info:    Trying to load font information for U+msb on input line 181
 .
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 2
-18.
+33.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2
-29.
+44.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <16> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 242.
-LaTeX Font Info:    Calculating math sizes for size <18> on input line 253.
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 257.
+LaTeX Font Info:    Calculating math sizes for size <18> on input line 268.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <18> on input line 253.
+(Font)              <18> on input line 268.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12.59995> on input line 253.
+(Font)              <12.59995> on input line 268.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 253.
-LaTeX Font Info:    Trying to load font information for T1+lmss on input line 3
-85.
-
-(/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/t1lmss.fd
-File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
+(Font)              <9> on input line 268.
+<../generate/diagrams/xgb_importance.pdf, id=9, 426.26566pt x 352.34511pt>
+File: ../generate/diagrams/xgb_importance.pdf Graphic file (type pdf)
+<use ../generate/diagrams/xgb_importance.pdf>
+Package pdftex.def Info: ../generate/diagrams/xgb_importance.pdf  used on input
+ line 321.
+(pdftex.def)             Requested size: 514.22195pt x 425.05931pt.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <17.28> on input line 385.
+(Font)              <17.28> on input line 418.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 385.
+(Font)              <12> on input line 418.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 385.
+(Font)              <10> on input line 418.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 385.
+(Font)              <7> on input line 418.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 385.
-<../generate/diagrams/outcome_stacked.pdf, id=7, 433.62pt x 289.08pt>
+(Font)              <5> on input line 418.
+<../generate/diagrams/outcome_stacked.pdf, id=10, 433.62pt x 289.08pt>
 File: ../generate/diagrams/outcome_stacked.pdf Graphic file (type pdf)
 <use ../generate/diagrams/outcome_stacked.pdf>
 Package pdftex.def Info: ../generate/diagrams/outcome_stacked.pdf  used on inpu
-t line 409.
+t line 442.
 (pdftex.def)             Requested size: 685.63292pt x 457.14719pt.
-<../generate/diagrams/timing_boxplot.pdf, id=8, 433.62pt x 289.08pt>
+<../generate/diagrams/timing_boxplot.pdf, id=11, 433.62pt x 289.08pt>
 File: ../generate/diagrams/timing_boxplot.pdf Graphic file (type pdf)
 <use ../generate/diagrams/timing_boxplot.pdf>
 Package pdftex.def Info: ../generate/diagrams/timing_boxplot.pdf  used on input
- line 419.
+ line 452.
 (pdftex.def)             Requested size: 685.63292pt x 457.14719pt.
-LaTeX Font Info:    Calculating math sizes for size <16> on input line 515.
+LaTeX Font Info:    Calculating math sizes for size <16> on input line 572.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <16> on input line 515.
+(Font)              <16> on input line 572.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <11.19995> on input line 515.
+(Font)              <11.19995> on input line 572.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 515.
-<poster_template.pdf, id=10, 2601.72pt x 3468.96pt>
+(Font)              <8> on input line 572.
 File: poster_template.pdf Graphic file (type pdf)
 <use poster_template.pdf>
-Package pdftex.def Info: poster_template.pdf  used on input line 521.
+Package pdftex.def Info: poster_template.pdf  used on input line 589.
 (pdftex.def)             Requested size: 2601.91217pt x 3469.11037pt.
  [1
 
@@ -978,8 +988,8 @@ exlive/2026basic/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texliv
 e/2026basic/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2026bas
 ic/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2026basic/te
 xmf-dist/fonts/enc/dvips/lm/lm-ts1.enc} <./poster_template.pdf> <../generate/di
-agrams/outcome_stacked.pdf> <../generate/diagrams/timing_boxplot.pdf>] (./poste
-r.aux)
+agrams/xgb_importance.pdf> <../generate/diagrams/outcome_stacked.pdf> <../gener
+ate/diagrams/timing_boxplot.pdf>] (./poster.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
@@ -988,11 +998,11 @@ Package rerunfilecheck Info: File `poster.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 24461 strings out of 469006
- 453038 string characters out of 5454813
- 994511 words of memory out of 5000000
- 52715 multiletter control sequences out of 15000+600000
- 748062 words of font info for 138 fonts, out of 8000000 for 9000
+ 24472 strings out of 469006
+ 453440 string characters out of 5454813
+ 1018319 words of memory out of 5000000
+ 52726 multiletter control sequences out of 15000+600000
+ 752933 words of font info for 140 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
  84i,19n,104p,470b,1499s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></u
@@ -1009,10 +1019,10 @@ ype1/public/lm/lmsy10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/
 public/lm/lmtk10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/publi
 c/lm/lmtt12.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/ams
 fonts/symbols/msam10.pfb>
-Output written on poster.pdf (1 page, 453722 bytes).
+Output written on poster.pdf (1 page, 471643 bytes).
 PDF statistics:
- 215 PDF objects out of 1000 (max. 8388607)
- 93 compressed objects within 1 object stream
+ 256 PDF objects out of 1000 (max. 8388607)
+ 98 compressed objects within 1 object stream
  10 named destinations out of 1000 (max. 500000)
- 28 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 39 words of extra memory for PDF output out of 10000 (max. 10000000)
 

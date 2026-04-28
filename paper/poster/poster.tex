@@ -24,6 +24,7 @@
 \definecolor{softgold}{HTML}{FFF3D6}
 \definecolor{softred}{HTML}{FBE6E6}
 \definecolor{softgray}{HTML}{F6F8FA}
+\definecolor{bodybg}{HTML}{F5F8FA}
 \definecolor{textgray}{HTML}{1B2A34}
 
 \setlength{\parindent}{0pt}
@@ -122,18 +123,32 @@
 \bodytext
 
 \begin{tikzpicture}[remember picture,overlay]
+  % Shorten the template header while preserving its colour and logo treatment.
   \fill[potsdamblue]
-    ([xshift=1.20in,yshift=-1.05in]current page.north west)
+    (current page.north west)
     rectangle
-    ([xshift=24.0in,yshift=-6.85in]current page.north west);
+    ([yshift=-7.35in]current page.north east);
+
+  \fill[bodybg]
+    ([yshift=-7.35in]current page.north west)
+    rectangle
+    ([yshift=-9.75in]current page.north east);
+
+  \node[anchor=north west, inner sep=0pt] at ([xshift=27.05in,yshift=-0.30in]current page.north west) {%
+    \includegraphics[
+      width=6.55in,
+      trim=25.5in 39.0in 1.8in 0.75in,
+      clip
+    ]{poster_template.pdf}%
+  };
 
   \node[
     anchor=north west,
     text=white,
-    text width=22.0in,
+    text width=22.2in,
     align=left
-  ] at ([xshift=1.55in,yshift=-1.55in]current page.north west) {%
-    {\bfseries\fontsize{50}{54}\selectfont
+  ] at ([xshift=1.50in,yshift=-0.82in]current page.north west) {%
+    {\sffamily\bfseries\fontsize{84}{88}\selectfont
     LAMP: ASP Rule Induction and\\[0.08in]
     Optimization with LLMs}
   };
@@ -142,9 +157,9 @@
     anchor=north west,
     text=white,
     align=left
-  ] at ([xshift=1.58in,yshift=-4.35in]current page.north west) {%
-    {\bfseries\fontsize{30}{34}\selectfont David Bunker}\\[0.10in]
-    {\fontsize{24}{28}\selectfont University of Potsdam}
+  ] at ([xshift=1.58in,yshift=-4.48in]current page.north west) {%
+    {\sffamily\bfseries\fontsize{48}{52}\selectfont David Bunker}\\[0.10in]
+    {\sffamily\fontsize{35}{39}\selectfont University of Potsdam}
   };
 
   \node[
@@ -159,7 +174,7 @@
   };
 \end{tikzpicture}
 
-\vspace*{8.55in}
+\vspace*{7.58in}
 
 \begin{center}
 \begin{minipage}{32.6in}
@@ -293,6 +308,24 @@ ILASP solves the same task under the Learning from Answer Sets framework, but do
 \item The target answer set is encoded as a single context-dependent positive example.
 \item In this study ILASP is the main symbolic baseline, run with a 420\,s timeout.
 \end{tightitems}
+\end{posterbox}
+
+\sectiongap
+
+\begin{posterbox}{Feature Analysis (RQ3)}
+\smallbody
+The paper also asks which benchmark features are associated with LLM failure. The strongest models missed too few cases for a useful classifier, so the analysis focuses on \textit{qwen3-coder:30b}.
+
+\vspace{0.04in}
+\centering
+\includegraphics[width=0.72\linewidth]{../generate/diagrams/xgb_importance.pdf}
+
+\vspace{0.06in}
+\RaggedRight
+The top gain features all describe scale and vocabulary breadth: larger target answer sets, more possible terms, and more predicates make exact rule recovery harder.
+
+\vspace{0.06in}
+XGBoost reached 61.7\% cross-validation accuracy with AUC 0.619, below the 64.2\% majority baseline. These are descriptive correlates, not reliable predictors yet.
 \end{posterbox}
 \end{minipage}\hfill
 \begin{minipage}[t]{10.35in}
@@ -429,6 +462,16 @@ Both strong LAMP models solved all 3 timeout cases & LLM-guided generation explo
 \bottomrule
 \end{tabular}
 \end{posterbox}
+
+\sectiongap
+
+\begin{posterbox}{Why Hybridize?}
+\begin{tightitems}
+\item ILASP gives the strong symbolic baseline: usually sub-second, concise, and principled within the mode bias.
+\item LAMP is slower, but its token-level generation explores the space differently and solved all 3 ILASP timeout cases.
+\item The natural next system is not LLM versus solver; it is ILASP-style search with solver-checked LLM proposals when search stalls.
+\end{tightitems}
+\end{posterbox}
 \end{minipage}\hfill
 \begin{minipage}[t]{10.35in}
 \vspace{0pt}
@@ -509,10 +552,35 @@ The three ILASP failures were all timeouts, not logical contradictions. Each tim
 \item Richer targets include higher-arity ASP, choice rules, disjunction, aggregates, planning benchmarks, and ASPBench.
 \item The most interesting extension is a hybrid system: ILASP-style search plus an agentic LLM refinement loop.
 \end{tightitems}
+\end{posterbox}
+
+\sectiongap
+
+\begin{posterbox}{Experimental Controls}
+\smallbody
+\begin{tightitems}
+\item Same input instance for both systems: facts, target answer set, and bounded rule schema.
+\item LAMP uses 3 total attempts: one initial generation and up to 2 solver-feedback rounds.
+\item All LLMs were run once per benchmark at temperature 1.
+\item \textit{gpt-5-mini} used the OpenAI API; \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} ran locally with Ollama.
+\item ILASP version 4 and all LAMP runs used the same 420\,s timeout.
+\item A LAMP output only counts as correct when \textsc{Clingo} returns exactly the target stable model.
+\end{tightitems}
 
 \vspace{0.08in}
 \tinybody
-Source code, benchmark data, and generated ILASP tasks are available at \url{https://github.com/dbunker/lamp}.
+Source code, benchmark data, and generated ILASP tasks: \url{https://github.com/dbunker/lamp}.
+\end{posterbox}
+
+\sectiongap
+
+\begin{posterbox}{Research Questions Answered}
+\smallbody
+\begin{tabular}{@{}p{1.1in}p{8.35in}@{}}
+\textbf{RQ1} & Yes: solver-in-the-loop prompting can produce correct ASP encodings from facts and a target answer set. \\
+\textbf{RQ2} & LAMP nearly matches ILASP in accuracy; ILASP is faster on average, but LAMP solves the ILASP timeout cases. \\
+\textbf{RQ3} & Failure correlates mostly with target size and vocabulary breadth, but the current sample is too small for reliable prediction. \\
+\end{tabular}
 \end{posterbox}
 \end{minipage}
 \end{minipage}
