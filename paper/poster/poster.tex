@@ -162,11 +162,6 @@
     {\sffamily\fontsize{35}{39}\selectfont University of Potsdam}
   };
 
-  \fill[potsdamblue]
-    (current page.south west)
-    rectangle
-    ([yshift=0.80in]current page.south east);
-
 \end{tikzpicture}
 
 \vspace*{7.58in}
@@ -223,6 +218,8 @@ AS(F \cup \Pi) = \{A^*\}
 \]
 
 Here $F$ is the given fact set, $A^*$ is the target answer set, $\Phi$ is a bounded hypothesis space, and the goal is to find a small program $\Pi \subseteq \Phi$ that reproduces $A^*$ exactly.
+
+Candidate programs use safe unary normal rules with bounded positive and default-negated body literals. Safe means every variable appears in a positive body literal, so grounding is finite. No new facts are allowed.
 
 \begin{tightitems}
 \item Both LAMP and ILASP receive the same facts, target answer set, and rule bounds.
@@ -285,18 +282,14 @@ Minimum derived atoms & 1, 3 \\
 
 \sectiongap
 
-\begin{posterbox}{Why This Matters}
+\begin{posterbox}{Why LAMP?}
 \begin{tightitems}
 \item ASP is powerful for configuration, planning, and combinatorial reasoning, but writing the rules is often the bottleneck.
-\item The paper shows that strong current LLMs can already act as useful ASP modeling assistants when a solver is kept in the loop.
-\item Because the task is rule induction rather than text translation, success here is evidence of structured reasoning rather than prompt memorization.
+\item LAMP uses the LLM to generate ASP rules directly from facts, a target answer set, and rule bounds.
+\item This differs from using LLMs mainly as a front end for natural-language translation or ILASP task construction.
+\item Every candidate is checked by \textsc{Clingo} at inference time, without LLM fine-tuning.
+\item Because the task is rule induction rather than text translation, success is evidence of structured reasoning rather than prompt memorization.
 \end{tightitems}
-\end{posterbox}
-
-\sectiongap
-
-\begin{posterbox}{Novelty / Positioning}
-LAMP uses the LLM to generate ASP rules directly from facts, a target answer set, and rule bounds. This differs from work that uses LLMs mainly as a front end for natural-language translation or ILASP task construction. Each candidate is checked by \textsc{Clingo} at inference time, without LLM fine-tuning or ILASP-style systematic hypothesis search.
 \end{posterbox}
 
 \sectiongap
@@ -313,20 +306,12 @@ ILASP solves the same task under the Learning from Answer Sets framework, but do
 
 \sectiongap
 
-\begin{posterbox}{Feature Analysis (RQ3)}
-\smallbody
-The paper also asks which benchmark features are associated with LLM failure. The strongest models missed too few cases for a useful classifier, so the analysis focuses on \textit{qwen3-coder:30b}.
-
-\vspace{0.04in}
-\centering
-\includegraphics[width=0.72\linewidth]{../generate/diagrams/xgb_importance.pdf}
-
-\vspace{0.06in}
-\RaggedRight
-The top gain features all describe scale and vocabulary breadth: larger target answer sets, more possible terms, and more predicates make exact rule recovery harder.
-
-\vspace{0.06in}
-XGBoost reached 61.7\% cross-validation accuracy with AUC 0.619, below the 64.2\% majority baseline. These are descriptive correlates, not reliable predictors yet.
+\begin{posterbox}{Why Hybridize?}
+\begin{tightitems}
+\item ILASP gives the strong symbolic baseline: usually sub-second, concise, and principled within the mode bias.
+\item LAMP is slower, but its token-level generation explores the space differently and solved all 3 ILASP timeout cases.
+\item The natural next system is not LLM versus solver; it is ILASP-style search with solver-checked LLM proposals when search stalls.
+\end{tightitems}
 \end{posterbox}
 \end{minipage}\hfill
 \begin{minipage}[t]{10.35in}
@@ -440,7 +425,7 @@ ILASP                    & ---       & 117 / 120 & 3 \\
 \end{tabular}
 
 \vspace{0.14in}
-\includegraphics[width=0.96\linewidth]{../generate/diagrams/outcome_stacked.pdf}
+\includegraphics[width=0.96\linewidth,trim=0 0 0 28pt,clip]{../generate/diagrams/outcome_stacked.pdf}
 
 \bodytext
 Feedback recovered 10 extra cases for \textit{gpt-5-mini}, 18 for \textit{gpt-oss:20b}, and 54 for \textit{qwen3-coder:30b}. The loop matters, especially once the first draft is close but not exact.
@@ -462,16 +447,10 @@ ILASP failures: 3, all at 420\,s & Rare search-space cliffs still matter. \\
 Both strong LAMP models solved all 3 timeout cases & LLM-guided generation explores the space differently. \\
 \bottomrule
 \end{tabular}
-\end{posterbox}
 
-\sectiongap
-
-\begin{posterbox}{Why Hybridize?}
-\begin{tightitems}
-\item ILASP gives the strong symbolic baseline: usually sub-second, concise, and principled within the mode bias.
-\item LAMP is slower, but its token-level generation explores the space differently and solved all 3 ILASP timeout cases.
-\item The natural next system is not LLM versus solver; it is ILASP-style search with solver-checked LLM proposals when search stalls.
-\end{tightitems}
+\vspace{0.10in}
+\RaggedRight
+LLM median runtimes were 22.7\,s for \textit{gpt-5-mini}, 43.2\,s for \textit{gpt-oss:20b}, and 35.7\,s for \textit{qwen3-coder:30b}. The \textit{gpt-5-mini} timing excludes network latency.
 \end{posterbox}
 \end{minipage}\hfill
 \begin{minipage}[t]{10.35in}
@@ -535,12 +514,30 @@ The three ILASP failures were all timeouts, not logical contradictions. Each tim
 
 \sectiongap
 
-\begin{posterbox}{What The Results Suggest}
+\begin{posterbox}{Feature Analysis (RQ3)}
+\smallbody
+The paper also asks which benchmark features are associated with LLM failure. The strongest models missed too few cases for a useful classifier, so the analysis focuses on \textit{qwen3-coder:30b}.
+
+\vspace{0.04in}
+\centering
+\includegraphics[width=0.70\linewidth]{../generate/diagrams/xgb_importance.pdf}
+
+\vspace{0.06in}
+\RaggedRight
+The top gain features describe scale and vocabulary breadth: larger target answer sets, more possible terms, and more predicates make exact rule recovery harder.
+
+\vspace{0.06in}
+XGBoost reached 61.7\% cross-validation accuracy with AUC 0.619, below the 64.2\% majority baseline, so these are descriptive correlates rather than reliable predictors.
+\end{posterbox}
+
+\sectiongap
+
+\begin{posterbox}{Take-home / Answers}
 \begin{tightitems}
-\item Strong LLMs can perform nontrivial ASP rule induction even without ASP-specific training.
-\item A fully local model, \textit{gpt-oss:20b}, is already close to ILASP on this benchmark class.
-\item ILASP is still the faster symbolic system on average, but LAMP can succeed on some instances where exhaustive symbolic search times out.
-\item The generated programs are not only correct; they are often cleaner and easier to explain than the synthetic originals.
+\item \textbf{RQ1:} Solver-in-the-loop prompting can produce correct ASP rules from facts and a target answer set.
+\item \textbf{RQ2:} LAMP nearly matches ILASP in accuracy; ILASP is faster on average, but LAMP solves the ILASP timeout cases.
+\item \textbf{RQ3:} Failure correlates with target size and vocabulary breadth, but the current sample is too small for reliable prediction.
+\item \textbf{Take-home:} LAMP is not a replacement for ILASP; it is a complementary LLM-guided search strategy that suggests hybrid symbolic--LLM systems.
 \end{tightitems}
 \end{posterbox}
 
@@ -550,7 +547,7 @@ The three ILASP failures were all timeouts, not logical contradictions. Each tim
 \begin{tightitems}
 \item The study uses synthetic benchmarks with unary predicates, normal rules, and exactly one answer set.
 \item Each model was run once per benchmark at temperature 1, so small score gaps should be interpreted cautiously.
-\item Richer targets include higher-arity ASP, choice rules, disjunction, aggregates, planning benchmarks, and ASPBench.
+\item Repeated trials, richer ASP constructs, ASPBench, planning benchmarks, and prompt optimization would strengthen the evaluation.
 \item The most interesting extension is a hybrid system: ILASP-style search plus an agentic LLM refinement loop.
 \end{tightitems}
 \end{posterbox}
@@ -559,36 +556,11 @@ The three ILASP failures were all timeouts, not logical contradictions. Each tim
 
 \begin{posterbox}{Experimental Controls}
 \smallbody
-\begin{tightitems}
-\item Same input instance for both systems: facts, target answer set, and bounded rule schema.
-\item LAMP uses 3 total attempts: one initial generation and up to 2 solver-feedback rounds.
-\item All LLMs were run once per benchmark at temperature 1.
-\item \textit{gpt-5-mini} used the OpenAI API; \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} ran locally with Ollama.
-\item ILASP version 4 and all LAMP runs used the same 420\,s timeout.
-\item A LAMP output only counts as correct when \textsc{Clingo} returns exactly the target stable model.
-\end{tightitems}
+Same input instance for both systems: facts, target answer set, and bounded rule schema. LAMP used 3 attempts, exact \textsc{Clingo} stable-model matching, and the same 420\,s timeout as ILASP v4. \textit{gpt-5-mini} used the OpenAI API; \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} ran locally with Ollama.
 
 \vspace{0.08in}
 \tinybody
 Source code, benchmark data, and generated ILASP tasks: \url{https://github.com/dbunker/lamp}.
-\end{posterbox}
-
-\sectiongap
-
-\begin{posterbox}{Research Questions Answered}
-\smallbody
-\begin{tabular}{@{}p{1.1in}p{8.35in}@{}}
-\textbf{RQ1} & Yes: solver-in-the-loop prompting can produce correct ASP encodings from facts and a target answer set. \\
-\textbf{RQ2} & LAMP nearly matches ILASP in accuracy; ILASP is faster on average, but LAMP solves the ILASP timeout cases. \\
-\textbf{RQ3} & Failure correlates mostly with target size and vocabulary breadth, but the current sample is too small for reliable prediction. \\
-\end{tabular}
-\end{posterbox}
-
-\sectiongap
-
-\begin{posterbox}{Take-home}
-{\bfseries Solver-in-the-loop prompting makes ASP rule induction practical.}
-ILASP remains the fast symbolic baseline, but LAMP provides a complementary LLM-guided search strategy: it nearly matches ILASP overall, solves the ILASP timeout cases, and often returns compact, stratified programs.
 \end{posterbox}
 \end{minipage}
 \end{minipage}
