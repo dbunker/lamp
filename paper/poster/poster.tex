@@ -306,12 +306,17 @@ ILASP solves the same task under the Learning from Answer Sets framework, but do
 
 \sectiongap
 
-\begin{posterbox}{Why Hybridize?}
+\begin{posterbox}{Experimental Controls}
+\smallbody
 \begin{tightitems}
-\item ILASP gives the strong symbolic baseline: usually sub-second, concise, and principled within the mode bias.
-\item LAMP is slower, but its token-level generation explores the space differently and solved all 3 ILASP timeout cases.
-\item The natural next system is not LLM versus solver; it is ILASP-style search with solver-checked LLM proposals when search stalls.
+\item Same facts, target answer set, and bounded rule schema are given to both LAMP and ILASP.
+\item Correctness is exact \textsc{Clingo} stable-model matching, not surface similarity to the original rules.
+\item LAMP used 3 attempts; ILASP and LAMP used the same 420\,s timeout.
+\item Each model was run once per benchmark at temperature 1, so small score gaps should be interpreted cautiously.
 \end{tightitems}
+\vspace{0.04in}
+\tinybody
+Artifacts: \url{https://github.com/dbunker/lamp}
 \end{posterbox}
 \end{minipage}\hfill
 \begin{minipage}[t]{10.35in}
@@ -556,54 +561,64 @@ XGBoost reached 61.7\% cross-validation accuracy with AUC 0.619, below the 64.2\
 \item \textbf{RQ1:} Solver-in-the-loop prompting can produce correct ASP rules from facts and a target answer set.
 \item \textbf{RQ2:} LAMP nearly matches ILASP in accuracy; ILASP is faster on average, but LAMP solves the ILASP timeout cases.
 \item \textbf{RQ3:} Failure correlates with target size and vocabulary breadth, but the current sample is too small for reliable prediction.
-\item \textbf{Hybrid direction:} LAMP is not a replacement for ILASP; it is a complementary LLM-guided search strategy.
+\item \textbf{Implication:} LAMP is not a replacement for ILASP; it is a complementary LLM-guided search strategy.
 \end{tightitems}
 \end{posterbox}
 
 \sectiongap
 
-\begin{posterbox}{Scope And Next Steps}
+\begin{posterbox}{Scope And Caveats}
 \begin{tightitems}
 \item The study is synthetic and restricted to unary predicates, normal rules, and exactly one answer set.
-\item Each model was run once per benchmark at temperature 1, so small score gaps should be interpreted cautiously.
-\item Next: richer ASP constructs, ASPBench or planning domains, and ILASP-style search with an agentic LLM refinement loop.
+\item \textit{gpt-5-mini} timing excludes network latency; ILASP failures are recorded at the 420\,s timeout ceiling.
+\item Richer ASP constructs, ASPBench, planning domains, repeated trials, and prompt optimization would strengthen the evaluation.
 \end{tightitems}
 \end{posterbox}
 \end{minipage}
 
 \vspace{0.22in}
 
-\begin{posterbox}{Experimental Controls}
+\begin{posterbox}{Next Step: Hybrid Symbolic--LLM Search}
 \begin{minipage}[t]{0.315\linewidth}
 \smallbody
-\textbf{Controlled comparison}
+\textbf{What ILASP contributes}
 \begin{tightitems}
-\item Same input instance for both systems: facts $F$, target answer set $A^*$, and bounded rule schema.
-\item LAMP receives $A^*$ in the prompt; ILASP receives it as a context-dependent positive example.
-\item Correctness is exact \textsc{Clingo} stable-model matching, so candidates are not accepted by surface similarity.
+\item Usually sub-second on this benchmark suite.
+\item Conflict-driven search over a principled mode bias.
+\item Very concise programs within the bounded hypothesis space.
 \end{tightitems}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.315\linewidth}
 \smallbody
-\textbf{Run conditions}
+\textbf{What LAMP contributes}
 \begin{tightitems}
-\item 120 synthetic benchmarks over unary normal rules, with all systems limited to the same 420\,s timeout.
-\item LAMP used 3 attempts: one initial generation and up to 2 solver-feedback refinements.
-\item \textit{gpt-5-mini} used the OpenAI API; \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} ran locally with Ollama.
+\item Token-level generation explores the rule space differently.
+\item \textit{gpt-5-mini} and \textit{gpt-oss:20b} solved all 3 ILASP timeout cases.
+\item Every proposal is still solver-checked by \textsc{Clingo}.
 \end{tightitems}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.315\linewidth}
 \smallbody
-\textbf{Timing and data}
+\textbf{Natural hybrid}
 \begin{tightitems}
-\item ILASP failures are recorded at the timeout ceiling; \textit{gpt-5-mini} timing excludes network latency.
-\item Output programs are judged by their produced stable model, literal count, and stratification rather than source-rule identity.
-\item Source code, benchmark data, and generated ILASP tasks are available with the paper artifacts.
+\item Use ILASP-style search as the reliable symbolic core.
+\item When search stalls, ask an LLM for candidate rules or refinements.
+\item Accept only candidates that pass exact stable-model verification.
 \end{tightitems}
-\vspace{0.04in}
-\tinybody
-\url{https://github.com/dbunker/lamp}
 \end{minipage}
+
+\vspace{0.12in}
+\begingroup
+\setlength{\fboxsep}{0.10in}
+\setlength{\fboxrule}{0.9pt}
+\fcolorbox{lineblue}{panelblue}{%
+  \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
+    \centering
+    {\bfseries\fontsize{26}{30}\selectfont
+    ILASP searches systematically $\rightarrow$ LLM proposes when search stalls $\rightarrow$ Clingo accepts only exact stable-model matches}
+  }%
+}
+\endgroup
 \end{posterbox}
 \end{minipage}
 \end{center}
