@@ -92,8 +92,8 @@
 
 \newcommand{\sectiongap}{\vspace{0.18in}}
 \newcommand{\metricvalue}[1]{{\bfseries\fontsize{32}{34}\selectfont #1}}
-\newcommand{\bodytext}{\fontsize{21}{25}\selectfont}
-\newcommand{\smallbody}{\fontsize{18}{21}\selectfont}
+\newcommand{\bodytext}{\fontsize{22}{26}\selectfont}
+\newcommand{\smallbody}{\fontsize{19}{22}\selectfont}
 \newcommand{\tinybody}{\fontsize{16}{18}\selectfont}
 \newcommand{\metriccard}[2]{%
   \begingroup
@@ -438,19 +438,22 @@ Feedback recovered 10 extra cases for \textit{gpt-5-mini}, 18 for \textit{gpt-os
 \includegraphics[width=0.96\linewidth]{../generate/diagrams/timing_boxplot.pdf}
 
 \vspace{0.08in}
-\begin{tabular}{@{}p{4.0in}p{5.55in}@{}}
+\centering
+\renewcommand{\arraystretch}{1.10}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-\textbf{Observation} & \textbf{Takeaway} \\
+\textbf{System} & \textbf{Total} & \textbf{Mean} & \textbf{Median} & \textbf{Max} \\
 \midrule
-ILASP median runtime: 0.66\,s & Conflict-driven search is usually extremely fast. \\
-ILASP failures: 3, all at 420\,s & Rare search-space cliffs still matter. \\
-Both strong LAMP models solved all 3 timeout cases & LLM-guided generation explores the space differently. \\
+\textit{gpt-5-mini} & 3805.46 & 31.71 & 22.70 & 199.22 \\
+\textit{gpt-oss:20b} & 8630.91 & 71.92 & 43.22 & 420.00 \\
+\textit{qwen3-coder} & 4577.38 & 38.14 & 35.72 & 112.77 \\
+ILASP & 1917.36 & 15.98 & 0.66 & 420.00 \\
 \bottomrule
 \end{tabular}
 
 \vspace{0.10in}
 \RaggedRight
-LLM median runtimes were 22.7\,s for \textit{gpt-5-mini}, 43.2\,s for \textit{gpt-oss:20b}, and 35.7\,s for \textit{qwen3-coder:30b}. The \textit{gpt-5-mini} timing excludes network latency.
+Times are seconds. LLM totals accumulate all feedback iterations; ILASP timeouts are recorded as 420\,s. \textit{gpt-5-mini} timing excludes network latency.
 \end{posterbox}
 \end{minipage}\hfill
 \begin{minipage}[t]{10.35in}
@@ -508,8 +511,24 @@ Both ILASP and strong LAMP models compressed the synthetic source programs heavi
 \end{tabular}
 
 \vspace{0.14in}
-\bodytext
-The three ILASP failures were all timeouts, not logical contradictions. Each timeout case had 11 negative literals, and grounded-rule counts between 20 and 27 compared with a dataset average of 13.28. That points to search-space blowup rather than impossibility of the task.
+\textbf{Structural profile of ILASP timeout cases}
+
+\vspace{0.05in}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Benchmark} & \textbf{Grounded} & \textbf{Hyp. space} & \textbf{Neg. lits.} \\
+\midrule
+7 & 27 & 19906 & 11 \\
+27 & 20 & 16960 & 11 \\
+67 & 27 & 2206 & 11 \\
+\midrule
+Dataset avg & 13.28 & 3255.22 & 8.80 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.12in}
+\RaggedRight
+These were timeouts, not logical contradictions. Benchmark 67 shows that grounded rules and negation can still cause search cliffs even when the hypothesis space is smaller.
 \end{posterbox}
 
 \sectiongap
@@ -532,37 +551,60 @@ XGBoost reached 61.7\% cross-validation accuracy with AUC 0.619, below the 64.2\
 
 \sectiongap
 
-\begin{posterbox}{Take-home / Answers}
+\begin{posterbox}{Research Questions}
 \begin{tightitems}
 \item \textbf{RQ1:} Solver-in-the-loop prompting can produce correct ASP rules from facts and a target answer set.
 \item \textbf{RQ2:} LAMP nearly matches ILASP in accuracy; ILASP is faster on average, but LAMP solves the ILASP timeout cases.
 \item \textbf{RQ3:} Failure correlates with target size and vocabulary breadth, but the current sample is too small for reliable prediction.
-\item \textbf{Take-home:} LAMP is not a replacement for ILASP; it is a complementary LLM-guided search strategy that suggests hybrid symbolic--LLM systems.
+\item \textbf{Hybrid direction:} LAMP is not a replacement for ILASP; it is a complementary LLM-guided search strategy.
 \end{tightitems}
 \end{posterbox}
 
 \sectiongap
 
-\begin{posterbox}{Limits And Next Steps}
+\begin{posterbox}{Scope And Next Steps}
 \begin{tightitems}
-\item The study uses synthetic benchmarks with unary predicates, normal rules, and exactly one answer set.
+\item The study is synthetic and restricted to unary predicates, normal rules, and exactly one answer set.
 \item Each model was run once per benchmark at temperature 1, so small score gaps should be interpreted cautiously.
-\item Repeated trials, richer ASP constructs, ASPBench, planning benchmarks, and prompt optimization would strengthen the evaluation.
-\item The most interesting extension is a hybrid system: ILASP-style search plus an agentic LLM refinement loop.
+\item Next: richer ASP constructs, ASPBench or planning domains, and ILASP-style search with an agentic LLM refinement loop.
 \end{tightitems}
-\end{posterbox}
-
-\sectiongap
-
-\begin{posterbox}{Experimental Controls}
-\smallbody
-Same input instance for both systems: facts, target answer set, and bounded rule schema. LAMP used 3 attempts, exact \textsc{Clingo} stable-model matching, and the same 420\,s timeout as ILASP v4. \textit{gpt-5-mini} used the OpenAI API; \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} ran locally with Ollama.
-
-\vspace{0.08in}
-\tinybody
-Source code, benchmark data, and generated ILASP tasks: \url{https://github.com/dbunker/lamp}.
 \end{posterbox}
 \end{minipage}
+
+\vspace{0.22in}
+
+\begin{posterbox}{Experimental Controls}
+\begin{minipage}[t]{0.315\linewidth}
+\smallbody
+\textbf{Controlled comparison}
+\begin{tightitems}
+\item Same input instance for both systems: facts $F$, target answer set $A^*$, and bounded rule schema.
+\item LAMP receives $A^*$ in the prompt; ILASP receives it as a context-dependent positive example.
+\item Correctness is exact \textsc{Clingo} stable-model matching, so candidates are not accepted by surface similarity.
+\end{tightitems}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.315\linewidth}
+\smallbody
+\textbf{Run conditions}
+\begin{tightitems}
+\item 120 synthetic benchmarks over unary normal rules, with all systems limited to the same 420\,s timeout.
+\item LAMP used 3 attempts: one initial generation and up to 2 solver-feedback refinements.
+\item \textit{gpt-5-mini} used the OpenAI API; \textit{gpt-oss:20b} and \textit{qwen3-coder:30b} ran locally with Ollama.
+\end{tightitems}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.315\linewidth}
+\smallbody
+\textbf{Timing and data}
+\begin{tightitems}
+\item ILASP failures are recorded at the timeout ceiling; \textit{gpt-5-mini} timing excludes network latency.
+\item Output programs are judged by their produced stable model, literal count, and stratification rather than source-rule identity.
+\item Source code, benchmark data, and generated ILASP tasks are available with the paper artifacts.
+\end{tightitems}
+\vspace{0.04in}
+\tinybody
+\url{https://github.com/dbunker/lamp}
+\end{minipage}
+\end{posterbox}
 \end{minipage}
 \end{center}
 
