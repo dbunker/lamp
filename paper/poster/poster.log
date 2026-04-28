@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.17)  28 APR 2026 16:30
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.17)  28 APR 2026 17:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -945,40 +945,40 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 File: ../generate/diagrams/xgb_importance.pdf Graphic file (type pdf)
 <use ../generate/diagrams/xgb_importance.pdf>
 Package pdftex.def Info: ../generate/diagrams/xgb_importance.pdf  used on input
- line 316.
+ line 322.
 (pdftex.def)             Requested size: 514.22195pt x 425.05931pt.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <17.28> on input line 413.
+(Font)              <17.28> on input line 419.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 413.
+(Font)              <12> on input line 419.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 413.
+(Font)              <10> on input line 419.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 413.
+(Font)              <7> on input line 419.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 413.
+(Font)              <5> on input line 419.
 <../generate/diagrams/outcome_stacked.pdf, id=10, 433.62pt x 289.08pt>
 File: ../generate/diagrams/outcome_stacked.pdf Graphic file (type pdf)
 <use ../generate/diagrams/outcome_stacked.pdf>
 Package pdftex.def Info: ../generate/diagrams/outcome_stacked.pdf  used on inpu
-t line 437.
+t line 443.
 (pdftex.def)             Requested size: 685.63292pt x 457.14719pt.
 <../generate/diagrams/timing_boxplot.pdf, id=11, 433.62pt x 289.08pt>
 File: ../generate/diagrams/timing_boxplot.pdf Graphic file (type pdf)
 <use ../generate/diagrams/timing_boxplot.pdf>
 Package pdftex.def Info: ../generate/diagrams/timing_boxplot.pdf  used on input
- line 447.
+ line 453.
 (pdftex.def)             Requested size: 685.63292pt x 457.14719pt.
-LaTeX Font Info:    Calculating math sizes for size <16> on input line 567.
+LaTeX Font Info:    Calculating math sizes for size <16> on input line 573.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <16> on input line 567.
+(Font)              <16> on input line 573.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <11.19995> on input line 567.
+(Font)              <11.19995> on input line 573.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 567.
+(Font)              <8> on input line 573.
 File: poster_template.pdf Graphic file (type pdf)
 <use poster_template.pdf>
-Package pdftex.def Info: poster_template.pdf  used on input line 591.
+Package pdftex.def Info: poster_template.pdf  used on input line 597.
 (pdftex.def)             Requested size: 2601.91217pt x 3469.11037pt.
  [1
 
@@ -1000,7 +1000,7 @@ Package rerunfilecheck Info: File `poster.out' has not changed.
 Here is how much of TeX's memory you used:
  24472 strings out of 469006
  453440 string characters out of 5454813
- 1020976 words of memory out of 5000000
+ 1025225 words of memory out of 5000000
  52726 multiletter control sequences out of 15000+600000
  752933 words of font info for 140 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
@@ -1019,7 +1019,7 @@ ype1/public/lm/lmsy10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/
 public/lm/lmtk10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/publi
 c/lm/lmtt12.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/ams
 fonts/symbols/msam10.pfb>
-Output written on poster.pdf (1 page, 471629 bytes).
+Output written on poster.pdf (1 page, 471993 bytes).
 PDF statistics:
  256 PDF objects out of 1000 (max. 8388607)
  98 compressed objects within 1 object stream

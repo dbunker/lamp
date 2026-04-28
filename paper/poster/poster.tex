@@ -295,6 +295,12 @@ Minimum derived atoms & 1, 3 \\
 
 \sectiongap
 
+\begin{posterbox}{Novelty / Positioning}
+LAMP uses the LLM to generate ASP rules directly from facts, a target answer set, and rule bounds. This differs from work that uses LLMs mainly as a front end for natural-language translation or ILASP task construction. Each candidate is checked by \textsc{Clingo} at inference time, without LLM fine-tuning or ILASP-style systematic hypothesis search.
+\end{posterbox}
+
+\sectiongap
+
 \begin{posterbox}{ILASP Baseline}
 ILASP solves the same task under the Learning from Answer Sets framework, but does so with conflict-driven symbolic search over an ASP metaprogram rather than iterative LLM generation.
 
