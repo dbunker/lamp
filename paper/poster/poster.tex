@@ -168,7 +168,7 @@
 
 \begin{center}
 \begin{minipage}{32.6in}
-\begin{posterbox}{Headline}
+\begin{posterbox}{Key Results}
 LAMP asks an LLM to recover ASP rules from \textit{instance facts} and an \textit{expected answer set}, then checks every candidate with \textsc{Clingo}. Across 120 synthetic rule-induction benchmarks, the strongest LAMP models nearly matched ILASP, solved every ILASP timeout case, and usually produced smaller, more stratified programs than the synthetic originals.
 
 \vspace{0.14in}
@@ -230,7 +230,7 @@ Candidate programs use safe unary normal rules with bounded positive and default
 
 \sectiongap
 
-\begin{posterbox}{Toy Benchmark}
+\begin{posterbox}{Example Benchmark}
 \smallbody
 \textbf{Facts}
 \begin{lstlisting}
@@ -538,7 +538,7 @@ These were timeouts, not logical contradictions. Benchmark 67 shows that grounde
 
 \sectiongap
 
-\begin{posterbox}{Feature Analysis (RQ3)}
+\begin{posterbox}{Failure Correlates}
 \smallbody
 The paper also asks which benchmark features are associated with LLM failure. The strongest models missed too few cases for a useful classifier, so the analysis focuses on \textit{qwen3-coder:30b}.
 

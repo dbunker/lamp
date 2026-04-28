@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.17)  28 APR 2026 19:45
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.17)  28 APR 2026 19:56
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1007,7 +1007,7 @@ Package rerunfilecheck Info: File `poster.out' has not changed.
 Here is how much of TeX's memory you used:
  24489 strings out of 469006
  453726 string characters out of 5454813
- 1020521 words of memory out of 5000000
+ 1021530 words of memory out of 5000000
  52746 multiletter control sequences out of 15000+600000
  768030 words of font info for 156 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
@@ -1025,7 +1025,7 @@ onts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/
 type1/public/lm/lmtk10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1
 /public/lm/lmtt12.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/publ
 ic/amsfonts/symbols/msam10.pfb>
-Output written on poster.pdf (1 page, 453762 bytes).
+Output written on poster.pdf (1 page, 453653 bytes).
 PDF statistics:
  253 PDF objects out of 1000 (max. 8388607)
  96 compressed objects within 1 object stream
