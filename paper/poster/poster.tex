@@ -168,46 +168,6 @@
 
 \begin{center}
 \begin{minipage}{32.6in}
-\begin{posterbox}{Key Results}
-LAMP asks an LLM to recover ASP rules from \textit{instance facts} and an \textit{expected answer set}, then checks every candidate with \textsc{Clingo}. Across 120 synthetic rule-induction benchmarks, the strongest LAMP models nearly matched ILASP, solved every ILASP timeout case, and usually produced smaller, more stratified programs than the synthetic originals.
-
-\vspace{0.14in}
-\begin{minipage}[t]{0.238\linewidth}
-\metriccard{softgreen}{%
-\metricvalue{99.2\%}
-
-Best final accuracy with LAMP\\
-\textit{gpt-5-mini}: 119 / 120}
-\end{minipage}\hfill
-\begin{minipage}[t]{0.238\linewidth}
-\metriccard{softgreen}{%
-\metricvalue{98.3\%}
-
-Best local model result\\
-\textit{gpt-oss:20b}: 118 / 120}
-\end{minipage}\hfill
-\begin{minipage}[t]{0.238\linewidth}
-\metriccard{softgold}{%
-\metricvalue{3 / 3}
-
-ILASP timeout benchmarks solved\\
-by both strong LAMP models}
-\end{minipage}\hfill
-\begin{minipage}[t]{0.238\linewidth}
-\metriccard{softgreen}{%
-\metricvalue{3--6}
-
-Average output literals for correct\\
-solutions vs.\ 22 or 33 originals}
-\end{minipage}
-\end{posterbox}
-\end{minipage}
-\end{center}
-
-\vspace{0.16in}
-
-\begin{center}
-\begin{minipage}{32.6in}
 \begin{minipage}[t]{10.35in}
 \vspace{0pt}
 \begin{posterbox}{Problem Setting}
@@ -440,6 +400,7 @@ Feedback recovered 10 extra cases for \textit{gpt-5-mini}, 18 for \textit{gpt-os
 
 \begin{posterbox}{Runtime And Search Behavior}
 \smallbody
+\centering
 \includegraphics[width=0.96\linewidth]{../generate/diagrams/timing_boxplot.pdf}
 
 \vspace{0.08in}
@@ -575,6 +536,42 @@ XGBoost reached 61.7\% cross-validation accuracy with AUC 0.619, below the 64.2\
 \end{tightitems}
 \end{posterbox}
 \end{minipage}
+
+\vspace{0.22in}
+
+\begin{posterbox}{Key Results}
+Across 120 synthetic rule-induction benchmarks, the strongest LAMP models nearly matched ILASP, solved every ILASP timeout case, and usually produced smaller, more stratified programs than the synthetic originals.
+
+\vspace{0.14in}
+\begin{minipage}[t]{0.238\linewidth}
+\metriccard{softgreen}{%
+\metricvalue{99.2\%}
+
+Best final accuracy with LAMP\\
+\textit{gpt-5-mini}: 119 / 120}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.238\linewidth}
+\metriccard{softgreen}{%
+\metricvalue{98.3\%}
+
+Best local model result\\
+\textit{gpt-oss:20b}: 118 / 120}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.238\linewidth}
+\metriccard{softgold}{%
+\metricvalue{3 / 3}
+
+ILASP timeout benchmarks solved\\
+by both strong LAMP models}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.238\linewidth}
+\metriccard{softgreen}{%
+\metricvalue{3--6}
+
+Average output literals for correct\\
+solutions vs.\ 22 or 33 originals}
+\end{minipage}
+\end{posterbox}
 
 \vspace{0.22in}
 
