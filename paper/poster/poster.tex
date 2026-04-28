@@ -162,16 +162,11 @@
     {\sffamily\fontsize{35}{39}\selectfont University of Potsdam}
   };
 
-  \node[
-    anchor=south west,
-    text=white,
-    text width=31.5in,
-    align=left
-  ] at ([xshift=1.35in,yshift=0.92in]current page.south west) {%
-    {\bfseries\fontsize{18}{20}\selectfont Take-home:}
-    {\fontsize{18}{20}\selectfont
-    Solver-in-the-loop prompting makes ASP rule induction practical: ILASP remains the fast symbolic baseline, while LAMP offers a complementary LLM workflow that can sometimes avoid the search bottlenecks of exhaustive methods.}
-  };
+  \fill[potsdamblue]
+    (current page.south west)
+    rectangle
+    ([yshift=0.80in]current page.south east);
+
 \end{tikzpicture}
 
 \vspace*{7.58in}
@@ -581,6 +576,13 @@ Source code, benchmark data, and generated ILASP tasks: \url{https://github.com/
 \textbf{RQ2} & LAMP nearly matches ILASP in accuracy; ILASP is faster on average, but LAMP solves the ILASP timeout cases. \\
 \textbf{RQ3} & Failure correlates mostly with target size and vocabulary breadth, but the current sample is too small for reliable prediction. \\
 \end{tabular}
+\end{posterbox}
+
+\sectiongap
+
+\begin{posterbox}{Take-home}
+{\bfseries Solver-in-the-loop prompting makes ASP rule induction practical.}
+ILASP remains the fast symbolic baseline, but LAMP provides a complementary LLM-guided search strategy: it nearly matches ILASP overall, solves the ILASP timeout cases, and often returns compact, stratified programs.
 \end{posterbox}
 \end{minipage}
 \end{minipage}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.17)  28 APR 2026 16:01
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.17)  28 APR 2026 16:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -877,108 +877,108 @@ LaTeX Font Info:    Trying to load font information for T1+lmss on input line 1
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/t1lmss.fd
 File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Calculating math sizes for size <21> on input line 181.
+LaTeX Font Info:    Calculating math sizes for size <21> on input line 176.
 LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 1
-81.
+76.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OML+lmm on input line 1
-81.
+76.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 
-181.
+176.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 
-181.
+176.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <21> on input line 181.
+(Font)              <21> on input line 176.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <14.69994> on input line 181.
+(Font)              <14.69994> on input line 176.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.5> on input line 181.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 181
+(Font)              <10.5> on input line 176.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 176
 .
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 181
+LaTeX Font Info:    Trying to load font information for U+msb on input line 176
 .
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 2
-33.
+28.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2
-44.
+39.
 
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <16> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 257.
-LaTeX Font Info:    Calculating math sizes for size <18> on input line 268.
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 252.
+LaTeX Font Info:    Calculating math sizes for size <18> on input line 263.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <18> on input line 268.
+(Font)              <18> on input line 263.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12.59995> on input line 268.
+(Font)              <12.59995> on input line 263.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 268.
+(Font)              <9> on input line 263.
 <../generate/diagrams/xgb_importance.pdf, id=9, 426.26566pt x 352.34511pt>
 File: ../generate/diagrams/xgb_importance.pdf Graphic file (type pdf)
 <use ../generate/diagrams/xgb_importance.pdf>
 Package pdftex.def Info: ../generate/diagrams/xgb_importance.pdf  used on input
- line 321.
+ line 316.
 (pdftex.def)             Requested size: 514.22195pt x 425.05931pt.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <17.28> on input line 418.
+(Font)              <17.28> on input line 413.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 418.
+(Font)              <12> on input line 413.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 418.
+(Font)              <10> on input line 413.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 418.
+(Font)              <7> on input line 413.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 418.
+(Font)              <5> on input line 413.
 <../generate/diagrams/outcome_stacked.pdf, id=10, 433.62pt x 289.08pt>
 File: ../generate/diagrams/outcome_stacked.pdf Graphic file (type pdf)
 <use ../generate/diagrams/outcome_stacked.pdf>
 Package pdftex.def Info: ../generate/diagrams/outcome_stacked.pdf  used on inpu
-t line 442.
+t line 437.
 (pdftex.def)             Requested size: 685.63292pt x 457.14719pt.
 <../generate/diagrams/timing_boxplot.pdf, id=11, 433.62pt x 289.08pt>
 File: ../generate/diagrams/timing_boxplot.pdf Graphic file (type pdf)
 <use ../generate/diagrams/timing_boxplot.pdf>
 Package pdftex.def Info: ../generate/diagrams/timing_boxplot.pdf  used on input
- line 452.
+ line 447.
 (pdftex.def)             Requested size: 685.63292pt x 457.14719pt.
-LaTeX Font Info:    Calculating math sizes for size <16> on input line 572.
+LaTeX Font Info:    Calculating math sizes for size <16> on input line 567.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <16> on input line 572.
+(Font)              <16> on input line 567.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <11.19995> on input line 572.
+(Font)              <11.19995> on input line 567.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 572.
+(Font)              <8> on input line 567.
 File: poster_template.pdf Graphic file (type pdf)
 <use poster_template.pdf>
-Package pdftex.def Info: poster_template.pdf  used on input line 589.
+Package pdftex.def Info: poster_template.pdf  used on input line 591.
 (pdftex.def)             Requested size: 2601.91217pt x 3469.11037pt.
  [1
 
@@ -1000,11 +1000,11 @@ Package rerunfilecheck Info: File `poster.out' has not changed.
 Here is how much of TeX's memory you used:
  24472 strings out of 469006
  453440 string characters out of 5454813
- 1018319 words of memory out of 5000000
+ 1020976 words of memory out of 5000000
  52726 multiletter control sequences out of 15000+600000
  752933 words of font info for 140 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
- 84i,19n,104p,470b,1499s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,19n,104p,470b,1500s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></u
 sr/local/texlive/2026basic/texmf-dist/fonts/type1/public/lm/lmcsc10.pfb></usr/l
 ocal/texlive/2026basic/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></usr/local/
@@ -1019,7 +1019,7 @@ ype1/public/lm/lmsy10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/
 public/lm/lmtk10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/publi
 c/lm/lmtt12.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/ams
 fonts/symbols/msam10.pfb>
-Output written on poster.pdf (1 page, 471643 bytes).
+Output written on poster.pdf (1 page, 471629 bytes).
 PDF statistics:
  256 PDF objects out of 1000 (max. 8388607)
  98 compressed objects within 1 object stream
