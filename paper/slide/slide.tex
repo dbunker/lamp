@@ -70,19 +70,17 @@ Bounded unary normal rules.
   \item LLM proposes rules from $F$, $A^*$, schema bounds.
   \item \textsc{Clingo} verifies the stable model.
   \item Mismatches feed back. Up to 3 attempts.
-  \item No fine tuning. Solver decides correctness.
 \end{itemize}
 
 \vspace{0.15cm}
 \sectionhead{Setup}
 \footnotesize
-120 synthetic benchmarks varying predicates, terms, facts, body literals, negation, derived atoms. ILASP baseline runs conflict driven search over an ASP meta encoding, 7 min timeout.
+120 synthetic benchmarks varying rule count, size, and negation. ILASP baseline runs search using an ASP meta encoding with 7 minute timeout.
 
 \end{column}
 
 \begin{column}{0.46\textwidth}
 
-\sectionhead{Iterative Loop}
 \centering
 \resizebox{0.98\linewidth}{!}{%
 \begin{tikzpicture}[node distance=0.35cm and 0.85cm]
@@ -140,7 +138,7 @@ Bounded unary normal rules.
 }
 
 \vspace{0.15cm}
-\sectionhead{Results across 120 benchmarks}
+\sectionhead{Results}
 \centering
 \footnotesize
 \renewcommand{\arraystretch}{1.05}
@@ -156,16 +154,11 @@ ILASP                   & ---    & 97.5\% & 3  \\
 \end{tabular}
 
 \vspace{0.10cm}
-{\scriptsize Output literals 3 to 6 vs 22 or 33 originals. Stratified 119/119, 117/118, 117/117 vs 49/120 originals.\par}
+{\scriptsize Outputs averaged 5 literals vs 22 or 33, more stratified.\par}
+{\scriptsize Strong LAMP models solved 3 ILASP timeout benchmarks.\par}
 
 \end{column}
 \end{columns}
-
-\vspace{0.15cm}
-\begin{beamercolorbox}[wd=\textwidth,sep=4pt,rounded=true]{block body}
-\centering\footnotesize
-Both strong LAMP models solved all 3 ILASP timeout benchmarks. Outputs were smaller and fully stratified. Natural extension: hybridize ILASP search with an agentic LLM loop on richer benchmarks like ASPBench.
-\end{beamercolorbox}
 
 \end{frame}
 
