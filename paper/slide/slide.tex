@@ -49,7 +49,7 @@
 
 \begin{document}
 
-\begin{frame}{LAMP\quad ASP Rule Induction and Optimization with LLMs}
+\begin{frame}{LAMP\quad LLM to ASP Modeling Protocol}
 
 \begin{columns}[T,onlytextwidth]
 
@@ -144,14 +144,14 @@ Bounded unary normal rules. Humans find this hard.
 \centering
 \footnotesize
 \renewcommand{\arraystretch}{1.05}
-\begin{tabular}{@{}lrr@{}}
+\begin{tabular}{@{}lrrr@{}}
 \toprule
-\textbf{System} & \textbf{Final acc.} & \textbf{Failures} \\
+\textbf{System} & \textbf{1st} & \textbf{Final} & \textbf{Fails} \\
 \midrule
-\textit{gpt-5-mini}      & 99.2\% & 1 \\
-\textit{gpt-oss:20b}     & 98.3\% & 2 \\
-\textit{qwen3-coder:30b} & 64.2\% & 43 \\
-ILASP                    & 97.5\% & 3 \\
+\textit{gpt-5-mini}     & 90.8\% & 99.2\% & 1  \\
+\textit{gpt-oss}    & 83.3\% & 98.3\% & 2  \\
+\textit{qwen3-coder}    & 19.2\% & 64.2\% & 43 \\
+ILASP                   & ---    & 97.5\% & 3  \\
 \bottomrule
 \end{tabular}
 
