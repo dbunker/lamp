@@ -1,0 +1,13 @@
+*.aux
+*.blg
+*.log
+*.bbl
+*.out
+*.ist
+*.glo
+*.listing
+*.cls
+*.nav
+*.snm
+*.toc
+_minted
