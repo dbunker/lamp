@@ -61,7 +61,7 @@ ASP rule induction. Given facts $F$ and a target answer set $A^*$, find a small 
 \[
   AS(F \cup \Pi) = \{A^*\}.
 \]
-Bounded unary normal rules. Humans find this hard.
+Bounded unary normal rules.
 
 \vspace{0.15cm}
 \sectionhead{Loop}
@@ -76,7 +76,7 @@ Bounded unary normal rules. Humans find this hard.
 \vspace{0.15cm}
 \sectionhead{Setup}
 \footnotesize
-120 synthetic benchmarks varying predicates, terms, facts, body literals, negation, derived atoms. ILASP baseline with 420\,s timeout.
+120 synthetic benchmarks varying predicates, terms, facts, body literals, negation, derived atoms. ILASP baseline runs conflict driven search over an ASP meta encoding, 7 min timeout.
 
 \end{column}
 
@@ -154,6 +154,9 @@ Bounded unary normal rules. Humans find this hard.
 ILASP                   & ---    & 97.5\% & 3  \\
 \bottomrule
 \end{tabular}
+
+\vspace{0.10cm}
+{\scriptsize Output literals 3 to 6 vs 22 or 33 originals. Stratified 119/119, 117/118, 117/117 vs 49/120 originals.\par}
 
 \end{column}
 \end{columns}
