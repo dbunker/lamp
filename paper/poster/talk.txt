@@ -1,3 +1,15 @@
-My work is on LAMP, the LLM to ASP Modeling Protocol. I started it to probe LLM reasoning, but LAMP worked surprisingly well. The task is ASP rule induction, recovering rules from given facts and an expected answer set, which people usually find hard. Local LLMs like gpt-oss now nearly match ILASP, the leading ILP system, sometimes succeeding where ILASP times out. Like with code generation, despite no ASP training they reason through it in their thinking tokens, likely using natural heuristics.
+My work is on LAMP, the LLM to ASP Modeling Protocol. I started it to probe LLM reasoning, but LAMP worked surprisingly well. The task is ASP rule induction, recovering rules from given facts and an expected answer set. Local LLMs like gpt-oss now nearly match ILASP, the leading ILP system, sometimes succeeding where ILASP times out. Like with code generation, despite no ASP training they reason through it in their thinking tokens, likely using natural heuristics.
 
 LAMP is an iterative loop where the LLM proposes rules, Clingo verifies, and mismatches feed back. I tested three LLMs on 120 synthetic benchmarks varying rule count, size, and positive and negative literals. Two hit over 98 percent, matching ILASP's 97.5. ILASP uses a conflict driven exhaustive search over an ASP meta encoding, but timed out after 7 minutes on three benchmarks both strong LLMs solved. Programs from both came out significantly smaller and fully stratified. A natural extension is hybridizing ILASP's search with an agentic LLM loop on richer benchmarks like ASPBench.
+
+------------------------
+
+- LAMP: LLM (Large Language Model) to ASP modeling protocol
+
+- Probe LLM reasoning ability, turned out was better than ILASP in some cases
+
+- Idea is to run LLMs against Answer Set Programing benchmarks, in this case synthetically generated of varying complexity, to generate ASP rules based on an example and answer set. ASP can be used for solving logistic, configuration, among other promblems with exponential complexity
+
+- Generally ILASP was faster, but in some instances took far longer than the LAMP iterative test with LLMs system
+
+- Future work is a combination of these systems using reinforcement learning on the LLM and setting the agent to be reactive via an MCP (Model Context Protocol) or similar
